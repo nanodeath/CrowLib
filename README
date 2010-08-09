@@ -1,0 +1,8 @@
+Versioning
+==========
+See http://semver.org/ (and Graph.version)
+
+Todo
+====
+* Should be possible to pass in neighbors-detecting algorithm and
+  distance-calculating algorithm

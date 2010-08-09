@@ -1,0 +1,111 @@
+<!doctype>
+<html>
+	<head>
+		<title>GraphLib QUnit Test Suite</title>
+		<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4/jquery.min.js"></script>
+		<script type="text/javascript" src="http://github.com/jquery/qunit/raw/master/qunit/qunit.js"></script>
+		<script type="text/javascript" src="GraphLib.js"></script>
+		<link type="text/css" rel="stylesheet" href="http://github.com/jquery/qunit/raw/master/qunit/qunit.css">
+		<script>
+		$(function(){
+			module("Tiny map");
+			/*
+				Map looks like:
+				[S -]
+				[+ E]
+				S: Start
+				E: End
+				+: walkable
+				-: not walkable
+			*/
+			function MyNode(arr){ this.arr = arr; };
+			MyNode.prototype = new BaseNode();
+			MyNode.prototype.getX = function(){ return this.arr[0]; };
+			MyNode.prototype.getY = function(){ return this.arr[1]; };
+			MyNode.prototype.distanceAlgorithm = GraphUtil.distance.sum;
+			
+			var graph = new Graph();
+			graph.addNode(new MyNode([0, 0]));
+			graph.addNode(new MyNode([0, 1]));
+			graph.addNode(new MyNode([1, 1]));
+			
+			test("getNode with coordinates", function() {
+				function nodeTest(x, y){
+					var n = graph.getNode(x, y);
+					ok(n, "Node at " + x + "," + y + " is ok");
+					equals(n.getX(), x, "Node's x value is as expected");
+					equals(n.getY(), y, "Node's y value is as expected");
+				}
+				
+				nodeTest(0, 0);
+				nodeTest(0, 1);
+				nodeTest(1, 1);
+				ok(!graph.getNode(1, 0));
+			});
+			
+			test("getNode with callback", function(){
+				var firstNode = graph.getNode(function(){
+					return true;
+				});
+				same(firstNode, new MyNode([0, 0]), "Got first element correctly");
+				var lastNode = graph.getNode(function(){
+					return this.getX() == 1 && this.getY() == 1;
+				});
+				same(lastNode, new MyNode([1, 1]), "Got last element correctly");
+			});
+			
+			test("getNodes with no args", function(){
+				var nodes = graph.getNodes();
+				equals(nodes.length, 3, "Three elements returned");
+				// TODO more?
+			});
+			
+			test("getNodes with function filter", function(){
+				var nodes = graph.getNodes(function(){
+				  return this.getX() == this.getY();
+				});
+				equals(nodes.length, 2, "Two elements");
+				same(nodes[0], new MyNode([0, 0]), "First element is first");
+				same(nodes[1], new MyNode([1, 1]), "Third element is second");
+			});
+			
+			test("getNodes with options hash and filter", function(){
+				var nodes = graph.getNodes({
+					filter: function(){
+						return this.getX() == this.getY();
+					}
+				});
+				equals(nodes.length, 2, "Two elements");
+				same(nodes[0], new MyNode([0, 0]), "First element is upper left node");
+				same(nodes[1], new MyNode([1, 1]), "Second element is lower right node");
+			});
+			
+			test("getNodes with options hash, bfs, and lower right starting point", function(){
+				var nodes = graph.getNodes({
+					start: graph.getNode(1, 1),
+					algorithm: 'bfs'
+				});
+				equals(nodes.length, 3, "Three elements");
+				same(nodes[0], new MyNode([1, 1]), "First element is lower right node");
+				same(nodes[1], new MyNode([0, 1]), "Second element is lower left node");
+				same(nodes[2], new MyNode([0, 0]), "Third element is upper left node");
+			});
+			
+			test("findGoal with only a goal", function(){
+				var path = graph.findGoal({goal: graph.getNode(1, 1)});
+				equals(path.nodes.length, 3, "Path contains expected number of elements");
+				same(path.start, new MyNode([0, 0]), "Path has expected start node");
+				same(path.end, new MyNode([1, 1]), "Path has expected end node");
+				equals(path.length, 2, "Path is of expected length");
+				ok(path.found, "Path indicates end was found");
+			});
+		});
+		</script>
+	</head>
+	<body>
+		<h1 id="qunit-header">GraphLib Test Suite</h1>
+		<h2 id="qunit-banner"></h2>
+		<h2 id="qunit-userAgent"></h2>
+		<ol id="qunit-tests"></ol>
+	</body>
+</html>
