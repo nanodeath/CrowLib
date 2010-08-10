@@ -198,6 +198,11 @@
 			this.nodes.push(node);
 
 			var x = node.getX(), y = node.getY();
+			if(typeof x !== "number") throw new Error("Node must have a valid x coord");
+			if(typeof y !== "number") throw new Error("Node must have a valid y coord");
+			x = Math.floor(x);
+			y = Math.floor(y);
+			
 			if(!this.map[x]) this.map[x] = {};
 			this.map[x][y] = node;
 		};

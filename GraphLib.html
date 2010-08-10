@@ -205,6 +205,17 @@
 			test("EffectGames extensions not testable", function(){
 				raises(function(){ Graph.fromTilePlane(); }, "Graph.fromTilePlane raises exception");
 			});
+			
+			module("etc");
+			test("addNode has valid arguments", function(){
+				var graph = smallGraph();
+				raises(function(){
+					graph.addNode(new MyNode([1]));
+				}, "Fails as expected with no y");
+				raises(function(){
+					graph.addNode(new MyNode([null, 1]));
+				}, "Fails as expected with no x");
+			});
 		});
 		</script>
 	</head>
