@@ -84,7 +84,6 @@
 		}
 		return list;
 	};
-	
 	function DijkstraAlgorithm(graph){
 		this.graph = graph;
 	}
@@ -94,9 +93,13 @@
 		this.previous = new Algorithm.NodeMap();
 		this.visited = new Algorithm.NodeMap(false);
 		this.visitedList = [];
+		
+		this.start = start;
+		this.goal = goal;
 		this.opts = typeof opts === "undefined" ? {} : opts;
-		this.distance.set(start, 0);
 
+		// Algorithm commenceth
+		this.distance.set(start, 0);
 		var endNode = typeof goal !== "function" ? goal : null;
 		this._visitNode(start, endNode);
 		
@@ -117,10 +120,18 @@
 		return {
 			nodes: path,
 			start: start,
+			goal: goal,
 			end: found ? endNode : null,
 			length: found ? this.distance.get(endNode) : Infinity,
-			found: found
+			found: found,
+			recalculate: this.recalculate,
+			algorithm: this
 		};
+	};
+	DijkstraAlgorithm.prototype.recalculate = function(){
+		var a = this.algorithm;
+		var ret = a.findPath(a.start, a.goal, a.opts);
+		return ret;
 	};
 	// If we have a filter function that determines the end node, there could be multiple end nodes...
 	// this function finds the closest end node.
@@ -178,9 +189,11 @@
 		// initialize
 		this.nodes = [];
 		this.map = {};
-		this.version = "0.5.0";
+		this.version = "0.5.1";
 		
 		// methods
+		// Add a node to this graph
+		// O(1)
 		this.addNode = function(node){
 			this.nodes.push(node);
 
@@ -188,6 +201,24 @@
 			if(!this.map[x]) this.map[x] = {};
 			this.map[x][y] = node;
 		};
+		// Remove a node at given coordinates from graph
+		// O(n) where n is number of total nodes
+		this.removeNode = function(x, y){
+			if(this.map[x] && this.map[x][y]){
+				delete this.map[x][y];
+				if(this.map[x].length == 0) delete this.map[x];
+			}
+			for(var i in this.nodes){
+				var node = this.nodes[i];
+				if(node.getX() == x && node.getY() == y){
+					this.nodes.splice(i, 1);
+					break;
+				}
+			}
+		};
+		// Gets a node at a particular coordinate, or the first node that meets a condition
+		// O(1) if a coordinate is given
+		// O(n) if a filter is given (n being number of total nodes)
 		this.getNode = function(x_or_filter, y){
 			if(typeof x_or_filter === "function"){
 				for(var i in this.nodes){
@@ -205,6 +236,10 @@
 			}
 			return undefined;
 		};
+		// Get multiple nodes...has 3 options:
+		//  1) pass a filter function: O(n)
+		//  2) pass an options object with a `start` node (optional), an `algorithm` (optional; search-type), and a `filter` (optional): running time varies by algorithm
+		//  3) pass nothing, in which case all nodes will be returns: O(1)
 		this.getNodes = function(filter_or_options){
 			switch(typeof filter_or_options){
 				case "function":
@@ -221,10 +256,15 @@
 				case "undefined":
 					return this.nodes;
 				default:
-					throw new Error("neither filter nor options provided");
+					throw new Error("unsupported object " + filter_or_options.toString());
 			}
 		};
 		
+		// Find the shortest path to a goal.  Pass in an options object with:
+		//  `start`: start node (optional)
+		//  `goal`: end node or end condition (callback is passed each node discovered: return true if match, false otherwise) (required)
+		//  `algo`: shortestPath-type algorithm to use (optional)
+		//  Running time varies by algorithm
 		this.findGoal = function(opts){
 			var start = opts.start || this.nodes[0];
 			var goal = opts.goal;
@@ -236,7 +276,10 @@
 	};
 	Graph.algorithm = {};
 	Graph.defaultAlgorithm = {};
+	
+	// Extension for EffectGames to facilitate creation of graphs
 	Graph.fromTilePlane = function(tplane, callback){
+		if(!window.Effect || !window.Effect.Port) throw new Error("EffectGames-specific extensions don't work anywhere else");
 		if(!tplane) throw new Error("tplane is required");
 		if(typeof callback !== "function") throw new Error("callback not provided or not a function");
 	
