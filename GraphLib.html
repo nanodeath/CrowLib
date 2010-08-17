@@ -4,9 +4,11 @@
 		<title>GraphLib QUnit Test Suite</title>
 		<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4/jquery.min.js"></script>
 		<script type="text/javascript" src="http://github.com/jquery/qunit/raw/master/qunit/qunit.js"></script>
+		<script type="text/javascript" src="http://closure-library.googlecode.com/svn/trunk/closure/goog/base.js"></script>
 		<script type="text/javascript" src="GraphLib.js"></script>
 		<link type="text/css" rel="stylesheet" href="http://github.com/jquery/qunit/raw/master/qunit/qunit.css">
 		<script>
+		goog.require("goog.structs.PriorityQueue");
 		$(function(){
 			module("Tiny map");
 			/*
@@ -22,7 +24,7 @@
 			MyNode.prototype = new BaseNode();
 			MyNode.prototype.getX = function(){ return this.arr[0]; };
 			MyNode.prototype.getY = function(){ return this.arr[1]; };
-			MyNode.prototype.distanceAlgorithm = GraphUtil.distance.sum;
+			MyNode.prototype.distanceAlgorithm = GraphUtil.distance.manhattan;
 			
 			function containsNode(path, x, y){
 				for(var i in path.nodes){
@@ -201,6 +203,33 @@
 				equals(path.length, 12, "Path is of expected length");
 			});
 			
+			module("A*");
+			test("basic test", function(){
+				var graph = smallGraph();
+				var path = graph.findGoal({goal: graph.getNode(1, 1), algorithm: "a*"});
+				equals(path.nodes.length, 3, "Path contains expected number of nodes");
+				same(path.start, new MyNode([0, 0]), "Path has expected start node");
+				same(path.end, new MyNode([1, 1]), "Path has expected end node");
+				equals(path.length, 2, "Path is of expected length");
+				ok(path.found, "Path indicates end was found");
+			});
+			test("basic test using custom distance", function(){
+				var graph = smallGraph();
+				var distanceEstimator = GraphUtil.distance.pythagoras;
+				var path = graph.findGoal({goal: graph.getNode(1, 1), algorithm: "a*"});
+				equals(path.nodes.length, 3, "Path contains expected number of nodes");
+				same(path.start, new MyNode([0, 0]), "Path has expected start node");
+				same(path.end, new MyNode([1, 1]), "Path has expected end node");
+				equals(path.length, 2, "Path is of expected length");
+				ok(path.found, "Path indicates end was found");
+			});
+			test("doesn't accept goal-callback", function(){
+				raises(function(){
+					var graph = smallGraph();
+					graph.findGoal({goal: function(){}, algorithm: "a*"});
+				}, "Callback for goal raised exception");
+			});
+			
 			module("EffectGames");
 			test("EffectGames extensions not testable", function(){
 				raises(function(){ Graph.fromTilePlane(); }, "Graph.fromTilePlane raises exception");
@@ -215,6 +244,11 @@
 				raises(function(){
 					graph.addNode(new MyNode([null, 1]));
 				}, "Fails as expected with no x");
+			});
+			test("renaming PriorityQueue constructor works", function(){
+				var klass = goog.structs.PriorityQueue;
+				var q = new klass();
+				q.enqueue(0, "cat");
 			});
 		});
 		</script>

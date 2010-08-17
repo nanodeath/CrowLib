@@ -14,6 +14,17 @@
 			map[Algorithm.util.hash(node)] = val;
 		};
 	};
+	Algorithm.PriorityQueue = function(){
+		throw new Error("A PriorityQueue class is required, but none found!");
+	};
+	Algorithm.initializeDataStructures = function(){
+		if(typeof "goog" !== "undefined" && goog.structs && goog.structs.PriorityQueue){
+			Algorithm.PriorityQueue = goog.structs.PriorityQueue;
+		}
+		
+		Algorithm.initializeDataStructures = function(){};
+	};
+	
 	function ShortestPathAlgorithm(){}
 	ShortestPathAlgorithm.prototype = new Algorithm();
 	ShortestPathAlgorithm.prototype.findPath = function(start, end, opts){};
@@ -130,8 +141,7 @@
 	};
 	DijkstraAlgorithm.prototype.recalculate = function(){
 		var a = this.algorithm;
-		var ret = a.findPath(a.start, a.goal, a.opts);
-		return ret;
+		return a.findPath(a.start, a.goal, a.opts);
 	};
 	// If we have a filter function that determines the end node, there could be multiple end nodes...
 	// this function finds the closest end node.
@@ -184,12 +194,99 @@
 			this._visitNode(next, endNode, nextNodes);
 		}
 	}
+	function AStarAlgorithm(graph){
+		this.graph = graph;
+	}
+	AStarAlgorithm.prototype = new ShortestPathAlgorithm();
+	AStarAlgorithm.prototype.findPath = function(start, goal, opts){
+		if(typeof goal === "function"){
+			throw new Error("A* doesn't support using a callback to determine the goal");
+		}
+		if(!opts) opts = {};
+		
+		this.start = start;
+		this.goal = goal;
+		this.opts = opts;
+	
+		this.evaluated = new Algorithm.NodeMap(false);
+		this.toEvaluate = new Algorithm.PriorityQueue();
+		this.toEvaluate.enqueue(0, start);
+		this.parent = new Algorithm.NodeMap();
+		
+		// gScore is distance of a node n from the starting point
+		this.gScore = new Algorithm.NodeMap();
+		// hScore is the estimated distance between a node n and the goal
+		this.hScore = new Algorithm.NodeMap();
+		
+		var estimateDistance = this.estimateDistance;
+		
+		this.gScore.set(start, 0);
+		this.hScore.set(start, estimateDistance(start, goal, this.graph));
+		var found = false, currentNode;
+		while(currentNode = this.toEvaluate.dequeue()){
+			if(currentNode === goal){
+				found = true;
+				break;
+			} else if(this.evaluated.get(currentNode)){
+				// normally this wouldn't be necessary, but if we check the same neighbor twice,
+				// it may get added to the toEvaluate list twice
+				continue;
+			}
+			this.evaluated.set(currentNode, true);
+			var neighbors = currentNode.getNeighbors(this.graph);
+			for(var n in neighbors){
+				var neighbor = neighbors[n];
+				if(this.evaluated.get(neighbor)) continue;
+				var newGScore = this.gScore.get(currentNode) + currentNode.distanceTo(neighbor);
+				
+				if(!this.toEvaluate.containsValue(neighbor) || newGScore < this.gScore.get(neighbor)){
+					this.parent.set(neighbor, currentNode);
+					this.gScore.set(neighbor, newGScore);
+					var hScore = estimateDistance(neighbor, goal);
+					this.hScore.set(neighbor, hScore);
+					var fScore = newGScore + hScore;
+					this.toEvaluate.enqueue(fScore, neighbor);
+				}
+			}
+		}
+		if(found){
+			var path = [];
+			if(goal){
+				path.unshift(goal);
+				var node = this.parent.get(goal);
+				while(node){
+					path.unshift(node);
+					node = this.parent.get(node);
+				}
+			}
+
+			return {
+				nodes: path,
+				start: start,
+				goal: goal,
+				end: found ? goal : null,
+				length: this.gScore.get(goal),
+				found: found,
+				recalculate: this.recalculate,
+				algorithm: this
+			};			
+		} else {
+			throw new Error("not found!");
+		}
+	};
+	AStarAlgorithm.prototype.estimateDistance = function(start, goal, graph){
+ 		return GraphUtil.distance.manhattan(start.getX() - goal.getX(), start.getY() - goal.getY());
+	}
+	AStarAlgorithm.prototype.recalculate = function(){
+		var a = this.algorithm;
+		return a.findPath(a.start, a.goal, a.opts);
+	};
 	
 	function Graph(){
 		// initialize
 		this.nodes = [];
 		this.map = {};
-		this.version = "0.5.1";
+		this.version = "0.6.0";
 		
 		// methods
 		// Add a node to this graph
@@ -271,11 +368,12 @@
 		//  `algo`: shortestPath-type algorithm to use (optional)
 		//  Running time varies by algorithm
 		this.findGoal = function(opts){
+			Algorithm.initializeDataStructures();
 			var start = opts.start || this.nodes[0];
 			var goal = opts.goal;
 			if(!goal) throw new Error("To find a goal, one must provide a goal...");
-			var algo = opts.algorithm || Graph.defaultAlgorithm.shortestPath;
-			// TODO add type check to algo here
+			var algo = Graph._lookupAlgorithm(opts.algorithm) || Graph.defaultAlgorithm.shortestPath;
+			if(!(algo.prototype instanceof ShortestPathAlgorithm)) throw new Error("only compatible with ShortestPathAlgorithms")
 			return (new algo(this)).findPath(start, goal, opts);
 		};
 	};
@@ -321,13 +419,14 @@
 	Graph.registerAlgorithm(LinearAlgorithm, 'linear', true);
 	Graph.registerAlgorithm(BFSAlgorithm, 'bfs');
 	Graph.registerAlgorithm(DijkstraAlgorithm, 'dijkstra', true);
+	Graph.registerAlgorithm(AStarAlgorithm, 'a*');
 	
 	var GraphUtil = {
 		distance: {
 			pythagoras: function(dx, dy){
 				return Math.sqrt(Math.pow(dx, 2) + Math.pow(dy, 2));
 			},
-			sum: function(dx, dy){
+			manhattan: function(dx, dy){
 				return Math.abs(dx) + Math.abs(dy);
 			}
 		}
