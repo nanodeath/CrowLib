@@ -4,8 +4,12 @@
 		<title>GraphLib QUnit Test Suite</title>
 		<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4/jquery.min.js"></script>
 		<script type="text/javascript" src="http://github.com/jquery/qunit/raw/master/qunit/qunit.js"></script>
-		<script type="text/javascript" src="http://closure-library.googlecode.com/svn/trunk/closure/goog/base.js"></script>
-		<script type="text/javascript" src="GraphLib.js"></script>
+		<script type="text/javascript" src="build/js/crow.js"></script>
+		<script type="text/javascript">
+			if(typeof Graph === "undefined"){
+				alert("Crow.js failed to load.  Run `rake` first.");
+			}
+		</script>
 		<link type="text/css" rel="stylesheet" href="http://github.com/jquery/qunit/raw/master/qunit/qunit.css">
 		<script>
 		goog.require("goog.structs.PriorityQueue");

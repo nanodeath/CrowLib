@@ -1,3 +1,5 @@
+	goog.require("goog.structs.PriorityQueue");
+
 	function Algorithm(){}
 	Algorithm.util = {
 		hash: function(node){
