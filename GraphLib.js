@@ -1,4 +1,4 @@
-	goog.require("goog.structs.PriorityQueue");
+goog.require('goog.structs.PriorityQueue');
 
 	function Algorithm(){}
 	Algorithm.util = {
