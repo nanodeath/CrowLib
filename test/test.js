@@ -1,3 +1,6 @@
+goog.require('crow.Graph');
+goog.require('crow.BaseNode');
+
 window["runTest"] = function(){
 	module("Tiny map");
 	/*
@@ -13,10 +16,10 @@ window["runTest"] = function(){
 	  * @constructor
 	  */
 	function MyNode(arr){ this.arr = arr; };
-	MyNode.prototype = new BaseNode();
+	MyNode.prototype = new crow.BaseNode();
 	MyNode.prototype.getX = function(){ return this.arr[0]; };
 	MyNode.prototype.getY = function(){ return this.arr[1]; };
-	MyNode.prototype.distanceAlgorithm = GraphUtil.distance.manhattan;
+	MyNode.prototype.distanceAlgorithm = crow.GraphUtil.distance.manhattan;
 	
 	function containsNode(path, x, y){
 		for(var i in path.nodes){
@@ -29,7 +32,7 @@ window["runTest"] = function(){
 	}
 	
 	function graphFromArray(map, callback){
-		var graph = new Graph();
+		var graph = new crow.Graph();
 		var x, y = 0;
 		for(var i in map){
 		  x = 0;

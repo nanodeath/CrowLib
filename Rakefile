@@ -32,10 +32,13 @@ class GoogleClosure
 		end
 	end
 
-	def self.compile(files, out, optimization="")
+	def self.compile(files, out, flags=nil)
 		files = [files] unless files.is_a? Array
 		files = files.map {|f| "--input=#{f}"}
-		sh "#{CALC_DEPS_BIN} #{files.join(' ')} --path=#{LIBRARY_ROOT} --output_mode=compiled --compiler_jar=#{COMPILER_JAR} #{optimization} > #{out}"
+		path = [LIBRARY_ROOT]
+		if(CONFIG[:path]) then path += CONFIG[:path] end
+		path.map! {|d| "--path=#{d}" }
+		sh "#{CALC_DEPS_BIN} #{files.join(' ')} #{path.join(' ')} --output_mode=compiled --compiler_jar=#{COMPILER_JAR} #{flags.nil? ? '' : '-f "' + flags.join(' ') + '"'} > #{out}"
 	end
 end
 
@@ -51,10 +54,11 @@ task :get_dependencies => [:get_google_closure_library, :get_google_closure_comp
 filename = CONFIG[:base_filename]
 
 OPTIMIZATIONS = {
-	:mini => "-f \"--compilation_level=WHITESPACE_ONLY\"",
-	:micro => "-f \"--compilation_level=SIMPLE_OPTIMIZATIONS\"",
-	:pico => "-f \"--compilation_level=ADVANCED_OPTIMIZATIONS\"",
+	:mini => ["--compilation_level=WHITESPACE_ONLY"],
+	:micro => ["--compilation_level=SIMPLE_OPTIMIZATIONS"],
+	:pico => ["--compilation_level=ADVANCED_OPTIMIZATIONS"],
 }
+
 task :compile, [:target, :type] do |t, args|
 	opts = CONFIG[:advanced_compilation]
 	if(opts[args.target].is_a? String)

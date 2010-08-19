@@ -1,9 +1,11 @@
 --- 
 :base_filename: crow
 :files:
-- src/core.js
+- src/crow/All.js
 :test_files:
 - test/test.js
+:path:
+- src
 :advanced_compilation:
   :mini: true
   :micro: true
