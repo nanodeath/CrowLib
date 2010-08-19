@@ -13,6 +13,18 @@ Generally speaking, you follow three steps to use Crow in your application:
 
 See the test.html in test/ for more examples.  There's even a helper that converts a 2d array of 1s and 0s into a graph.
 
+Example
+=======
+Examples coming soon!
+
+Simple Maze
+-----------
+This example will feature a simple 5x5 maze and the A* algorithm.
+
+Dunes and Demise
+----------------
+This example will feature multiple tile types (sand and grass), some precious crystal, and Dijkstra's Algorithm.
+
 Including in your app
 =====================
 There's two ways you can include Crow into your app -- either as a simple script tag or include with one of the automatically compiled scripts, or as a library in Google Closure.
@@ -31,6 +43,8 @@ You can either import just the pieces you need, like goog.require('crow.Graph') 
 
 Requirements
 ============
+This section outlines what you must have installed and/or present in order to use this library.
+
 Build-time
 ----------
 
