@@ -1,0 +1,10 @@
+--- 
+:base_filename: crow
+:files:
+- src/core.js
+:test_files:
+- test/test.js
+:advanced_compilation:
+  :mini: true
+  :micro: true
+  :pico: true

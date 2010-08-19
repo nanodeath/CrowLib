@@ -1,3 +1,7 @@
+require 'yaml'
+
+CONFIG = YAML.load_file("Config.yaml")
+
 task :default => [:build]
 
 def download_file(url, destination)
@@ -28,11 +32,10 @@ class GoogleClosure
 		end
 	end
 
-	def self.compile(files, out)
+	def self.compile(files, out, optimization="")
 		files = [files] unless files.is_a? Array
-		files.map! {|f| "--input=#{f}"}
-		optimization = "" # -f \"--compilation_level=ADVANCED_OPTIMIZATIONS\"
-		sh "#{CALC_DEPS_BIN} #{files} --path=#{LIBRARY_ROOT} --output_mode=compiled --compiler_jar=#{COMPILER_JAR} #{optimization} > #{out}"
+		files = files.map {|f| "--input=#{f}"}
+		sh "#{CALC_DEPS_BIN} #{files.join(' ')} --path=#{LIBRARY_ROOT} --output_mode=compiled --compiler_jar=#{COMPILER_JAR} #{optimization} > #{out}"
 	end
 end
 
@@ -45,9 +48,34 @@ end
 
 task :get_dependencies => [:get_google_closure_library, :get_google_closure_compiler]
 
-task :build => [:get_dependencies] do
+filename = CONFIG[:base_filename]
+
+OPTIMIZATIONS = {
+	:mini => "-f \"--compilation_level=WHITESPACE_ONLY\"",
+	:micro => "-f \"--compilation_level=SIMPLE_OPTIMIZATIONS\"",
+	:pico => "-f \"--compilation_level=ADVANCED_OPTIMIZATIONS\"",
+}
+task :compile, [:target, :type] do |t, args|
+	opts = CONFIG[:advanced_compilation]
+	if(opts[args.target].is_a? String)
+		GoogleClosure.compile CONFIG[:files], "build/js/#{opts[args.target]}.js", OPTIMIZATIONS[args.target]
+	elsif(opts[args.target])
+		GoogleClosure.compile CONFIG[:files], "build/js/#{filename}.#{args.suffix}.js", OPTIMIZATIONS[args.target]
+	end
+end
+
+task :js_build_dir do
 	mkdir_p "build/js"
-	GoogleClosure.compile "GraphLib.js", "build/js/crow.js"
+end
+
+task :build => [:get_dependencies, :js_build_dir] do
+	Rake::Task[:compile].execute(OpenStruct.new({:target => :mini, :suffix => "min"}))
+	Rake::Task[:compile].execute(OpenStruct.new({:target => :micro, :suffix => "micro"}))
+	Rake::Task[:compile].execute(OpenStruct.new({:target => :pico, :suffix => "pico"}))
+end
+
+task :test => :js_build_dir do
+	GoogleClosure.compile CONFIG[:files] + CONFIG[:test_files], "build/js/#{filename}-test.js", OPTIMIZATIONS[:pico]
 end
 
 task :clean do
