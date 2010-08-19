@@ -20,13 +20,14 @@ There's two ways you can include Crow into your app -- either as a simple script
 Automatically-compiled script
 -----------------------------
 If you run `rake` (assuming you have the build-time requirements given lower down), three files will be generated for you at build/js:
+
 1. crow.min.js: this compiled with `whitespace_only`.  Safest, but least compression.
 2. crow.micro.js: this compiled with `simple_optimizations`.  Renames local variables and the like, but public API is untouched.  Little better compression.
 3. crow.pico.js: this compiled with `advanced_optimizations`.  Pretty much everything gets renamed here, and because I haven't exported the public API yet, it's useless except as a demonstration of the compression unless you are also using the Google Closure compiler.  Once I export the public API it should become an actual usable artifact.
 
 Google Closure library
 ----------------------
-You can either import just the pieces you need, like goog.require('crow.Graph') and goog.require('crow.AStarAlgorithm'), or you can simply include the whole library, with goog.require('crow.All') and let the compiler's dead code remover strip out what you don't use.
+You can either import just the pieces you need, like goog.require('crow.Graph') and goog.require('crow.AStarAlgorithm'), or you can simply include the whole library, with goog.require('crow.All') and let the compiler figure it out.
 
 Requirements
 ============
@@ -34,6 +35,7 @@ Build-time
 ----------
 
 There are numerous build-time requirements, but any Linux user should already have most of them:
+
 * wget
 * unzip
 * svn
