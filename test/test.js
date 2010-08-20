@@ -31,25 +31,8 @@ window["runTest"] = function(){
 		return false;
 	}
 	
-	function graphFromArray(map, callback){
-		var graph = new crow.Graph();
-		var x, y = 0;
-		for(var i in map){
-		  x = 0;
-			var row = map[i];
-			for(var ch_idx = 0; ch_idx < row.length; ch_idx++){
-				var ch = row.charAt(ch_idx);
-				var node = callback(x, y, ch);
-				if(node) graph.addNode(node);
-				x++;
-			}
-			y++;
-		}
-		return graph;
-	};
-	
 	function smallGraph(){
-		return graphFromArray([
+		return crow.Graph.graphFromArray([
 			"10",
 			"11"
 		], function(x, y, val){
@@ -59,7 +42,7 @@ window["runTest"] = function(){
 		});
 	}
 	function mediumGraph(){
-		return graphFromArray([
+		return crow.Graph.graphFromArray([
 			"1111",
 			"1001",
 			"1111",
@@ -71,7 +54,7 @@ window["runTest"] = function(){
 		});
 	}
 	function largeGraph(){
-		return graphFromArray([
+		return crow.Graph.graphFromArray([
 			"11110010",
 			"10011110",
 			"11010010",

@@ -13,8 +13,10 @@ crow.Graph = function(){
 	this.version = "0.7.0";
 	
 	// methods
-	// Add a node to this crow.Graph
-	// O(1)
+	/**
+	 * Add a node to this crow.Graph
+	 * @param {crow.BaseNode} node Node to add to graph.
+	 */
 	this.addNode = function(node){
 		this.nodes.push(node);
 
@@ -29,6 +31,11 @@ crow.Graph = function(){
 	};
 	// Remove a node at given coordinates from crow.Graph
 	// O(n) where n is number of total nodes
+	/**
+	 * Removes a node from the graph.
+	 * @param {number} x x-coordinate (0-indexed)
+	 * @param {number} y y-coordinate (0-indexed)
+	 */
 	this.removeNode = function(x, y){
 		if(this.map[x] && this.map[x][y]){
 			delete this.map[x][y];
@@ -42,9 +49,16 @@ crow.Graph = function(){
 			}
 		}
 	};
-	// Gets a node at a particular coordinate, or the first node that meets a condition
-	// O(1) if a coordinate is given
-	// O(n) if a filter is given (n being number of total nodes)
+	/**
+	 * Gets a node at a particular coordinate, or the first node that meets a condition
+	 * 
+	 * O(1) if a coordinate is given
+	 * 
+	 * O(n) if a filter is given (n being number of total nodes)
+	 * @param {(number|function(this:crow.BaseNode): boolean)} x_or_filter x-coordinate
+	 *  of element to remove, or a callback that eventually returns true for a node.
+	 * @param {number=} y-coordinate y-coordinate of element to remove (if callback omitted)
+	 */
 	this.getNode = function(x_or_filter, y){
 		if(typeof x_or_filter === "function"){
 			for(var i in this.nodes){
@@ -62,10 +76,14 @@ crow.Graph = function(){
 		}
 		return undefined;
 	};
-	// Get multiple nodes...has 3 options:
-	//  1) pass a filter function: O(n)
-	//  2) pass an options object with a `start` node (optional), an `algorithm` (optional; search-type), and a `filter` (optional): running time varies by algorithm
-	//  3) pass nothing, in which case all nodes will be returns: O(1)
+	/**
+	 * Return a collection of nodes.  Has 3 modes:
+	 * <ol><li>pass a filter function: O(n)</li>
+	 * <li>pass an options object with a `start` node (optional), an `algorithm` (optional; search-type), and a `filter` (optional): running time varies by algorithm</li>
+	 * <li>pass nothing, in which case all nodes will be returns: O(1)</li></ol>
+	 * @param {(function(this:crow.BaseNode): boolean|{start=:crow.BaseNode,algorithm=:crow.Algorithm,filter=:function(this.crow.BaseNode)})=}
+	 * @return {crow.BaseNode[]}
+	 */
 	this.getNodes = function(filter_or_options){
 		switch(typeof filter_or_options){
 			case "function":
@@ -121,6 +139,36 @@ crow.Graph.fromTilePlane = function(tplane, callback){
 	}
 	return g;
 };
+
+/**
+	* Generate a graph from an array and a callback.
+	* Callback will be called once for each character in
+	* each element of the array.  If the callback returns anything,
+	* that object will be added to the graph.
+	* 
+  * See test.js for sample usage.
+  * @param {Array.<string>} array Array of strings encoding your nodes.
+  * @param {function(number: x, number: y, string: value): ?Object} callback The callback that optionally returns a node.  The first parameter is an x-coordinate, the second parameter is a y-coordinate, and the last parameter is a one-character string from a value in the array.
+  *
+  * @return {crow.Graph} The primed Graph
+  */
+crow.Graph.fromArray = function(array, callback){
+		var graph = new crow.Graph();
+		var x, y = 0;
+		for(var i in array){
+		  x = 0;
+			var row = array[i];
+			for(var ch_idx = 0; ch_idx < row.length; ch_idx++){
+				var ch = row.charAt(ch_idx);
+				var node = callback(x, y, ch);
+				if(node) graph.addNode(node);
+				x++;
+			}
+			y++;
+		}
+		return graph;
+	};
+
 crow.Graph.registerAlgorithm = function(algo, name, isDefaultForType){
 	crow.Graph.algorithm[name] = algo;
 	if(isDefaultForType){

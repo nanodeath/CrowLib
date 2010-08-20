@@ -8,7 +8,16 @@ def download_file(url, destination)
 	sh "wget #{url} -O #{destination}"
 end
 
+class String
+	def starts_with?(prefix)
+	  prefix = prefix.to_s
+	  self[0, prefix.length] == prefix
+	end
+end
+
 class GoogleClosure
+	include Singleton
+	
 	ROOT = "build/google_closure"
 
 	LIBRARY_URL = "http://closure-library.googlecode.com/svn/trunk/"
@@ -20,19 +29,19 @@ class GoogleClosure
 	COMPILER_ROOT = ROOT + "/compiler"
 	COMPILER_JAR = COMPILER_ROOT + "/compiler.jar"
 	
-	def self.checkout_library
+	def checkout_library
 		sh "svn checkout #{LIBRARY_URL} #{LIBRARY_ROOT}" unless File.exist?(LIBRARY_ROOT)
 	end
 
-	def self.download_compiler
+	def download_compiler
 		unless File.exist?(COMPILER_JAR)
 			mkdir_p COMPILER_ROOT
 			download_file(COMPILER_URL, COMPILER_ARCHIVE) unless File.exist?(COMPILER_ARCHIVE)
 			sh "unzip #{COMPILER_ARCHIVE} -d #{COMPILER_ROOT}"
 		end
 	end
-
-	def self.compile(files, out, flags=nil)
+	
+	def compile(files, out, flags=nil)
 		files = [files] unless files.is_a? Array
 		files = files.map {|f| "--input=#{f}"}
 		path = [LIBRARY_ROOT]
@@ -40,13 +49,38 @@ class GoogleClosure
 		path.map! {|d| "--path=#{d}" }
 		sh "#{CALC_DEPS_BIN} #{files.join(' ')} #{path.join(' ')} --output_mode=compiled --compiler_jar=#{COMPILER_JAR} #{flags.nil? ? '' : '-f "' + flags.join(' ') + '"'} > #{out}"
 	end
+	def calculate_dependencies(files)
+		files = [files] unless files.is_a? Array
+		files = files.map {|f| "--input=#{f}"}
+		path = [LIBRARY_ROOT]
+		if(CONFIG[:path]) then path += CONFIG[:path] end
+		path.map! {|d| "--path=#{d}" }
+		puts "Checking dependencies..."
+		%x[#{CALC_DEPS_BIN} #{files.join(' ')} #{path.join(' ')}].split
+	end
 end
 
 task :get_google_closure_library do
-	GoogleClosure.checkout_library
+	GoogleClosure.instance.checkout_library
 end
 task :get_google_closure_compiler do
-	GoogleClosure.download_compiler
+	GoogleClosure.instance.download_compiler
+end
+task :get_jsdoc_toolkit do
+	URL = "http://jsdoc-toolkit.googlecode.com/svn/trunk/"
+	FOLDER = "build/jsdoc_toolkit"
+	sh "svn checkout #{URL} #{FOLDER}" unless File.exist?(FOLDER)
+end
+task :generate_javascript_docs => [:get_google_closure_library, :get_jsdoc_toolkit] do
+	files = GoogleClosure.instance.calculate_dependencies(CONFIG[:files])
+	files.reject! {|f| f.starts_with? "build/"}
+	ROOT = "build/jsdoc_toolkit/jsdoc-toolkit"
+	JAR = ROOT + "/jsrun.jar"
+	RUN_JS = ROOT + "/app/run.js"
+	TEMPLATES = ROOT + "/templates/jsdoc"
+	FILES = files.join(' ') # CONFIG[:files].join(' ')
+	mkdir_p "dist/docs"
+	sh "java -jar #{JAR} #{RUN_JS} -a -t=#{TEMPLATES} #{FILES} -d=dist/docs"
 end
 
 task :get_dependencies => [:get_google_closure_library, :get_google_closure_compiler]
@@ -62,9 +96,9 @@ OPTIMIZATIONS = {
 task :compile, [:target, :type] do |t, args|
 	opts = CONFIG[:advanced_compilation]
 	if(opts[args.target].is_a? String)
-		GoogleClosure.compile CONFIG[:files], "build/js/#{opts[args.target]}.js", OPTIMIZATIONS[args.target]
+		GoogleClosure.instance.compile CONFIG[:files], "build/js/#{opts[args.target]}.js", OPTIMIZATIONS[args.target]
 	elsif(opts[args.target])
-		GoogleClosure.compile CONFIG[:files], "build/js/#{filename}.#{args.suffix}.js", OPTIMIZATIONS[args.target]
+		GoogleClosure.instance.compile CONFIG[:files], "build/js/#{filename}.#{args.suffix}.js", OPTIMIZATIONS[args.target]
 	end
 end
 
@@ -78,12 +112,14 @@ task :build => [:get_dependencies, :js_build_dir] do
 	Rake::Task[:compile].execute(OpenStruct.new({:target => :pico, :suffix => "pico"}))
 end
 
+task :docs => [:generate_javascript_docs]
+
 task :test => :js_build_dir do
-	GoogleClosure.compile CONFIG[:files] + CONFIG[:test_files], "build/js/#{filename}-test.js", OPTIMIZATIONS[:pico]
+	GoogleClosure.instance.compile CONFIG[:files] + CONFIG[:test_files], "build/js/#{filename}-test.js", OPTIMIZATIONS[:pico]
 end
 
 task :clean do
-	directories_to_clean = ["build/js"]
+	directories_to_clean = ["build/js", "dist"]
 	directories_to_clean.each {|d| rm_r d if File.exist? d}
 end
 task :deep_clean => [:clean] do
