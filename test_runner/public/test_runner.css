@@ -5,3 +5,50 @@
 #backToIndex {
 	margin-top: 1em;
 }
+
+#home {
+	color: #333;
+	font-family: sans-serif;
+}
+#home body {
+	padding-left: 2em;
+}
+
+#home h1 {
+	font-size: 5em;
+	color: #ccc;
+	text-align: right;
+}
+#home h1 .subtitle {
+	display: block;
+	font-size: 0.15em;
+	font-style: italic;
+}
+
+#home body {
+	width: 55em;
+}
+
+#home h2 {
+	font-size: 2em;
+	color: #ccc;
+	margin-bottom: 0.5em;
+	margin-top: 1em;
+}
+
+#home h1, #home h2 {
+	color: #ccc;
+}
+#home h1 span:hover, #home h2 span:hover {
+	color: #bbb;
+}
+
+#home ul {
+	margin-top: 0;
+	margin-bottom: 0;
+}
+
+
+#home #content {
+	padding-left: 2em;
+}

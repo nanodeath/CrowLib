@@ -1,14 +1,26 @@
 <!DOCTYPE html>
-<html>
+<html id="home">
 	<head>
-		<title></title>
+		<title>Crow TestRunner</title>
+		<link type="text/css" rel="stylesheet" href="/test_runner.css">
 	</head>
 	<body>
 
-<p>Welcome to the test runner.  The following tests are available:</p>
-<div id="tests">
-	Gathering tests...
+<h1>Crow TestRunner<span class="subtitle">Max Aller &lt;nanodeath@gmail.com&gt;</span></h1>
+<div id="content"
+	<p>Welcome to the test runner for Crow.  Please choose an option below.</p>
+	<h2><span>Run tests</span></h2>
+	<div id="tests">
+		Gathering tests...
+	</div>
+	<h2><span>Controls</span></h2>
+	<div id="controls">
+		<input class="recompile" type="button" value="Recompile and Reload"/>
+	</div>
+	<div id="feedback"></div>
+
 </div>
+
 <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4/jquery.min.js"></script>
 <script type="text/javascript" src="/<%= @test_js %>"></script>
 <script type="text/javascript" src="/test_runner.js"></script>

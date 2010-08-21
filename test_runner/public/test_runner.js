@@ -17,16 +17,18 @@ $("#controls .recompile").click(function(e){
 });
 $(function(){			
 	var options = $("#controls select.test_selection");
-	for(var i in test){
-		if(i != currentTest){
-			options.append("<option>" + i);
+	if(options.length > 0){
+		for(var i in test){
+			if(i != currentTest){
+				options.append("<option>" + i);
+			}
 		}
-	}
 	
-	options.bind('change', function(e){
-		var val = $("option[selected]", this).val();
-		if(val){
-			location = "/test/" + val;
-		}
-	});
+		options.bind('change', function(e){
+			var val = $("option[selected]", this).val();
+			if(val){
+				location = "/test/" + val;
+			}
+		});
+	}
 });
