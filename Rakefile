@@ -119,6 +119,26 @@ task :test => [:get_dependencies, :js_build_dir] do
 	GoogleClosure.instance.compile CONFIG[:files] + CONFIG[:test_files], "build/js/#{filename}-test.js", OPTIMIZATIONS[:min]
 end
 
+task :check_bundler do
+	if `which bundle` == ""
+		raise "Bundler must be installed...http://gembundler.com/"
+	end
+end
+
+task :prepare_test_runner => [:check_bundler] do
+	if(!File.exist? "test_runner/gems")
+		cd "test_runner" do
+			sh "bundle install gems --disable-shared-gems"
+		end
+	end
+end
+
+task :test_runner => [:prepare_test_runner] do
+	cd "test_runner" do
+		ruby "test_runner.rb"
+	end
+end
+
 task :clean do
 	directories_to_clean = ["build/js", "dist"]
 	directories_to_clean.each {|d| rm_r d if File.exist? d}

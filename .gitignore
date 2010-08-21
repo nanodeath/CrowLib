@@ -4,3 +4,4 @@ DEADJOE
 dist
 docs
 .bundle
+test_runner/gems
