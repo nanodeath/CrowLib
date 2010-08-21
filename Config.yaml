@@ -4,6 +4,7 @@
 - src/crow/All.js
 :test_files:
 - test/test.js
+- test/examples/maze.js
 :path:
 - src
 :advanced_compilation:

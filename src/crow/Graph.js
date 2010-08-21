@@ -81,8 +81,8 @@ crow.Graph = function(){
 	 * <ol><li>pass a filter function: O(n)</li>
 	 * <li>pass an options object with a `start` node (optional), an `algorithm` (optional; search-type), and a `filter` (optional): running time varies by algorithm</li>
 	 * <li>pass nothing, in which case all nodes will be returns: O(1)</li></ol>
-	 * @param {(function(this:crow.BaseNode): boolean|{start=:crow.BaseNode,algorithm=:crow.Algorithm,filter=:function(this.crow.BaseNode)})=}
-	 * @return {crow.BaseNode[]}
+	 * @param {(function(this:crow.BaseNode): boolean|{start:crow.BaseNode,algorithm_name:string,filter:function(this.crow.BaseNode)})=} filter or options
+	 * @returns {Array.<crow.BaseNode>}
 	 */
 	this.getNodes = function(filter_or_options){
 		switch(typeof filter_or_options){
@@ -148,7 +148,7 @@ crow.Graph.fromTilePlane = function(tplane, callback){
 	* 
   * See test.js for sample usage.
   * @param {Array.<string>} array Array of strings encoding your nodes.
-  * @param {function(number: x, number: y, string: value): ?Object} callback The callback that optionally returns a node.  The first parameter is an x-coordinate, the second parameter is a y-coordinate, and the last parameter is a one-character string from a value in the array.
+  * @param {function(number, number, string): ?Object} callback The callback that optionally returns a node.  The first parameter is an x-coordinate, the second parameter is a y-coordinate, and the last parameter is a one-character string from a value in the array.
   *
   * @return {crow.Graph} The primed Graph
   */

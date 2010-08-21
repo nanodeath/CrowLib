@@ -32,7 +32,7 @@ window["runTest"] = function(){
 	}
 	
 	function smallGraph(){
-		return crow.Graph.graphFromArray([
+		return crow.Graph.fromArray([
 			"10",
 			"11"
 		], function(x, y, val){
@@ -42,7 +42,7 @@ window["runTest"] = function(){
 		});
 	}
 	function mediumGraph(){
-		return crow.Graph.graphFromArray([
+		return crow.Graph.fromArray([
 			"1111",
 			"1001",
 			"1111",
@@ -54,7 +54,7 @@ window["runTest"] = function(){
 		});
 	}
 	function largeGraph(){
-		return crow.Graph.graphFromArray([
+		return crow.Graph.fromArray([
 			"11110010",
 			"10011110",
 			"11010010",

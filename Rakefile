@@ -114,8 +114,8 @@ end
 
 task :docs => [:generate_javascript_docs]
 
-task :test => :js_build_dir do
-	GoogleClosure.instance.compile CONFIG[:files] + CONFIG[:test_files], "build/js/#{filename}-test.js", OPTIMIZATIONS[:pico]
+task :test => [:get_dependencies, :js_build_dir] do
+	GoogleClosure.instance.compile CONFIG[:files] + CONFIG[:test_files], "build/js/#{filename}-test.js", OPTIMIZATIONS[:min]
 end
 
 task :clean do
