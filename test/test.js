@@ -1,7 +1,8 @@
 goog.require('crow.Graph');
 goog.require('crow.BaseNode');
 
-window["runTest"] = function(){
+window["test"] = window["test"] || {};
+window["test"]["mainTest"] = function(){
 	module("Tiny map");
 	/*
 		Map looks like:

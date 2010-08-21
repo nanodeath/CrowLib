@@ -1,7 +1,8 @@
 goog.require('crow.Graph');
 goog.require('crow.BaseNode');
 
-window["runMazeExample"] = function(){
+window["test"] = window["test"] || {};
+window["test"]["dunesAndDemise"] = function(){
 	/**
    * @constructor
 	 */
@@ -46,7 +47,7 @@ window["runMazeExample"] = function(){
 		});
 	}
 	
-	test("Algorithm finds good path", function(){
+	test("A* Algorithm finds good path", function(){
 		var graph = generateGraph();
 		var path = graph.findGoal({start: graph.getNode(0, 0), goal: graph.getNode(5, 4), algorithm: "a*"});
 		ok(path.found, "found route");

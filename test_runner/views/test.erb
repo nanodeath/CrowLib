@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>GraphLib QUnit Test Suite: <%= @test %></title>
+		<link type="text/css" rel="stylesheet" href="http://github.com/jquery/qunit/raw/master/qunit/qunit.css">
+		<link type="text/css" rel="stylesheet" href="/test_runner.css">
+	</head>
+	<body>
+
+<h1 id="qunit-header">GraphLib Test Suite: <%= @test %></h1>
+<h2 id="qunit-banner"></h2>
+<h2 id="qunit-userAgent"></h2>
+<ol id="qunit-tests"></ol>
+<div id="controls">
+	<input class="recompile" type="button" value="Recompile and Reload"/>
+	<select class="test_selection">
+		<option value="">Other tests...</option>
+	</select>
+</div>
+<div id="feedback">
+</div>
+<a id="backToIndex" href="/">Back to test index</a>
+
+<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4/jquery.min.js"></script>
+<script type="text/javascript" src="http://github.com/jquery/qunit/raw/master/qunit/qunit.js"></script>
+<script type="text/javascript" src="/test_runner.js"></script>
+<script type="text/javascript" src="/crow-test.js"></script>
+<script>
+	var currentTest = "<%= @test %>";
+	$(test.<%= @test %>);
+</script>
+
+	</body>
+</html>

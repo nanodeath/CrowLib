@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title></title>
+	</head>
+	<body>
+
+<p>Welcome to the test runner.  The following tests are available:</p>
+<div id="tests">
+	Gathering tests...
+</div>
+<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4/jquery.min.js"></script>
+<script type="text/javascript" src="/<%= @test_js %>"></script>
+<script type="text/javascript" src="/test_runner.js"></script>
+<script>
+	if(test){
+		var list = $("<ul>");
+		for(var i in test){
+			list.append("<li><a href='/test/" + i + "'>" + i + "</a></li>");
+		}
+		$("#tests").replaceWith(list);
+	} else {
+		$("div").text("An error occurred!  Check the terminal...");
+	}
+</script>
+
+	</body>
+</html>

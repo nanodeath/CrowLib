@@ -1,6 +1,6 @@
 require 'yaml'
 
-CONFIG = YAML.load_file("Config.yaml")
+CONFIG = YAML.load_file(File.join(File.dirname(__FILE__), "Config.yaml"))
 
 task :default => [:build]
 
