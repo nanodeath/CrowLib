@@ -63,8 +63,18 @@ Runtime
 None! This library has no external dependencies.
 
 Testing
+-------
+In addition to the build-time dependencies, there are a couple other dependencies required to run tests (since there are server-side components):
+
+* gem (Rubygems)
+* "bundler" gem for Ruby
+
+Testing
 =======
-Run `rake test` to generate the necessary test javascripts, then head over to one of the html files under test/.
+Run `rake test_runner` and then head over to [localhost:4567](http://localhost:4567/).  All will be explained when you get there.
+
+To just generate the tests, run `rake test`
+
 The tests are written using QUnit (and jQuery).
 
 Versioning
@@ -73,6 +83,5 @@ See http://semver.org/ (and Graph.version)
 
 Todo
 ====
-* Should be possible to pass in neighbors-detecting algorithm and
-  distance-calculating algorithm, either to the Graph methods directly or on the node class.
+* Should be possible to pass in neighbors-detecting algorithm either to the Graph methods directly or on the node class.
 * Should automatically detect the "best" algorithm for the job, i.e. Dijkstra's for findGoal with a condition, or A* for findGoal with an explicit node

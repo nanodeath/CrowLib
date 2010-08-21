@@ -37,12 +37,12 @@ def execute_with_output(command)
 end
 
 def recompile_tests
+	out = nil
+	err = nil
 	cd "../" do
-#		Rake::Task[:test].execute
-#		Rake.application['test'].invoke
 		out, err = execute_with_output("rake test")
-		return {:out => out, :err => err}
 	end
+	return {:out => out, :err => err}
 end
 
 def symlink_tests
