@@ -96,17 +96,18 @@ OPTIMIZATIONS = {
 task :compile, [:target, :type] do |t, args|
 	opts = CONFIG[:advanced_compilation]
 	if(opts[args.target].is_a? String)
-		GoogleClosure.instance.compile CONFIG[:files], "build/js/#{opts[args.target]}.js", OPTIMIZATIONS[args.target]
+		GoogleClosure.instance.compile CONFIG[:files], "dist/js/#{opts[args.target]}.js", OPTIMIZATIONS[args.target]
 	elsif(opts[args.target])
-		GoogleClosure.instance.compile CONFIG[:files], "build/js/#{filename}.#{args.suffix}.js", OPTIMIZATIONS[args.target]
+		GoogleClosure.instance.compile CONFIG[:files], "dist/js/#{filename}.#{args.suffix}.js", OPTIMIZATIONS[args.target]
 	end
 end
 
 task :js_build_dir do
 	mkdir_p "build/js"
 end
+directory "dist/js"
 
-task :build => [:get_dependencies, :js_build_dir] do
+task :build => [:get_dependencies, :"dist/js"] do
 	Rake::Task[:compile].execute(OpenStruct.new({:target => :mini, :suffix => "min"}))
 	Rake::Task[:compile].execute(OpenStruct.new({:target => :micro, :suffix => "micro"}))
 	Rake::Task[:compile].execute(OpenStruct.new({:target => :pico, :suffix => "pico"}))
