@@ -5,3 +5,4 @@ dist
 docs
 .bundle
 test_runner/gems
+test_runner/public/test/

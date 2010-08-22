@@ -31,22 +31,23 @@ window["test"]["dunesAndDemise"] = function(){
 	Sand.prototype = new MyNode();
 	Sand.prototype.resistance = 2.0; // Sand has double the "resistance" of regular path
 	
-	function generateGraph(){
-		return crow.Graph.fromArray([
+	var graphArray = [
 			"R---R-",  // R for Road, S for Sand, and - means not a tile
 			"R-RRRR",
 			"RSRS-R",
 			"R-RRRS",
 			"RRR--R",
 			"--SRRR"
-		], function(x, y, val){
+		];
+	function generateGraph(){
+		return crow.Graph.fromArray(graphArray, function(x, y, val){
 			switch(val){
 				case "R": return new Road([x, y]);
 				case "S": return new Sand([x, y]);
 			}
 		});
 	}
-	
+	window.testPaths = [];
 	test("A* Algorithm finds good path", function(){
 		var graph = generateGraph();
 		var path = graph.findGoal({start: graph.getNode(0, 0), goal: graph.getNode(5, 4), algorithm: "a*"});
@@ -55,5 +56,47 @@ window["test"]["dunesAndDemise"] = function(){
 		for(var i in expected){
 			same([path.nodes[i].getX(), path.nodes[i].getY()], expected[i], "path node " + i + " is as expected");
 		}
+		window["testPaths"].push(["A* path", path]);
 	});
+	
+	var canvas = $("<canvas id='main' width='40' height='40'>").appendTo(document.body).hide();
+	var canvasDom = canvas[0];
+	if (canvasDom.getContext){
+		var ctx = canvasDom.getContext("2d");
+		ctx.beginPath();
+		ctx.arc(20, 20, 20, 0, Math.PI*2, false);
+		ctx.strokeStyle = "black";
+		ctx.fillStyle = "red";
+		ctx.fill();
+		ctx.stroke();
+	}
+	
+	canvas = $("<canvas class='goal' width='40' height='40'>").appendTo(document.body).hide();
+	canvasDom = canvas[0];
+	if (canvasDom.getContext){
+		var ctx = canvasDom.getContext("2d");
+		ctx.lineWidth = 3;
+		ctx.lineCap = "round";
+		ctx.beginPath();
+		ctx.moveTo(0, 0);
+		ctx.lineTo(40, 40);
+		ctx.moveTo(40, 0);
+		ctx.lineTo(0, 40);
+		ctx.strokeStyle = "gold";
+		ctx.stroke();
+	}
+
+	var prelude = $("<p>This traverses the following graph:");
+	var graphTable = $("<table class='graph'>");
+
+	for(var i = 0; i < graphArray.length; i++){
+		var row = $("<tr>");
+		for(var j = 0; j < graphArray[i].length; j++){
+			row.append("<td class='" + graphArray[i].charAt(j) + "'><div></div></td>");
+		}
+		graphTable.append(row);
+	}
+	prelude.append(graphTable);
+	
+	$("#prelude").append(prelude);
 };

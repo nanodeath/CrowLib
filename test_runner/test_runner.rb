@@ -49,7 +49,8 @@ def symlink_tests
 	if(!File.exist? TEST_FILE)
 		recompile_tests
 	end
-	FileUtils.ln_sf(TEST_FILE, "public/" + LINKED_TEST)
+	FileUtils.ln_sf(TEST_FILE, "public/" + LINKED_TEST) unless File.exist? "public/" + LINKED_TEST
+	mkdir_p "public/test" unless File.exist? "public/test"
 end
 
 get "/" do
@@ -59,15 +60,24 @@ get "/" do
 end
 
 get "/test/:test" do |test|
+	symlink_tests
 	@test = test
-	puts "Test is #{@test}, rendering!"
+	original_css = File.join(ROOT, "test", test + ".css")
+	@stylesheet = "/test/" + test + ".css"
+	new_css = File.join("public", @stylesheet)
+	if(File.exist?(original_css) and !File.exist?(new_css))
+		FileUtils.ln_sf(original_css, new_css)
+	end
+	if(!File.exist? new_css)
+		@stylesheet = nil
+	end
 	erb :test
 end
 
 get "/test_script/:test_name" do
 	content_type 'text/javascript', :charset => 'utf-8'
 	if(!File.exist? TEST_FILE)
-		recompile_tests	
+		recompile_tests
 	end
 	File.new(TEST_FILE)
 end

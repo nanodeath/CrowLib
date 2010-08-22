@@ -47,7 +47,8 @@ class GoogleClosure
 		path = [LIBRARY_ROOT]
 		if(CONFIG[:path]) then path += CONFIG[:path] end
 		path.map! {|d| "--path=#{d}" }
-		sh "#{CALC_DEPS_BIN} #{files.join(' ')} #{path.join(' ')} --output_mode=compiled --compiler_jar=#{COMPILER_JAR} #{flags.nil? ? '' : '-f "' + flags.join(' ') + '"'} > #{out}"
+		flags = flags.map {|f| '-f "' + f + '"'}.join(" ") unless flags.nil?
+		sh "#{CALC_DEPS_BIN} #{files.join(' ')} #{path.join(' ')} --output_mode=compiled --compiler_jar=#{COMPILER_JAR} #{flags} > #{out}"
 	end
 	def calculate_dependencies(files)
 		files = [files] unless files.is_a? Array
@@ -116,7 +117,7 @@ end
 task :docs => [:generate_javascript_docs]
 
 task :test => [:get_dependencies, :js_build_dir] do
-	GoogleClosure.instance.compile CONFIG[:files] + CONFIG[:test_files], "build/js/#{filename}-test.js", OPTIMIZATIONS[:min]
+	GoogleClosure.instance.compile CONFIG[:files] + CONFIG[:test_files], "build/js/#{filename}-test.js", (["--create_source_map=./build/test-map"] + OPTIMIZATIONS[:mini])
 end
 
 task :check_bundler do
@@ -145,4 +146,5 @@ task :clean do
 end
 task :deep_clean => [:clean] do
 	rm_r "build" if File.exist? "build"
+	rm_r "test_runner/gems" if File.exist? "test_runner/gems"
 end

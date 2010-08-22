@@ -4,6 +4,9 @@
 		<title>GraphLib QUnit Test Suite: <%= @test %></title>
 		<link type="text/css" rel="stylesheet" href="http://github.com/jquery/qunit/raw/master/qunit/qunit.css">
 		<link type="text/css" rel="stylesheet" href="/test_runner.css">
+		<% unless @stylesheet.nil? %>
+		<link type="text/css" rel="stylesheet" href="<%= @stylesheet %>">
+		<% end %>
 	</head>
 	<body>
 
@@ -11,10 +14,14 @@
 <h2 id="qunit-banner"></h2>
 <h2 id="qunit-userAgent"></h2>
 <ol id="qunit-tests"></ol>
+<div id="prelude"></div>
 <div id="controls">
-	<input class="recompile" type="button" value="Recompile and Reload"/>
+	<input class="recompile" type="button" value="Recompile and Reload">
 	<select class="test_selection">
-		<option value="">Other tests...</option>
+		<option value="">Other tests...
+	</select>
+	<select class="test_paths">
+		<option value="">Watch a test...
 	</select>
 </div>
 <div id="feedback"></div>

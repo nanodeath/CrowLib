@@ -192,6 +192,7 @@ window["test"]["mainTest"] = function(){
 		equals(path.length, 2, "Path is of expected length");
 		ok(path.found, "Path indicates end was found");
 	});
+	/*
 	test("basic test using custom distance", function(){
 		var graph = smallGraph();
 		var distanceEstimator = GraphUtil.distance.pythagoras;
@@ -202,6 +203,7 @@ window["test"]["mainTest"] = function(){
 		equals(path.length, 2, "Path is of expected length");
 		ok(path.found, "Path indicates end was found");
 	});
+	*/
 	test("doesn't accept goal-callback", function(){
 		raises(function(){
 			var graph = smallGraph();
