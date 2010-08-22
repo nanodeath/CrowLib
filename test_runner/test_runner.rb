@@ -62,7 +62,7 @@ end
 get "/test/:test" do |test|
 	symlink_tests
 	@test = test
-	original_css = File.join(ROOT, "test", test + ".css")
+	original_css = File.join(ROOT, "tst", test + ".css")
 	@stylesheet = "/gen/test/" + test + ".css"
 	new_css = File.join("public", @stylesheet)
 	if(File.exist?(original_css) and !File.exist?(new_css))

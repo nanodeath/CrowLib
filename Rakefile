@@ -3,7 +3,8 @@ require 'yaml'
 
 CONFIG = YAML.load_file(File.join(File.dirname(__FILE__), "Config.yaml"))
 
-task :default => [:build]
+desc "Builds all compilation targets specified in Config.yaml"
+task :default => [:build_crow]
 
 CLEAN.include("build/js", "dist", "test_runner/public/gen")
 CLOBBER.include("build", "test_runner/gems")
@@ -35,15 +36,13 @@ class GoogleClosure
 	COMPILER_JAR = COMPILER_ROOT + "/compiler.jar"
 	
 	def checkout_library
-		sh "svn checkout #{LIBRARY_URL} #{LIBRARY_ROOT}" unless File.exist?(LIBRARY_ROOT)
+		sh "svn checkout #{LIBRARY_URL} #{LIBRARY_ROOT}"
 	end
 
 	def download_compiler
-		unless File.exist?(COMPILER_JAR)
-			mkdir_p COMPILER_ROOT
-			download_file(COMPILER_URL, COMPILER_ARCHIVE) unless File.exist?(COMPILER_ARCHIVE)
-			sh "unzip #{COMPILER_ARCHIVE} -d #{COMPILER_ROOT}"
-		end
+		mkdir_p COMPILER_ROOT
+		download_file(COMPILER_URL, COMPILER_ARCHIVE) unless File.exist?(COMPILER_ARCHIVE)
+		sh "unzip #{COMPILER_ARCHIVE} -d #{COMPILER_ROOT}"
 	end
 	
 	def compile(files, out, flags=nil)
@@ -56,7 +55,9 @@ class GoogleClosure
 		sh "#{CALC_DEPS_BIN} #{files.join(' ')} #{path.join(' ')} --output_mode=compiled --compiler_jar=#{COMPILER_JAR} #{flags} > #{out}"
 	end
 	def calculate_dependencies(files)
-		files = [files] unless files.is_a? Array
+		if(!files.is_a? Array)
+			files = files.to_a
+		end
 		files = files.map {|f| "--input=#{f}"}
 		path = [LIBRARY_ROOT]
 		if(CONFIG[:path]) then path += CONFIG[:path] end
@@ -66,33 +67,27 @@ class GoogleClosure
 	end
 end
 
-# TASKS
-task :get_google_closure_library do
-	GoogleClosure.instance.checkout_library
+class SourceList
+	include Singleton
+	
+	attr_accessor :file_list
+	
+	def self.get
+		SourceList.instance.file_list ||= GoogleClosure.instance.calculate_dependencies(FileList.new(CONFIG[:files]))
+	end
 end
-task :get_google_closure_compiler do
-	GoogleClosure.instance.download_compiler
-end
-task :get_jsdoc_toolkit do
-	URL = "http://jsdoc-toolkit.googlecode.com/svn/trunk/"
-	FOLDER = "build/jsdoc_toolkit"
-	sh "svn checkout #{URL} #{FOLDER}" unless File.exist?(FOLDER)
-end
-task :generate_javascript_docs => [:get_google_closure_library, :get_jsdoc_toolkit] do
-	files = GoogleClosure.instance.calculate_dependencies(CONFIG[:files])
-	files.reject! {|f| f.starts_with? "build/"}
-	ROOT = "build/jsdoc_toolkit/jsdoc-toolkit"
-	JAR = ROOT + "/jsrun.jar"
-	RUN_JS = ROOT + "/app/run.js"
-	TEMPLATES = ROOT + "/templates/jsdoc"
-	FILES = files.join(' ') # CONFIG[:files].join(' ')
-	mkdir_p "dist/docs"
-	sh "java -jar #{JAR} #{RUN_JS} -a -t=#{TEMPLATES} #{FILES} -d=dist/docs"
+class TestList
+	include Singleton
+	
+	attr_accessor :file_list
+	
+	def self.get
+		TestList.instance.file_list ||= GoogleClosure.instance.calculate_dependencies(FileList.new(CONFIG[:files] + CONFIG[:test_files]))
+	end
 end
 
-task :get_dependencies => [:get_google_closure_library, :get_google_closure_compiler]
-
-filename = CONFIG[:base_filename]
+default_name = CONFIG[:base_filename]
+debug_filename = "build/js/#{CONFIG[:base_filename]}.debug.js"
 
 OPTIMIZATIONS = {
 	:mini => ["--compilation_level=WHITESPACE_ONLY"],
@@ -100,26 +95,109 @@ OPTIMIZATIONS = {
 	:pico => ["--compilation_level=ADVANCED_OPTIMIZATIONS"],
 }
 
-task :compile, [:target, :type] do |t, args|
-	opts = CONFIG[:advanced_compilation]
-	# opts[args.target] is either a string representing a target filename
-	# or a boolean, saying whether to render it or not
-	if(opts[args.target].is_a? String)
-		GoogleClosure.instance.compile CONFIG[:files], "dist/js/#{opts[args.target]}.js", OPTIMIZATIONS[args.target]
-	elsif(opts[args.target])
-		GoogleClosure.instance.compile CONFIG[:files], "dist/js/#{filename}.#{args.suffix}.js", OPTIMIZATIONS[args.target]
+directory "build/js"
+directory "dist/js"
+directory "dist/docs"
+
+# TASKS
+file GoogleClosure::CALC_DEPS_BIN do
+	GoogleClosure.instance.checkout_library
+end
+file GoogleClosure::COMPILER_JAR do
+	GoogleClosure.instance.download_compiler
+end
+
+class JsDoc
+	CHECKOUT_ROOT = "build/jsdoc_toolkit"
+	ROOT = CHECKOUT_ROOT + "/jsdoc-toolkit"
+	JAR = ROOT + "/jsrun.jar"
+	RUN_JS = ROOT + "/app/run.js"
+	TEMPLATES = ROOT + "/templates/jsdoc"
+end
+
+file JsDoc::JAR do
+	URL = "http://jsdoc-toolkit.googlecode.com/svn/trunk/"
+	sh "svn checkout #{URL} #{JsDoc::CHECKOUT_ROOT}"
+end
+
+task :generate_javascript_docs => ["dist/docs", JsDoc::JAR] do
+	files = SourceList.get.to_a
+	files.reject! {|f| f.starts_with? "build/"}
+	FILES = files.join(' ') # CONFIG[:files].join(' ')
+	sh "java -jar #{JsDoc::JAR} #{JsDoc::RUN_JS} -a -t=#{JsDoc::TEMPLATES} #{FILES} -d=dist/docs"
+end
+
+task :prepare_build do
+	CONFIG[:advanced_compilation].each do |mode, name|
+		name_to_use = nil
+
+		if(name.is_a? String)
+			name_to_use = "dist/js/#{name}.js"
+		elsif(name)
+			name_to_use = "dist/js/#{default_name}.#{mode.to_s}.js"
+		end
+
+		if(!name_to_use.nil?)
+			optimization = OPTIMIZATIONS[mode]
+			file name_to_use => [:"dist/js", GoogleClosure::CALC_DEPS_BIN, GoogleClosure::COMPILER_JAR] do
+				GoogleClosure.instance.compile CONFIG[:files], name_to_use, optimization
+			end
+			SourceList.get.each {|f| file name_to_use => f}
+			task :real_build => [name_to_use]
+		end
 	end
 end
+task :real_build
+task :build_crow => [:prepare_build, :real_build]
 
-task :js_build_dir do
-	mkdir_p "build/js"
+file debug_filename => ["build/js"] do
+	generate_debug(CONFIG[:files], debug_filename)
 end
-directory "dist/js"
+task :prepare_debug => [GoogleClosure::CALC_DEPS_BIN] do
+	SourceList.get.each {|f| file debug_filename => f}
+end
+task :real_debug_build => [debug_filename]
+desc "Builds #{debug_filename}, the concatenated (not minified) version of files"
+task :debug => [:prepare_debug, :real_debug_build]
 
-task :build => [:get_dependencies, :"dist/js"] do
-	Rake::Task[:compile].execute(OpenStruct.new({:target => :mini, :suffix => "min"}))
-	Rake::Task[:compile].execute(OpenStruct.new({:target => :micro, :suffix => "micro"}))
-	Rake::Task[:compile].execute(OpenStruct.new({:target => :pico, :suffix => "pico"}))
+namespace "test" do
+	test_filename = "build/js/#{default_name}-test.js"
+	task :prepare_build do
+		TestList.get.each {|f| file test_filename => f}
+		file test_filename => ["build/js", GoogleClosure::CALC_DEPS_BIN, GoogleClosure::COMPILER_JAR] do
+			GoogleClosure.instance.compile CONFIG[:files] + CONFIG[:test_files], test_filename, (["--create_source_map=./build/test-map"] + OPTIMIZATIONS[:mini])
+		end
+	end
+	task :real_build => [test_filename]
+	desc "Builds build/js/#{default_name}-test.js, the default minified test javascript"
+	task :build => ["test:prepare_build", "test:real_build"]
+
+	test_debug_filename = "build/js/#{CONFIG[:base_filename]}-test.debug.js"
+	file test_debug_filename => ["build/js"] do
+		generate_debug(CONFIG[:files] + CONFIG[:test_files], test_debug_filename)
+	end
+	task :prepare_debug => [GoogleClosure::CALC_DEPS_BIN] do
+		TestList.get.each {|f| file test_debug_filename => f}
+	end
+	task :real_debug_build => [test_debug_filename]
+	desc "Builds #{test_debug_filename}, the unminified debugging test javascript"
+	task :debug => ["test:prepare_debug", "test:real_debug_build"]
+
+	task :prepare_test_runner => [:check_bundler] do
+		if(!File.exist? "test_runner/gems")
+			cd "test_runner" do
+				sh "bundle install gems --disable-shared-gems"
+			end
+		end
+	end
+
+	desc "Run the test server on localhost (port will be shown on startup)"
+	task :runner => [:prepare_test_runner] do
+		cd "test_runner" do
+			puts "** Port will show up shortly.  Use Ctrl-C to exit! **"
+			ruby "test_runner.rb"
+		end
+	end
 end
 
 def generate_debug(files, filename, markers=true)
@@ -142,41 +220,15 @@ def generate_debug(files, filename, markers=true)
 		end
 	end
 	File.open(filename, "w") {|f| f.write output.string }
+	$stderr.puts("Wrote debug file: #{filename}")
 end
 
-task :debug => [:get_dependencies, :"build/js"] do
-	generate_debug(CONFIG[:files], "build/js/#{CONFIG[:base_filename]}.debug.js")
-end
-
-namespace "test" do
-	task :debug => [:get_dependencies, :"build/js"] do
-		generate_debug(CONFIG[:files] + CONFIG[:test_files], "build/js/#{CONFIG[:base_filename]}-test.debug.js")
-	end
-end
 
 task :docs => [:generate_javascript_docs]
-
-task :test => [:get_dependencies] do
-	GoogleClosure.instance.compile CONFIG[:files] + CONFIG[:test_files], "build/js/#{filename}-test.js", (["--create_source_map=./build/test-map"] + OPTIMIZATIONS[:mini])
-end
 
 task :check_bundler do
 	if `which bundle` == ""
 		raise "Bundler must be installed...http://gembundler.com/"
-	end
-end
-
-task :prepare_test_runner => [:check_bundler] do
-	if(!File.exist? "test_runner/gems")
-		cd "test_runner" do
-			sh "bundle install gems --disable-shared-gems"
-		end
-	end
-end
-
-task :test_runner => [:prepare_test_runner] do
-	cd "test_runner" do
-		ruby "test_runner.rb"
 	end
 end
 
