@@ -13,8 +13,8 @@ require "open3"
 
 ROOT = File.expand_path(File.dirname(__FILE__) + "/../");
 load ROOT + "/Rakefile"
-TEST_FILE = ROOT + "/build/js/crow-test.js"
-LINKED_TEST = "crow-test.js"
+TEST_FILE = ROOT + "/build/js/crow-test.debug.js"
+LINKED_TEST = "gen/crow-test.debug.js"
 
 def execute_with_output(command)
 	stdout_buffer = []
@@ -40,7 +40,7 @@ def recompile_tests
 	out = nil
 	err = nil
 	cd "../" do
-		out, err = execute_with_output("rake test")
+		out, err = execute_with_output("rake test:debug")
 	end
 	return {:out => out, :err => err}
 end
@@ -49,8 +49,8 @@ def symlink_tests
 	if(!File.exist? TEST_FILE)
 		recompile_tests
 	end
+	mkdir_p "public/gen/test" unless File.exist? "public/gen/test"
 	FileUtils.ln_sf(TEST_FILE, "public/" + LINKED_TEST) unless File.exist? "public/" + LINKED_TEST
-	mkdir_p "public/test" unless File.exist? "public/test"
 end
 
 get "/" do
@@ -63,7 +63,7 @@ get "/test/:test" do |test|
 	symlink_tests
 	@test = test
 	original_css = File.join(ROOT, "test", test + ".css")
-	@stylesheet = "/test/" + test + ".css"
+	@stylesheet = "/gen/test/" + test + ".css"
 	new_css = File.join("public", @stylesheet)
 	if(File.exist?(original_css) and !File.exist?(new_css))
 		FileUtils.ln_sf(original_css, new_css)
@@ -72,14 +72,6 @@ get "/test/:test" do |test|
 		@stylesheet = nil
 	end
 	erb :test
-end
-
-get "/test_script/:test_name" do
-	content_type 'text/javascript', :charset => 'utf-8'
-	if(!File.exist? TEST_FILE)
-		recompile_tests
-	end
-	File.new(TEST_FILE)
 end
 
 get "/recompile" do

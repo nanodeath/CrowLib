@@ -1,3 +1,4 @@
+require 'rake/clean'
 require 'yaml'
 
 CONFIG = YAML.load_file(File.join(File.dirname(__FILE__), "Config.yaml"))
@@ -107,11 +108,44 @@ task :js_build_dir do
 	mkdir_p "build/js"
 end
 directory "dist/js"
+directory "build/js"
 
 task :build => [:get_dependencies, :"dist/js"] do
 	Rake::Task[:compile].execute(OpenStruct.new({:target => :mini, :suffix => "min"}))
 	Rake::Task[:compile].execute(OpenStruct.new({:target => :micro, :suffix => "micro"}))
 	Rake::Task[:compile].execute(OpenStruct.new({:target => :pico, :suffix => "pico"}))
+end
+
+def generate_debug(files, filename, markers=true)
+	deps = GoogleClosure.instance.calculate_dependencies(files)
+	output = StringIO.new
+	deps.each do |d|
+		output.puts("// FILE: #{d}: DeBUG //") if markers
+		count = 0
+		File.open(d) do |f|
+			while(line = f.gets)
+				count += 1
+				if(markers && count % 25 == 0)
+					output.puts(line.chomp + "\t\t// LINE #{count} in #{d}: DeBUG")
+				else
+					output.puts line
+				end
+			end
+			output.puts("// FINAL LINE #{count} in #{d}: DeBUG //") if markers
+			output.puts
+		end
+	end
+	File.open(filename, "w") {|f| f.write output.string }
+end
+
+task :debug => [:get_dependencies, :"build/js"] do
+	generate_debug(CONFIG[:files], "build/js/#{CONFIG[:base_filename]}.debug.js")
+end
+
+namespace "test" do
+	task :debug => [:get_dependencies, :"build/js"] do
+		generate_debug(CONFIG[:files] + CONFIG[:test_files], "build/js/#{CONFIG[:base_filename]}-test.debug.js")
+	end
 end
 
 task :docs => [:generate_javascript_docs]
@@ -140,11 +174,12 @@ task :test_runner => [:prepare_test_runner] do
 	end
 end
 
-task :clean do
-	directories_to_clean = ["build/js", "dist"]
+CLEAN.include("build/js", "dist", "test_runner/public/gen")
+#task :clean do
+#	directories_to_clean = ["build/js", "dist", "test_runner/public/gen"]
+#	directories_to_clean.each {|d| rm_r d if File.exist? d}
+#end
+task :clobber => [:clean] do
+	directories_to_clean = ["build", "test_runner/gems"]
 	directories_to_clean.each {|d| rm_r d if File.exist? d}
-end
-task :deep_clean => [:clean] do
-	rm_r "build" if File.exist? "build"
-	rm_r "test_runner/gems" if File.exist? "test_runner/gems"
 end
