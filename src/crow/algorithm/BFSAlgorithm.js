@@ -3,6 +3,9 @@ goog.require('crow.algorithm.SearchAlgorithm');
 
 /**
  * @constructor
+ * Notes: BFS doesn't yet have a notion of distance between different nodes.
+ * If two adjacent nodes are an infinite distance apart (i.e. there's a wall between
+ * them) it doesn't check.
  */
 crow.algorithm.BFSAlgorithm = function(graph){
 	this.graph = graph;
