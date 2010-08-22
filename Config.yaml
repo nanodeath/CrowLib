@@ -4,7 +4,7 @@
 - src/crow/All.js
 :test_files:
 - tst/test.js
-- tst/examples/maze.js
+- tst/dunesAndDemise.js
 :path:
 - src
 :advanced_compilation:

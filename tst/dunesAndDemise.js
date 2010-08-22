@@ -4,7 +4,7 @@ goog.require('crow.BaseNode');
 window["test"] = window["test"] || {};
 window["test"]["dunesAndDemise"] = function(){
 	/**
-   * @constructor
+	 * @constructor
 	 */
 	function MyNode(arr){ this.arr = arr; };
 	MyNode.prototype = new crow.BaseNode();
@@ -19,13 +19,13 @@ window["test"]["dunesAndDemise"] = function(){
 	MyNode.prototype.resistance = 1.0;
 	
 	/**
-   * @constructor
+	 * @constructor
 	 */
 	function Road(){ MyNode.apply(this, arguments); }
 	Road.prototype = new MyNode();
 	
 	/**
-   * @constructor
+	 * @constructor
 	 */
 	function Sand(){ MyNode.apply(this, arguments); }
 	Sand.prototype = new MyNode();
