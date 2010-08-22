@@ -5,6 +5,10 @@ CONFIG = YAML.load_file(File.join(File.dirname(__FILE__), "Config.yaml"))
 
 task :default => [:build]
 
+CLEAN.include("build/js", "dist", "test_runner/public/gen")
+CLOBBER.include("build", "test_runner/gems")
+
+# HELPERS
 def download_file(url, destination)
 	sh "wget #{url} -O #{destination}"
 end
@@ -62,6 +66,7 @@ class GoogleClosure
 	end
 end
 
+# TASKS
 task :get_google_closure_library do
 	GoogleClosure.instance.checkout_library
 end
@@ -97,6 +102,8 @@ OPTIMIZATIONS = {
 
 task :compile, [:target, :type] do |t, args|
 	opts = CONFIG[:advanced_compilation]
+	# opts[args.target] is either a string representing a target filename
+	# or a boolean, saying whether to render it or not
 	if(opts[args.target].is_a? String)
 		GoogleClosure.instance.compile CONFIG[:files], "dist/js/#{opts[args.target]}.js", OPTIMIZATIONS[args.target]
 	elsif(opts[args.target])
@@ -108,7 +115,6 @@ task :js_build_dir do
 	mkdir_p "build/js"
 end
 directory "dist/js"
-directory "build/js"
 
 task :build => [:get_dependencies, :"dist/js"] do
 	Rake::Task[:compile].execute(OpenStruct.new({:target => :mini, :suffix => "min"}))
@@ -150,7 +156,7 @@ end
 
 task :docs => [:generate_javascript_docs]
 
-task :test => [:get_dependencies, :js_build_dir] do
+task :test => [:get_dependencies] do
 	GoogleClosure.instance.compile CONFIG[:files] + CONFIG[:test_files], "build/js/#{filename}-test.js", (["--create_source_map=./build/test-map"] + OPTIMIZATIONS[:mini])
 end
 
@@ -174,12 +180,3 @@ task :test_runner => [:prepare_test_runner] do
 	end
 end
 
-CLEAN.include("build/js", "dist", "test_runner/public/gen")
-#task :clean do
-#	directories_to_clean = ["build/js", "dist", "test_runner/public/gen"]
-#	directories_to_clean.each {|d| rm_r d if File.exist? d}
-#end
-task :clobber => [:clean] do
-	directories_to_clean = ["build", "test_runner/gems"]
-	directories_to_clean.each {|d| rm_r d if File.exist? d}
-end
