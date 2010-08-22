@@ -62,9 +62,7 @@ table.graph td {
 	border:1px solid black;
 	width: 50px;
 	padding: 0;
-	text-align: center;
 	vertical-align: top;
-	/*position: relative;*/
 }
 table.graph div {
 	position: relative;
@@ -72,9 +70,8 @@ table.graph div {
 
 table.graph td canvas {
 	position: absolute;
-	left: 2px;
-	top: 2px;
-	/*display: block;*/
+	left: 5px;
+	top: 5px;
 }
 table.graph {
 	border-spacing: 0;
