@@ -48,6 +48,7 @@ crow.algorithm.AStarAlgorithm.prototype.findPath = function(start, goal, opts){
 			var neighbor = neighbors[n];
 			if(this.evaluated.get(neighbor)) continue;
 			var newGScore = this.gScore.get(currentNode) + currentNode.distanceTo(neighbor);
+			if(newGScore == Infinity) continue;
 			
 			if(!this.toEvaluate.containsValue(neighbor) || newGScore < this.gScore.get(neighbor)){
 				this.parent.set(neighbor, currentNode);
