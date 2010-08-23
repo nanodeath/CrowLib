@@ -1,0 +1,13 @@
+td.floor {
+	background-color: #eee;
+}
+td.wall {
+	background-color: #444;
+}
+table.graph td {
+	height: 25px;
+	width: 25px;
+}
+input[type=text] {
+	width: 3em;
+}

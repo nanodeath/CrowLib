@@ -7,7 +7,7 @@ desc "Builds all compilation targets specified in Config.yaml"
 task :default => [:build_crow]
 
 CLEAN.include("build/js", "dist", "test_runner/public/gen")
-CLOBBER.include("build", "test_runner/gems")
+CLOBBER.include("build", "test_runner/gems", "test_runner/.bundle")
 
 # HELPERS
 def download_file(url, destination)
@@ -165,7 +165,7 @@ namespace "test" do
 	task :prepare_build do
 		TestList.get.each {|f| file test_filename => f}
 		file test_filename => ["build/js", GoogleClosure::CALC_DEPS_BIN, GoogleClosure::COMPILER_JAR] do
-			GoogleClosure.instance.compile CONFIG[:files] + CONFIG[:test_files], test_filename, (["--create_source_map=./build/test-map"] + OPTIMIZATIONS[:mini])
+			GoogleClosure.instance.compile FileList.new(CONFIG[:files] + CONFIG[:test_files]), test_filename, (["--create_source_map=./build/test-map"] + OPTIMIZATIONS[:mini])
 		end
 	end
 	task :real_build => [test_filename]
@@ -174,7 +174,7 @@ namespace "test" do
 
 	test_debug_filename = "build/js/#{CONFIG[:base_filename]}-test.debug.js"
 	file test_debug_filename => ["build/js"] do
-		generate_debug(CONFIG[:files] + CONFIG[:test_files], test_debug_filename)
+		generate_debug(FileList.new(CONFIG[:files] + CONFIG[:test_files]), test_debug_filename)
 	end
 	task :prepare_debug => [GoogleClosure::CALC_DEPS_BIN] do
 		TestList.get.each {|f| file test_debug_filename => f}

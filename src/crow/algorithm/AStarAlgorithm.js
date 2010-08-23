@@ -74,14 +74,23 @@ crow.algorithm.AStarAlgorithm.prototype.findPath = function(start, goal, opts){
 			nodes: path,
 			start: start,
 			goal: goal,
-			end: found ? goal : null,
+			end: goal,
 			length: this.gScore.get(goal),
-			found: found,
+			found: true,
 			recalculate: this.recalculate,
 			algorithm: this
 		};			
 	} else {
-		throw new Error("not found!");
+		return {
+			nodes: [],
+			start: start,
+			goal: goal,
+			end: null,
+			length: Infinity,
+			found: false,
+			recalculate: this.recalculate,
+			algorithm: this
+		};			
 	}
 };
 crow.algorithm.AStarAlgorithm.prototype.estimateDistance = function(start, goal, graph){

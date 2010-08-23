@@ -3,8 +3,7 @@
 :files:
 - src/crow/All.js
 :test_files:
-- tst/test.js
-- tst/dunesAndDemise.js
+- tst/*.js
 :path:
 - src
 :advanced_compilation:
