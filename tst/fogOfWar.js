@@ -1,5 +1,6 @@
 goog.require('crow.Graph');
 goog.require('crow.BaseNode');
+goog.require('crow.Algorithm');
 
 window["test"] = window["test"] || {};
 window["test"]["fogOfWar"] = function(){
@@ -55,20 +56,25 @@ window["test"]["fogOfWar"] = function(){
 		ctx.fill();
 		ctx.stroke();
 	}
+	var mode = null
 	
 	// Design a maze!
 	var button = $("<button>Design!</button>");
 	button.click(function(){
+		mode = "design";
 		var graphTable = $("<table class='graph'>");
 		graphTable.click(function(e){
-			var cell = $(e.target);
-			var position = cell.data("position");
-			cell.toggleClass("wall");
-			if(cell.hasClass("wall")){
-				mazeGraph.removeNode(position[0], position[1]);
-			} else {
-				mazeGraph.addNode(position[0], position[1]);
+			if(mode == "design"){
+				var cell = $(e.target);
+				var position = cell.data("position");
+				cell.toggleClass("wall");
+				if(cell.hasClass("wall")){
+					mazeGraph.removeNode(position[0], position[1]);
+				} else {
+					mazeGraph.addNode(position[0], position[1]);
+				}
 			}
+			e.preventDefault();
 		});
 		for(var i = 0; i < 8; i++){
 			var row = $("<tr>");
@@ -89,21 +95,80 @@ window["test"]["fogOfWar"] = function(){
 	});
 	// Helpers
 	function getCell(x, y){
-		console.log($("table.graph tr:nth-child(" + (y+1) + ") td:nth-child(" + (x+1) + ") div"))
 		return $("table.graph tr:nth-child(" + (y+1) + ") td:nth-child(" + (x+1) + ") div");
 	}
+	
+	var ScoreBox = function(player){
+		var self = this;
+		this.dom = $("<div class='scorebox'>");
+		this.dom.append("<h2>Score</h2>");
+		var scoreTable = $("<table>");
+		scoreTable.append("<tr><th/><th>Count</th><th>Score</th></tr>");
+
+		var row = $("<tr><td>Moves:</td></tr>");
+		var moveCountEl = $("<td>").appendTo(row);
+		var moveScoreEl = $("<td>").appendTo(row);
+		var moveScoreMultiplier = 1;
+		row.appendTo(scoreTable);
+		
+		row = $("<tr><td>Backtracks:</td></tr>");
+		var backtracksCountEl = $("<td>").appendTo(row);
+		var backtracksScoreEl = $("<td>").appendTo(row);
+		var backtracksScoreMultiplier = 2;
+		row.appendTo(scoreTable);
+
+		row = $("<tr><td>Total:</td><td></td></tr>");
+		var totalScoreEl = $("<td>").appendTo(row);
+		row.appendTo(scoreTable);
+
+		scoreTable.appendTo(this.dom);
+		
+		var moves, repeatMoves, movesScore, repeatMovesScore;
+		
+		this.reset = function(){
+			moves = repeatMoves = movesScore = repeatMovesScore = 0;
+		}
+		this.updateTable = function(){
+			moveCountEl.text(moves);
+			moveScoreEl.text(movesScore);
+			
+			backtracksCountEl.text(repeatMoves);
+			backtracksScoreEl.text(repeatMovesScore);
+			
+			totalScoreEl.text(movesScore + repeatMovesScore);
+		};
+		this.updateScores = function(){
+			movesScore = moves*moveScoreMultiplier;
+			repeatMovesScore = repeatMoves*backtracksScoreMultiplier;
+		}
+		canvas.bind("win", this.reset);
+		canvas.bind("lose", this.reset);
+		canvas.bind("move", function(e, data){
+			moves++;
+			if(data.alreadyVisited) repeatMoves++;
+			self.updateScores();
+			self.updateTable();
+		});
+		this.reset();
+		this.updateTable();
+	};
 	
 	// Play
 	var play = $("<button>Play!</button>");
 	play.click(function(){
+		mode = "play";
 		$("table.graph td").addClass("foggy");
+		
 		canvas.show();
 		canvas.appendTo(getCell(0, 7));
 		var graph = mazeGraph.makeGraph();
 		
 		var player = function(x, y){
+			var visitedNodes;
 			var range = 3;
 			this.start = function(){
+				visitedNodes = new crow.Algorithm.NodeMap(false);
+				visitedNodes.set(graph.getNode(x, y), true);
 				this.liftFog();
 				this.step();
 			};
@@ -113,19 +178,23 @@ window["test"]["fogOfWar"] = function(){
 				if(nodes.length < 2){
 					if(!path.found){
 						alert(":( you suck");
+						canvas.trigger("lose");
 					} else {
+						canvas.trigger("win");
 						return;
 					}
 				}
 				var nextNode = nodes[1];
 				var nextCell = getCell(nextNode.getX(), nextNode.getY());
+				canvas.trigger("move", [{alreadyVisited: visitedNodes.get(nextNode)}]);
+				visitedNodes.set(nextNode, true);
 
 				canvas.appendTo(nextCell);
 
 				var me = this;
 				x = nextNode.getX(), y = nextNode.getY();
 				this.liftFog();
-				setTimeout(function(){me.step.call(me)}, 500);
+				setTimeout(function(){me.step.call(me)}, 333);
 			};
 			this.liftFog = function(){
 				var currentNode = graph.getNode(x, y);
@@ -139,7 +208,11 @@ window["test"]["fogOfWar"] = function(){
 				}
 			};
 		};
-		(new player(0, 7)).start();
+		var p = new player(0, 7);
+		var score_box = new ScoreBox(p);
+		$("#prelude").append(score_box.dom);
+		p.start();
 	});
+	$("#prelude").html("<p>Hit design to build a maze starting at the S and leading to the E.  The longer the path, the better, and bonus points for forcing the AI to backtrack.  When you're done, hit Play.</p>");
 	$("#controls").append(button).append(play);
 };

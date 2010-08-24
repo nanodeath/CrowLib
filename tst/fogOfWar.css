@@ -12,3 +12,7 @@ td.foggy {
 	background-color: #888;
 	color: white;
 }
+
+table.graph, div.scoreBox {
+	float: left;
+}

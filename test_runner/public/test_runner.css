@@ -81,3 +81,7 @@ table.graph {
 table.graph canvas {
 	margin: 0;
 }
+
+.clear {
+	clear: both;
+}
