@@ -16,3 +16,9 @@ td.foggy {
 table.graph, div.scoreBox {
 	float: left;
 }
+
+table.graph td canvas.path_marker {
+	position: absolute;
+	left: 20px;
+	top: 20px;
+}
