@@ -13,9 +13,12 @@ window["test"]["fogOfWar"] = function(){
 	MyNode.prototype.getY = function(){ return this.arr[1]; };
 	MyNode.prototype.foggy = true;
 	MyNode.prototype.isWalkable = true;
+	MyNode.prototype.isKnownWall = function(){
+		return !this.foggy && !this.isWalkable;
+	};
 	MyNode.prototype.distanceAlgorithm = crow.GraphUtil.distance.manhattan;
 	MyNode.prototype.distanceTo = function(other){
-		if(!this.foggy && !this.isWalkable){
+		if(other.isKnownWall()){
 			return Infinity;
 		} else {
 			return crow.BaseNode.prototype.distanceTo.apply(this, arguments);
@@ -189,15 +192,35 @@ window["test"]["fogOfWar"] = function(){
 				this.liftFog();
 				this.step();
 			};
+			this.recalculatePath = function(){
+				this.path = graph.findGoal({start: graph.getNode(x, y), goal: graph.getNode(7, 0), algorithm: "a*"});
+				this.nodes = this.path.nodes;			
+			};
 			this.step = function(){
 				canvas.trigger("move", [{alreadyVisited: visitedNodes.get(graph.getNode(x, y))}]);
 				visitedNodes.set(graph.getNode(x, y), true);
 				this.draw();
 				this.liftFog();
-				this.path = graph.findGoal({start: graph.getNode(x, y), goal: graph.getNode(7, 0), algorithm: "a*"})
+				if(!this.path){
+						this.recalculatePath();
+				} else {
+					var recalculate = false;
+					for(var i = 1; i < this.nodes.length; i++){
+						if(this.nodes[i].isKnownWall()){
+							recalculate = true;
+							break;
+						}
+					}
+					if(recalculate){
+						this.recalculatePath();
+					} else {
+						this.nodes.shift();
+					}
+				}
+
 				this.drawMarker();
 
-				var nodes = this.path.nodes;
+				var nodes = this.nodes;
 				if(nodes.length < 1){
 					if(!this.path.found){
 						alert(":( you suck");
@@ -212,7 +235,7 @@ window["test"]["fogOfWar"] = function(){
 				x = nextNode.getX(), y = nextNode.getY();
 
 				var me = this;
-				setTimeout(function(){me.step.call(me)}, 1000);
+				setTimeout(function(){me.step.call(me)}, 500);
 			};
 			this.draw = function(){
 				canvas.appendTo(getCell(x, y));
