@@ -56,6 +56,23 @@ window["test"]["fogOfWar"] = function(){
 		ctx.fill();
 		ctx.stroke();
 	}
+	
+	function makePathMarker(){
+		var size = 10;
+		var canvas = $("<canvas class='path_marker' width='" + size + "' height='" + size + "'>");
+		var canvasDom = canvas[0];
+		if (canvasDom.getContext){
+			var ctx = canvasDom.getContext("2d");
+			ctx.beginPath();
+			ctx.arc(size/2, size/2, size/2, 0, Math.PI*2, false);
+			ctx.strokeStyle = "black";
+			ctx.fillStyle = "red";
+			ctx.fill();
+			ctx.stroke();
+		}
+		return canvas;
+	}
+	
 	var mode = null
 	
 	// Design a maze!
@@ -173,10 +190,11 @@ window["test"]["fogOfWar"] = function(){
 				this.step();
 			};
 			this.step = function(){
-				var path = graph.findGoal({start: graph.getNode(x, y), goal: graph.getNode(7, 0), algorithm: "a*"})
-				var nodes = path.nodes;
+				this.path = graph.findGoal({start: graph.getNode(x, y), goal: graph.getNode(7, 0), algorithm: "a*"})
+				this.drawMarker();
+				var nodes = this.path.nodes;
 				if(nodes.length < 2){
-					if(!path.found){
+					if(!this.path.found){
 						alert(":( you suck");
 						canvas.trigger("lose");
 					} else {
@@ -184,17 +202,29 @@ window["test"]["fogOfWar"] = function(){
 						return;
 					}
 				}
+				console.log(nodes);
 				var nextNode = nodes[1];
-				var nextCell = getCell(nextNode.getX(), nextNode.getY());
+				x = nextNode.getX(), y = nextNode.getY();
+				var nextCell = getCell(x, y);
 				canvas.trigger("move", [{alreadyVisited: visitedNodes.get(nextNode)}]);
 				visitedNodes.set(nextNode, true);
 
-				canvas.appendTo(nextCell);
-
 				var me = this;
-				x = nextNode.getX(), y = nextNode.getY();
+
+				this.draw();
+
 				this.liftFog();
-				setTimeout(function(){me.step.call(me)}, 333);
+				setTimeout(function(){me.step.call(me)}, 1000);
+			};
+			this.draw = function(){
+				canvas.appendTo(getCell(x, y));
+			};
+			this.drawMarker = function(){
+				$("table.graph canvas.path_marker").remove();
+				for(var i = 1; i < this.path.nodes.length; i++){
+					var n = this.path.nodes[i];
+					makePathMarker().appendTo(getCell(n.getX(), n.getY()));
+				}			
 			};
 			this.liftFog = function(){
 				var currentNode = graph.getNode(x, y);
