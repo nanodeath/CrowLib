@@ -192,7 +192,7 @@ namespace "test" do
 	end
 
 	desc "Run the test server on localhost (port will be shown on startup)"
-	task :runner => [:prepare_test_runner, :prepare_debug] do
+	task :runner => [:prepare_test_runner, :debug] do
 		cd "test_runner" do
 			puts "** Port will show up shortly.  Use Ctrl-C to exit! **"
 			ruby "test_runner.rb"
