@@ -6,7 +6,7 @@ CONFIG = YAML.load_file(File.join(File.dirname(__FILE__), "Config.yaml"))
 desc "Builds all compilation targets specified in Config.yaml"
 task :default => [:build_crow]
 
-CLEAN.include("build/js", "dist", "test_runner/public/gen")
+CLEAN.include("build/js", "dist", "test_runner/public/gen", "test_runner/tmp", "DEADJOE")
 CLOBBER.include("build", "test_runner/gems", "test_runner/.bundle")
 
 # HELPERS

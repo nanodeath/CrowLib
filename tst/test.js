@@ -3,6 +3,14 @@ goog.require('crow.BaseNode');
 
 window["test"] = window["test"] || {};
 window["test"]["mainTest"] = function(){
+	console.logNodes = function(nodes){
+		var output = [];
+		for(var i = 0; i < nodes.length; i++){
+			output.push("[" + nodes[i].getX() + "," + nodes[i].getY() + "]");
+		}
+		console.log(output.join(","));	
+	};
+
 	module("Tiny map");
 	/*
 		Map looks like:
@@ -209,6 +217,74 @@ window["test"]["mainTest"] = function(){
 			var graph = smallGraph();
 			graph.findGoal({goal: function(){}, algorithm: "a*"});
 		}, "Callback for goal raised exception");
+	});
+	module("procedural path generation: A*");
+	test("stationary", function(){
+		var limit = 8;
+		var graph = largeGraph();
+		var path = graph.findGoal({start: graph.getNode(0, 0), goal: graph.getNode(7, 5), algorithm: "a*", limit: limit});
+		ok(!path.found, "path not found after first attempt");
+		path.continueCalculating(10);
+		ok(!path.found, "path not found after one continue");
+		path.continueCalculating(10);
+		ok(path.found, "path found after two continues");
+		
+		var unlimitedPath = graph.findGoal({start: graph.getNode(0, 0), goal: graph.getNode(7, 5), algorithm: "a*"});
+		ok(path.nodes.length <= unlimitedPath.nodes.length * 1.5, "path is pretty efficient (" + path.nodes.length + " vs " + unlimitedPath.nodes.length + " ideal)");
+	});
+	
+	test("moving along path", function(){
+		var limit = 8;
+		var graph = largeGraph();
+		var path = graph.findGoal({start: graph.getNode(0, 0), goal: graph.getNode(7, 5), algorithm: "a*", limit: limit});
+		ok(!path.found, "path not found after first go");
+		
+		path.advanceTo(1);
+		path.continueCalculating(10);
+		ok(!path.found, "path not found after one continue");
+		
+		path.advanceTo(1);
+		path.continueCalculating(10);
+		ok(path.found, "path found after two continues");
+		
+		var unlimitedPath = graph.findGoal({start: graph.getNode(2, 0), goal: graph.getNode(7, 5), algorithm: "a*"});
+		ok(path.nodes.length <= unlimitedPath.nodes.length * 1.5, "path is pretty efficient (" + path.nodes.length + " vs " + unlimitedPath.nodes.length + " ideal)");
+	});
+	
+	test("moving, but not along path", function(){
+		var limit = 8;
+		var graph = largeGraph();
+		var path = graph.findGoal({start: graph.getNode(0, 0), goal: graph.getNode(7, 5), algorithm: "a*", limit: limit});
+		ok(!path.found, "path not found after first go");
+		
+		path.advanceTo(graph.getNode(0, 1));
+		path.continueCalculating(10);
+		ok(!path.found, "path not found after one continue");
+		
+		path.advanceTo(graph.getNode(0, 2));
+		path.continueCalculating(10);
+		ok(!path.found, "path not found after two continues since actor keeps moving off best path");
+	});
+	
+	test("small limits don't perform well", function(){
+		var limit = 5;
+		var graph = largeGraph();
+		var path = graph.findGoal({start: graph.getNode(0, 0), goal: graph.getNode(7, 5), algorithm: "a*", limit: limit});
+		
+		var i = 100;
+		while(i--){
+			path.continueCalculating(limit);
+		}
+		ok(!path.found, "can't find goal even after many (100) iterations");
+	});
+	test("small numbers can work with linear limit increase", function(){
+		var limit = 5;
+		var graph = largeGraph();
+		var path = graph.findGoal({start: graph.getNode(0, 0), goal: graph.getNode(7, 5), algorithm: "a*", limit: limit});
+
+		while(!path.continueCalculating(++limit)){}
+		var unlimitedPath = graph.findGoal({start: graph.getNode(0, 0), goal: graph.getNode(7, 5), algorithm: "a*"});
+		ok(path.nodes.length <= unlimitedPath.nodes.length * 2, "resulting path is reasonably efficient (" + path.nodes.length + " vs " + unlimitedPath.nodes.length + " ideal)");
 	});
 	
 	module("EffectGames");

@@ -10,7 +10,7 @@ crow.Graph = function(){
 	// initialize
 	this.nodes = [];
 	this.map = {};
-	this.version = "0.7.0";
+	this.version = "0";
 	
 	// methods
 	/**
