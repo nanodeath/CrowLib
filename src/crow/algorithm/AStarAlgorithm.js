@@ -127,7 +127,7 @@ crow.algorithm.AStarAlgorithm.prototype.findPath = function(start, goal, opts){
 		pathOpts.length = Infinity;
 		pathOpts.found = false;
 		
-	return new crow.algorithm.Path(pathOpts);
+		return new crow.algorithm.Path(pathOpts);
 	}
 };
 crow.algorithm.AStarAlgorithm.prototype.estimateDistance = function(start, goal, graph){

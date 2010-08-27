@@ -2,16 +2,25 @@ goog.provide('crow.Algorithm');
 goog.require('goog.structs.PriorityQueue');
 
 /**
+ * Base class for all algorithms.
  * @constructor
  */
 crow.Algorithm = function(){};
+/**
+ * Thing!
+ */
 crow.Algorithm.util = {
+  /**
+   * Hashes a node by convertings its coordinates into a unique string.
+   */
 	hash: function(node){
 		return node.getX() + "_" + node.getY();
 	}
 };
 /**
+ * A map from nodes (using their hash) to arbitrary values
  * @constructor
+ * @param {*} [defaultValue] The default value for a node when retrieving it if there's no value associated with it
  */
 crow.Algorithm.NodeMap = function(defaultValue){
 	var map = {};

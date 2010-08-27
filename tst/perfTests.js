@@ -27,19 +27,25 @@ window["test"]["perfTests"] = function(){
 		{
 			size: 4,
 			expectedTime: 5,
-			runs: 5
+			runs: 10
 		},
 		{
 			size: 5,
-			expectedTime: 50
+			expectedTime: 15,
+			runs: 5
 		},
+		{
+			size: 8,
+			expectedTime: 1000,
+			runs: 1
+		}
 	];
 	
 	var astarTests = [
 		{
 			size: 2,
 			runs: 1000,
-			expectedTime: 0.25,
+			expectedTime: 0.30,
 			algo: "a*"
 		},
 		{
@@ -49,8 +55,8 @@ window["test"]["perfTests"] = function(){
 		},
 		{
 			size: 25,
-			expectedTime: 50
-		},
+			expectedTime: 60
+		}
 	];
 
 	function benchmark(func){

@@ -18,13 +18,17 @@ crow.algorithm.DijkstraAlgorithm.prototype.findPath = function(start, goal, opts
 	this.goal = goal;
 	this.opts = typeof opts === "undefined" ? {} : opts;
 
-	// Algorithm commenceth
 	this.distance.set(start, 0);
-	var endNode = typeof goal !== "function" ? goal : null;
-	this._visitNode(start, endNode);
-	
+	var endNode, found;
+
+	// Algorithm commenceth	
 	if(typeof goal === "function"){
+		this._process(start);
 		endNode = this._determineClosestEndNode(goal);
+		found = !!endNode;
+	} else {
+		found = this._process(start, goal);
+		endNode = goal;
 	}
 
 	var path = [];
@@ -36,17 +40,15 @@ crow.algorithm.DijkstraAlgorithm.prototype.findPath = function(start, goal, opts
 			node = this.previous.get(node);
 		}
 	}
-	var found = !!endNode;
-	return {
+	return new crow.algorithm.Path({
 		nodes: path,
 		start: start,
 		goal: goal,
 		end: found ? endNode : null,
 		length: found ? this.distance.get(endNode) : Infinity,
 		found: found,
-		recalculate: this.recalculate,
 		algorithm: this
-	};
+	});
 };
 crow.algorithm.DijkstraAlgorithm.prototype.recalculate = function(){
 	var a = this.algorithm;
@@ -68,38 +70,28 @@ crow.algorithm.DijkstraAlgorithm.prototype._determineClosestEndNode = function(g
 	}
 	return closest;
 };
-crow.algorithm.DijkstraAlgorithm.prototype._visitNode = function(node, endNode, nextNodes){
-	if(!nextNodes) nextNodes = [];
-	var neighbors = node.getNeighbors(this.graph);
-	for(var n in neighbors){
-		var neighbor = neighbors[n];
-		if(this.visited.get(neighbor) || (this.opts.filter && !this.opts.filter.call(neighbor))) continue;
+crow.algorithm.DijkstraAlgorithm.prototype._process = function(node, endNode){
+	var nextNodes = new crow.Algorithm.PriorityQueue();
+	while(node != null){
+		var neighbors = node.getNeighbors(this.graph);
+		for(var n in neighbors){
+			var neighbor = neighbors[n];
+			if(this.visited.get(neighbor) || (this.opts.filter && !this.opts.filter.call(neighbor))) continue;
 		
-		var distFromStart = this.distance.get(node) + node.distanceTo(neighbor);
-		if(distFromStart < this.distance.get(neighbor)){
-			this.distance.set(neighbor, distFromStart);
-			this.previous.set(neighbor, node);
+			var distFromStart = this.distance.get(node) + node.distanceTo(neighbor);
+			if(distFromStart < this.distance.get(neighbor)){
+				this.distance.set(neighbor, distFromStart);
+				this.previous.set(neighbor, node);
+			}
+			nextNodes.enqueue(distFromStart, neighbor);
 		}
-		nextNodes.push(neighbor);
-	}
-	this.visited.set(node, true);
-	this.visitedList.push(node);
-	if(node === endNode) return;
+		this.visited.set(node, true);
+		this.visitedList.push(node);
+		if(node === endNode) return true; // base case: target found
 
-	// We have to visit the next unvisited node with the smallest distance from the source
-	var next = null, nextDistance = Infinity, nextIndex = -1;
-	for(var i in nextNodes){
-		var n = nextNodes[i];
-		if(this.distance.get(n) < nextDistance){
-			next = n;
-			nextDistance = this.distance.get(n);
-			nextIndex = i;
-		}
+		// We have to visit the next unvisited node with the smallest distance from the source
+		node = nextNodes.dequeue();
 	}
-	if(next != null){
-		// remove the node we're about to visit from the to-visit list
-		// and then visit it
-		nextNodes.splice(nextIndex, 1);
-		this._visitNode(next, endNode, nextNodes);
-	}
+	// base case: target not found; alternatively, a target wasn't given
+	return false;
 };

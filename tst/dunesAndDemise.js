@@ -58,7 +58,16 @@ window["test"]["dunesAndDemise"] = function(){
 		}
 		window["testPaths"].push(["A* path", path]);
 	});
-	
+	test("Dijkstra's Algorithm finds good path", function(){
+		var graph = generateGraph();
+		var path = graph.findGoal({start: graph.getNode(0, 0), goal: graph.getNode(5, 4)});
+		ok(path.found, "found route");
+		var expected = [[0,0],[0,1],[0,2],[1,2],[2,2],[2,3],[3,3],[4,3],[5,3],[5,4]];
+		for(var i in expected){
+			same([path.nodes[i].getX(), path.nodes[i].getY()], expected[i], "path node " + i + " is as expected");
+		}
+		window["testPaths"].push(["Dijkstra's path", path]);
+	});
 	var canvas = $("<canvas id='main' width='40' height='40'>").appendTo(document.body).hide();
 	var canvasDom = canvas[0];
 	if (canvasDom.getContext){
