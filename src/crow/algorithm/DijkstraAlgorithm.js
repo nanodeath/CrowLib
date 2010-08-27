@@ -78,12 +78,14 @@ crow.algorithm.DijkstraAlgorithm.prototype._process = function(node, endNode){
 			var neighbor = neighbors[n];
 			if(this.visited.get(neighbor) || (this.opts.filter && !this.opts.filter.call(neighbor))) continue;
 		
-			var distFromStart = this.distance.get(node) + node.distanceTo(neighbor);
-			if(distFromStart < this.distance.get(neighbor)){
-				this.distance.set(neighbor, distFromStart);
+			var neighborDistanceThroughMe = this.distance.get(node) + node.distanceTo(neighbor);
+			var currentNeighborDistance = this.distance.get(neighbor);
+			if(neighborDistanceThroughMe < currentNeighborDistance){
+				this.distance.set(neighbor, neighborDistanceThroughMe);
 				this.previous.set(neighbor, node);
+				currentNeighborDistance = neighborDistanceThroughMe;
 			}
-			nextNodes.enqueue(distFromStart, neighbor);
+			nextNodes.enqueue(currentNeighborDistance, neighbor);
 		}
 		this.visited.set(node, true);
 		this.visitedList.push(node);
