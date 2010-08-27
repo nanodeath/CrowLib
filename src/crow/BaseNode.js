@@ -24,12 +24,31 @@ crow.BaseNode.prototype.distanceTo = function(other){
 	return this.distanceAlgorithm(dx, dy);
 };
 
+crow.BaseNode.prototype.hash = function(clear_cache){
+		if(!this._cachedHash || clear_cache){
+			this._cachedHash = this.getX() + "_" + this.getY();
+		}
+		return this._cachedHash;
+	}
+
 // Find neighbors of this node in the provided graph
 // (checks horizontally and vertically, not diagonally)
 crow.BaseNode.prototype.getNeighbors = function(graph){
 	var neighbors = [];
-	var range = [-1, 1];
 	var ox = this.getX(), oy = this.getY();
+	var n;
+	n = graph.getNode(ox - 1, oy);
+	if(n) neighbors.push(n);
+	n = graph.getNode(ox + 1, oy);
+	if(n) neighbors.push(n);
+	n = graph.getNode(ox, oy - 1);
+	if(n) neighbors.push(n);
+	n = graph.getNode(ox, oy + 1);
+	if(n) neighbors.push(n);
+	return neighbors;
+	/*
+	var range = [-1, 1];
+
 	for(var i in range){
 		var x = ox + range[i];
 		var n = graph.getNode(x, oy);
@@ -41,4 +60,5 @@ crow.BaseNode.prototype.getNeighbors = function(graph){
 		if(n) neighbors.push(n);
 	}
 	return neighbors;
+	*/
 };

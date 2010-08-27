@@ -7,17 +7,6 @@ goog.require('goog.structs.PriorityQueue');
  */
 crow.Algorithm = function(){};
 /**
- * Thing!
- */
-crow.Algorithm.util = {
-  /**
-   * Hashes a node by convertings its coordinates into a unique string.
-   */
-	hash: function(node){
-		return node.getX() + "_" + node.getY();
-	}
-};
-/**
  * A map from nodes (using their hash) to arbitrary values
  * @constructor
  * @param {*} [defaultValue] The default value for a node when retrieving it if there's no value associated with it
@@ -25,11 +14,11 @@ crow.Algorithm.util = {
 crow.Algorithm.NodeMap = function(defaultValue){
 	var map = {};
 	this.get = function(node){
-		var val = map[crow.Algorithm.util.hash(node)];
+		var val = map[node.hash()];
 		return typeof val !== "undefined" ? val : defaultValue;
 	};
 	this.set = function(node, val){
-		map[crow.Algorithm.util.hash(node)] = val;
+		map[node.hash()] = val;
 	};
 };
 /**

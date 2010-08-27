@@ -1,5 +1,6 @@
 goog.require('crow.Graph');
 goog.require('crow.BaseNode');
+goog.require('crow.util.Test');
 
 window["test"] = window["test"] || {};
 window["test"]["mainTest"] = function(){

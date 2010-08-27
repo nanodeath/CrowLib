@@ -19,7 +19,7 @@ crow.algorithm.BFSAlgorithm.prototype.search = function(start, opts){
 	
 	function checkNeighbor(n){
 		if(n){
-			var h = crow.Algorithm.util.hash(n);
+			var h = n.hash();
 			if(!visited[h] && !pendingVisit[h] && (!opts.filter || opts.filter.call(n))){
 				queue.push(n);
 				pendingVisit[h] = 1;
@@ -30,7 +30,7 @@ crow.algorithm.BFSAlgorithm.prototype.search = function(start, opts){
 	var list = [];
 	while(queue.length > 0){
 		var el = queue.shift();
-		visited[crow.Algorithm.util.hash(el)] = 1;
+		visited[el.hash()] = 1;
 		list.push(el);
 		
 		var range = [-1, 1];

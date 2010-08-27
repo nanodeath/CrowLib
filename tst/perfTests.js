@@ -37,7 +37,7 @@ window["test"]["perfTests"] = function(){
 		{
 			size: 8,
 			expectedTime: 1000,
-			runs: 1
+			runs: 10
 		}
 	];
 	
