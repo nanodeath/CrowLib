@@ -25,10 +25,12 @@ crow.BaseNode.prototype.distanceTo = function(other){
 };
 
 crow.BaseNode.prototype.hash = function(clear_cache){
-		if(!this._cachedHash || clear_cache){
-			this._cachedHash = this.getX() + "_" + this.getY();
+		var h = this._cachedHash;
+		if(!h || clear_cache){
+			h = this.getX() + "_" + this.getY();
+			this._cachedHash = h;
 		}
-		return this._cachedHash;
+		return h;
 	}
 
 // Find neighbors of this node in the provided graph
