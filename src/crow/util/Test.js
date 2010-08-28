@@ -11,3 +11,13 @@ if(typeof same !== "undefined"){
 	}
 	same = newSame;
 }
+
+if(typeof console !== "undefined"){
+	console.logNodes = function(nodes){
+		var output = [];
+		for(var i = 0; i < nodes.length; i++){
+			output.push("[" + nodes[i].getX() + "," + nodes[i].getY() + "]");
+		}
+		console.log(output.join(","));	
+	};
+}

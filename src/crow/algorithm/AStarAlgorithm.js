@@ -90,7 +90,8 @@ crow.algorithm.AStarAlgorithm.prototype.findPath = function(start, goal, opts){
 		goal: goal,
 		length: null,
 		recalculate: this.recalculate,
-		algorithm: this
+		algorithm: this,
+		graph: opts.graph
 	};
 
 	if(found){

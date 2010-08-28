@@ -4,14 +4,6 @@ goog.require('crow.util.Test');
 
 window["test"] = window["test"] || {};
 window["test"]["mainTest"] = function(){
-	console.logNodes = function(nodes){
-		var output = [];
-		for(var i = 0; i < nodes.length; i++){
-			output.push("[" + nodes[i].getX() + "," + nodes[i].getY() + "]");
-		}
-		console.log(output.join(","));	
-	};
-
 	module("Tiny map");
 	/*
 		Map looks like:

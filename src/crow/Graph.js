@@ -2,6 +2,7 @@ goog.provide('crow.Graph');
 goog.require('crow.Algorithm');
 goog.require('crow.algorithm.LinearAlgorithm');
 goog.require('crow.algorithm.DijkstraAlgorithm');
+goog.require('goog.events.EventTarget');
 
 /**
  * @constructor
@@ -11,6 +12,7 @@ crow.Graph = function(){
 	this.nodes = [];
 	this.map = {};
 	this.version = "0";
+	this.validator = new goog.events.EventTarget();
 	
 	// methods
 	/**
@@ -115,8 +117,17 @@ crow.Graph = function(){
 		var goal = opts.goal;
 		if(!goal) throw new Error("To find a goal, one must provide a goal...");
 		var algo = crow.Graph._lookupAlgorithm(opts.algorithm) || crow.Graph.defaultAlgorithm.shortestPath;
-		if(!(algo.prototype instanceof crow.algorithm.ShortestPathAlgorithm)) throw new Error("only compatible with ShortestPathAlgorithms")
+		if(!(algo.prototype instanceof crow.algorithm.ShortestPathAlgorithm)) throw new Error("only compatible with ShortestPathAlgorithms");
+		opts.graph = this;
 		return (new algo(this)).findPath(start, goal, opts);
+	};
+	
+	this.invalidate = function(x, y, dx, dy){
+		if(dx && dy){
+			this.validator.dispatchEvent({type: "invalidateSection", x: x, y: y, dx: dx, dy: dy});
+		} else {
+			this.validator.dispatchEvent({type: "invalidatePoint", x: x, y: y});
+		}
 	};
 };
 crow.Graph.algorithm = {};
