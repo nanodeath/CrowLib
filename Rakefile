@@ -192,10 +192,19 @@ namespace "test" do
 	end
 
 	desc "Run the test server on localhost (port will be shown on startup)"
-	task :runner => [:prepare_test_runner, :debug] do
+	task :runner => [:prepare_test_runner] do
 		cd "test_runner" do
 			puts "** Port will show up shortly.  Use Ctrl-C to exit! **"
 			ruby "test_runner.rb"
+		end
+	end
+	namespace "runner" do
+		desc "Remove the database associated with the test runner"
+		task :clean_db do
+			raise
+			cd "test_runner" do
+				rm_rf "*.db"
+			end
 		end
 	end
 end

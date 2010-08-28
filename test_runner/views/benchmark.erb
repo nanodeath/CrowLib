@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html id="home">
+	<head>
+		<title>Crow TestRunner: Benchmark</title>
+		<link type="text/css" rel="stylesheet" href="/test_runner.css">
+		<link type="text/css" rel="stylesheet" href="/overcast/jquery-ui-1.8.4.custom.css">
+		<style>
+            /*
+             * Override styles needed due to the mix of three different CSS sources! For proper examples
+             * please see the themes example in the 'Examples' section of this site
+             */
+            .dataTables_info { padding-top: 0; }
+            .dataTables_paginate { padding-top: 0; }
+            .css_right { float: right; }
+            #example_wrapper .fg-toolbar { font-size: 0.8em }
+            #theme_links span { float: left; padding: 2px 10px; }
+		</style>
+	</head>
+	<body>
+
+<h1>Benchmark Results<span class="subtitle">from perfTests</span></h1>
+<div id="content"
+	<p>Welcome to the test display for Crow, taken from the "Save" button on the <a href="/test/perfTests">perfTests test</a>.</p>
+	<h2><span>Test Results</span></h2>
+	<div style="width:1024px">
+		<table id="results" style="width:100%">
+				<thead>
+				<tr>
+					<th>Test</th>
+					<th>Result 	(ms)</th>
+					<th>Date</th>
+					<th>Browser</th>
+					<th>Name</th>
+					<th>Version</th>
+				</tr>
+			</thead>
+			<tbody>
+			<% @results.each do |r| %>
+				<tr>
+					<td><%= r[:test_name] %></td>
+					<td><%= r[:result] %></td>
+					<td><%= r[:date] %></td>
+					<td>
+						<%
+							if(r[:webkit])
+								if(r[:chrome])
+									%>Chrome<%
+								else
+									%>Webkit<%
+								end
+							elsif(r[:msie])
+								%>Internet Explorer<%
+							elsif(r[:opera])
+								%>Opera<%
+							elsif(r[:mozilla])
+								%>Mozilla<%
+							end
+							%> <%= r[:browser_version] %>
+					</td>
+					<td><%= r[:name] %></td>
+					<td><%= r[:version] %></td>
+				</tr>
+			<% end %>
+			</tbody>
+		</table>
+	</div>
+	<h2><span>Latest commits</span></h2>
+	<table class="latest_commits">
+		<tr>
+			<th>Hash</th>
+			<th>Message</th>
+		</tr>
+		<% ALL_GIT.each do |commit|
+			parts = commit.split
+			sha1 = parts[0]
+			message = parts[1..-1].join(" ")
+		 %>
+			<tr>
+				<td class="sha1"><span class="sha1_short"><%= sha1[0..5] %></span><span class="sha1_remaining"><%= sha1[6..-1] %></span></td>
+				<td><%= message %>
+			</tr>
+		<% end %>
+	</table>
+</div>
+
+<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4/jquery.min.js"></script>
+<script type="text/javascript" src="/jquery-ui-1.8.4.custom.min.js"></script>
+<script type="text/javascript" src="/jquery.dataTables.min.js"></script>
+<script>
+	$(function(){
+		$("table").dataTable({bJQueryUI: true});
+	});
+</script>
+
+	</body>
+</html>

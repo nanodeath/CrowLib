@@ -17,6 +17,8 @@ window["test"]["perfTests"] = function(){
 		"--"
 	];
 	
+	var testResults = {};
+	
 	var dijkstraTests = [
 		{
 			size: 2,
@@ -71,7 +73,7 @@ window["test"]["perfTests"] = function(){
 			currentTest = $.extend({}, currentTest, tests[i]);
 			var testName = "Graph size " + currentTest.size + " with " + currentTest.algo;
 			
-			var generateTest = function(t){
+			var generateTest = function(t, testName){
 				return function(){
 					var runs = t.runs;
 			
@@ -93,13 +95,23 @@ window["test"]["perfTests"] = function(){
 					var average = total / runs;
 	
 					ok(average <= t.expectedTime, "Graph takes <=" + t.expectedTime + "ms to evaluate (" + average + "ms) on modern browsers");
+					testResults[testName] = average;
 				}
 			};
-			test(testName, generateTest(currentTest));
+			test(testName, generateTest(currentTest, testName));
 		}
 	};
 	makeTests(dijkstraTests);
 	makeTests(astarTests);
+	
+	var testAndSaveButton = $("<button>Save</button>");
+	testAndSaveButton.appendTo("#controls");
+	testAndSaveButton.click(function(){
+		var n = prompt("Name or id for this unit (i.e. Max, or Max-Laptop, or Max-Laptop-BatteryPower)");
+		if(n){
+			$.post("/benchmark", {name: n, useragent: {string: navigator.userAgent, version: $.browser.version, webkit: $.browser.webkit, opera: $.browser.opera, msie: $.browser.msie, mozilla: $.browser.mozilla}, results: testResults});
+		}
+	});
 	/*
 	module("findGoal: Dijkstra");
 	test("base cost", function(){

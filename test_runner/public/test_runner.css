@@ -85,3 +85,15 @@ table.graph canvas {
 .clear {
 	clear: both;
 }
+
+table.latest_commits {
+	width: 1024px;
+}
+
+table.latest_commits .sha1 {
+	font-family: monospace;
+}
+
+table.latest_commits .sha1_remaining {
+	color: #aaa;
+}
