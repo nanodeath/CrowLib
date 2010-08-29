@@ -24,7 +24,7 @@ window["test"]["gameOptimizations"] = function(){
 		});
 	};
 	
-	test("invalidate point", function(){
+	test("invalidate point, a*", function(){
 		var graph = tinyGraph();
 		var path = graph.findGoal({start: graph.getNode(0, 0), goal: graph.getNode(2, 2), algorithm: "a*"});
 		
@@ -47,7 +47,7 @@ window["test"]["gameOptimizations"] = function(){
 		for(var i in expected){
 			same([path.nodes[i].getX(), path.nodes[i].getY()], expected[i], "busted: path node " + i + " is as expected");
 		}
-		equals(3, path.nodes.length, "busted path is indeed shorter");
+		equals(path.nodes.length, 3, "busted path is indeed shorter");
 		
 		// Now let's add another node making it possible to find the goal
 		graph.addNode(new MyNode([2, 1]));
@@ -61,7 +61,7 @@ window["test"]["gameOptimizations"] = function(){
 		}
 	});
 	
-	test("invalidate area", function(){
+	test("invalidate area, a*", function(){
 		var graph = tinyGraph();
 		var path = graph.findGoal({start: graph.getNode(0, 0), goal: graph.getNode(2, 2), algorithm: "a*"});
 		
@@ -79,7 +79,7 @@ window["test"]["gameOptimizations"] = function(){
 		for(var i in expected){
 			same([path.nodes[i].getX(), path.nodes[i].getY()], expected[i], "incomplete: path node " + i + " is as expected");
 		}
-		equals(2, path.nodes.length, "incomplete path is indeed shorter");
+		equals(path.nodes.length, 2, "incomplete path is indeed shorter");
 				
 		// After we invalidate the point, we can regenerate the rest of the graph		
 		ok(!path.found, "deleted only available path; can't find new path");
@@ -95,4 +95,42 @@ window["test"]["gameOptimizations"] = function(){
 			same([path.nodes[i].getX(), path.nodes[i].getY()], expected[i], "new path: node " + i + " is as expected");
 		}
 	});
+	
+	test("invalidate point, dijkstra", function(){
+		var graph = tinyGraph();
+		var path = graph.findGoal({start: graph.getNode(0, 0), goal: graph.getNode(2, 2)});
+		
+		var expected = [[0,0],[1,0],[1,1],[1,2],[2,2]];
+		for(var i in expected){
+			same([path.nodes[i].getX(), path.nodes[i].getY()], expected[i], "initial: path node " + i + " is as expected");
+		}
+		
+		// Now we remove a point and signal to our graph that any paths containing that point
+		// are no longer valid after that point
+		graph.removeNode(1, 2);
+		graph.invalidate(1, 2);
+		
+		// After we invalidate the point, we can regenerate the rest of the graph
+		path.continueCalculating();
+		
+		ok(!path.found, "deleted only available path; can't find new path");
+		
+		var expected = [[0,0],[1,0],[1,1]];
+		for(var i in expected){
+			same([path.nodes[i].getX(), path.nodes[i].getY()], expected[i], "busted: path node " + i + " is as expected");
+		}
+		equals(path.nodes.length, 3, "busted path is indeed shorter");
+		
+		// Now let's add another node making it possible to find the goal
+		graph.addNode(new MyNode([2, 1]));
+		// We don't need to invalidate the point because we know the path doesn't contain it
+		path.continueCalculating();
+		ok(path.found, "after adding new node, path is found again");
+
+		var expected = [[0,0],[1,0],[1,1],[2,1],[2,2]];
+		for(var i in expected){
+			same([path.nodes[i].getX(), path.nodes[i].getY()], expected[i], "new path: node " + i + " is as expected");
+		}
+	});
+
 }

@@ -45,7 +45,8 @@ crow.algorithm.DijkstraAlgorithm.prototype.findPath = function(start, goal, opts
 		end: found ? endNode.innerNode : null,
 		length: found ? endNode.distance : Infinity,
 		found: found,
-		algorithm: this
+		algorithm: this,
+		graph: opts.graph
 	});
 };
 crow.algorithm.DijkstraAlgorithm.prototype.recalculate = function(){
