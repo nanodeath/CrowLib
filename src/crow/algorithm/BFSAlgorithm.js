@@ -14,25 +14,26 @@ crow.algorithm.BFSAlgorithm.prototype = new crow.algorithm.SearchAlgorithm();
 crow.algorithm.BFSAlgorithm.prototype.search = function(start, opts){
 	if(!opts) opts = {};
 	// opts can contain a `filter` callback to ignore nodes
-	var visited = {}, pendingVisit = {};
+	var visited = new crow.Algorithm.NodeMap(false), pendingVisit = new crow.Algorithm.NodeMap(false);
 	var queue = [start];
 	
+	// TODO private instance method
 	function checkNeighbor(n){
 		if(n){
-			var h = n.hash();
-			if(!visited[h] && !pendingVisit[h] && (!opts.filter || opts.filter.call(n))){
+			if(!visited.get(n) && !pendingVisit.get(n) && (!opts.filter || opts.filter.call(n))){
 				queue.push(n);
-				pendingVisit[h] = 1;
+				pendingVisit.set(n, true);
 			}
 		}
 	}
 	
-	var list = [];
-	while(queue.length > 0){
-		var el = queue.shift();
-		visited[el.hash()] = 1;
+	var list = [], el;
+	while(el = queue.shift()){
+		visited.set(el, true);
 		list.push(el);
 		
+		// TODO this can be optimized.  we don't need to make and iterate over an array for 4 elements,
+		// even if it does look nice
 		var range = [-1, 1];
 		var ox = el.getX(), oy = el.getY();
 		for(var i in range){
