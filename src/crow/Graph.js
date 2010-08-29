@@ -123,8 +123,9 @@ crow.Graph = function(){
 	};
 	
 	this.invalidate = function(x, y, dx, dy){
+		if(dx == 0 || dy == 0) throw new Error("dx and dy can't be 0");
 		if(dx && dy){
-			this.validator.dispatchEvent({type: "invalidateSection", x: x, y: y, dx: dx, dy: dy});
+			this.validator.dispatchEvent({type: "invalidateRegion", x: x, y: y, dx: dx, dy: dy});
 		} else {
 			this.validator.dispatchEvent({type: "invalidatePoint", x: x, y: y});
 		}
@@ -196,7 +197,7 @@ crow.Graph._lookupAlgorithm = function(name){
 		var algo = crow.Graph.algorithm[name];
 		if(algo) return algo;
 		else throw new Error("Algorithm `" + name + "` not found");
-	} else return undefined;
+	} else return null;
 };
 
 crow.Graph.registerAlgorithm(crow.algorithm.LinearAlgorithm, 'linear', true);

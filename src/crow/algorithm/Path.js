@@ -18,14 +18,32 @@ crow.algorithm.Path = function(opts){
 	
 	if(this.graph){
 		this.graph.validator.addEventListener("invalidatePoint", this._invalidatePoint, null, this);
+		this.graph.validator.addEventListener("invalidateRegion", this._invalidateRegion, null, this);
 	}
 };
 
 crow.algorithm.Path.prototype._invalidatePoint = function(e){
+	if(this._baked) return;
 	var x = e.x, y = e.y;
 	for(var i = 0; i < this.nodes.length; i++){
 		var n = this.nodes[i];
 		if(n.getX() == x && n.getY() == y){
+			this.nodes = this.nodes.slice(0, i);
+			this.end = null;
+			this.found = false;
+			break;
+		}
+	}
+};
+
+crow.algorithm.Path.prototype._invalidateRegion = function(e){
+	if(this._baked) return;
+	var x = e.x, y = e.y;
+	var x2 = x + e.dx, y2 = y + e.dy;
+	for(var i = 0; i < this.nodes.length; i++){
+		var n = this.nodes[i];
+		var nx = n.getX(), ny = n.getY();
+		if(nx >= x && ny >= y && nx < x2 && ny < y2){
 			this.nodes = this.nodes.slice(0, i);
 			this.end = null;
 			this.found = false;
@@ -65,7 +83,8 @@ crow.algorithm.Path.prototype.continueCalculating = function(count){
 	var lastNode = this.nodes[this.nodes.length-1];
 	var opts = !count ? {} : {limit: count};
 	var continuedPath = this.algorithm.findPath(lastNode, this.goal, opts);
-	// this node list needs to be pruned, in case continuedPath contains a node in this
+	// TODO this node list needs to be pruned, in case continuedPath contains a node in this;
+	// in other words, if the continuedPath backtracks along the current path
 	this.nodes = this.nodes.concat(continuedPath.nodes.slice(1)),
 	this.found = continuedPath.found;
 	return this.found;
@@ -75,5 +94,7 @@ crow.algorithm.Path.prototype.bake = function(){
 	this._baked = true;
 	if(this.graph){
 		this.graph.validator.removeEventListener("invalidatePoint", this._invalidatePoint);
+		this.graph.validator.removeEventListener("invalidateRegion", this._invalidatePoint);
+		this.graph = null;
 	}
 };
