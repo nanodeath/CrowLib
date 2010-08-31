@@ -92,3 +92,5 @@ Todo
 ====
 * Provide an example of different types of actors traversing a graph (i.e. aerial vehicles can traverse any terrain, while land vehicles cannot).  Alternatively, explore layers.
 * Should automatically detect the "best" algorithm for the job, i.e. Dijkstra's for findGoal with a condition, or A* for findGoal with an explicit node
+* Investigate implementing D* Lite
+* Fill out the wiki more
