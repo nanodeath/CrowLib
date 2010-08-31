@@ -15,15 +15,20 @@ See the test.html in test/ for more examples.  There's even a helper that conver
 
 Example
 =======
-Examples coming soon!
+See these examples in action by running the interactive test suite!  Head down to the Testing section below for more details.
 
 Simple Maze
 -----------
-This example will feature a simple 5x5 maze and the A* algorithm.
+This example features questionable maze generation using the A* algorithm to generate a simple 16x16 maze.
 
 Dunes and Demise
 ----------------
-This example will feature multiple tile types (sand and grass), some precious crystal, and Dijkstra's Algorithm.
+This example features multiple tile types (sand and grass; sand is twice as slow as grass) and both Dijkstra's Algorithm and A*.
+
+Fog Of War
+----------
+This example demonstrates two things -- how to implement fog of war in your game (by giving nodes an attribute `known` or `visible` or `foggy` and making it appear walkable, even if it's a wall), 
+and how to make a drawable maze using click events and tables.
 
 Including in your app
 =====================
@@ -31,9 +36,9 @@ There's two ways you can include Crow into your app -- either as a simple script
 
 Automatically-compiled script
 -----------------------------
-If you run `rake` (assuming you have the build-time requirements given lower down), three files will be generated for you at build/js:
+If you run `rake` (assuming you have the build-time requirements given lower down), three files will be generated for you at dist/js:
 
-1. crow.min.js: this compiled with `whitespace_only`.  Safest, but least compression.
+1. crow.mini.js: this compiled with `whitespace_only`.  Safest, but least compression.
 2. crow.micro.js: this compiled with `simple_optimizations`.  Renames local variables and the like, but public API is untouched.  Little better compression.
 3. crow.pico.js: this compiled with `advanced_optimizations`.  Pretty much everything gets renamed here, and because I haven't exported the public API yet, it's useless except as a demonstration of the compression unless you are also using the Google Closure compiler.  Once I export the public API it should become an actual usable artifact.
 
@@ -71,17 +76,19 @@ In addition to the build-time dependencies, there are a couple other dependencie
 
 Testing
 =======
-Run `rake test_runner` and then head over to [localhost:4567](http://localhost:4567/).  All will be explained when you get there.
+Run `rake test:runner` and then head over to [localhost:4567](http://localhost:4567/).  All will be explained when you get there.
 
-To just generate the tests, run `rake test`
+To just generate the tests, run `rake test:build`.
 
-The tests are written using QUnit (and jQuery).
+The tests are written using QUnit (and jQuery).  Some of the tests have "circles" which are generated using Canvas.  As such, to get the full experience you'll need to be using a browser with Canvas.
 
 Versioning
 ==========
 See http://semver.org/ (and Graph.version)
 
+Not in effect until it hits alpha...
+
 Todo
 ====
-* Should be possible to pass in neighbors-detecting algorithm either to the Graph methods directly or on the node class.
+* Provide an example of different types of actors traversing a graph (i.e. aerial vehicles can traverse any terrain, while land vehicles cannot).  Alternatively, explore layers.
 * Should automatically detect the "best" algorithm for the job, i.e. Dijkstra's for findGoal with a condition, or A* for findGoal with an explicit node

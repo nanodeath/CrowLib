@@ -118,6 +118,9 @@ window["test"]["fogOfWar"] = function(){
 		return $("table.graph tr:nth-child(" + (y+1) + ") td:nth-child(" + (x+1) + ") div");
 	}
 	
+	/**
+	 * @constructor
+	 */
 	var ScoreBox = function(player){
 		var self = this;
 		this.dom = $("<div class='scorebox'>");

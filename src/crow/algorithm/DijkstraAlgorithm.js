@@ -104,6 +104,9 @@ crow.algorithm.DijkstraAlgorithm.prototype._getWrapperNode = function(node){
 	this._wrapperNode.set(node, w);
 	return w;
 };
+/**
+ * @constructor
+ */
 crow.algorithm.DijkstraAlgorithm.WrapperNode = function(node){
 	this.innerNode = node;
 	this.visited = false;
