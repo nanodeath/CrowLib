@@ -3,12 +3,35 @@ goog.provide('crow.BaseNode');
 /**
  * Basic node object.
  * @param {Array} arr Two-element array containing the x- and y-coordinates (in that order) of this element.
+ * @property {Number} x x-coordinate of this node.
+ * @property {Number} y y-coordinate of this node.
+ * @property {Number} hash hash value of this node (a semi-unique identifier for this node).
  * @constructor
  */
 crow.BaseNode = function(arr){
 	if(arr){
 		this.x = arr[0];
 		this.y = arr[1];
+	}
+	this._initialized = false;
+};
+
+crow.BaseNode.prototype._initialize = function(){
+	if(!this._initialized){
+		this._initialized = true;
+		
+		var x = this.getX(), y = this.getY();
+		if(typeof x !== "number") throw new Error("Node must have a valid x coord");
+		if(typeof y !== "number") throw new Error("Node must have a valid y coord");
+		x = Math.floor(x);
+		y = Math.floor(y);
+		
+		this.x = x;
+		this.y = y;
+		this.hash = this.hash();
+		
+		delete this.getX;
+		delete this.getY;
 	}
 };
 
@@ -17,11 +40,15 @@ crow.BaseNode = function(arr){
 
 /**
  * Get the x-coordinate of this node.
+ * NOTE: once this node is added to a graph, this method is removed.  You should
+ * instead rely on the 'x' property.
  * @returns {Number}
  */
 crow.BaseNode.prototype.getX = function(){ return this.x; };
 /**
  * Get the y-coordinate of this node.
+ * NOTE: once this node is added to a graph, this method is removed.  You should
+ * instead rely on the 'y' property.
  * @returns {Number}
  */
 crow.BaseNode.prototype.getY = function(){ return this.y; };
@@ -41,6 +68,12 @@ crow.BaseNode.prototype.distanceTo = function(other){
 	return this.distanceAlgorithm(dx, dy);
 };
 
+/**
+ * Calculate a unique string representing this node in the graph.
+ * NOTE: once this node is added to a graph, this method is replaced
+ * with a property of the same name containing the result of calling this method.
+ * @returns {String}
+ */
 crow.BaseNode.prototype.hash = function(){
 	return this.x + "_" + this.y;
 }
@@ -60,19 +93,4 @@ crow.BaseNode.prototype.getNeighbors = function(graph){
 	n = graph.getNode(ox, oy + 1);
 	if(n) neighbors.push(n);
 	return neighbors;
-	/*
-	var range = [-1, 1];
-
-	for(var i in range){
-		var x = ox + range[i];
-		var n = graph.getNode(x, oy);
-		if(n) neighbors.push(n);
-	}
-	for(var j in range){
-		var y = oy + range[j];
-		var n = graph.getNode(ox, y);
-		if(n) neighbors.push(n);
-	}
-	return neighbors;
-	*/
 };

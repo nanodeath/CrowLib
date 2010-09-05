@@ -9,8 +9,8 @@ if(typeof same !== "undefined"){
 		// TODO make graph use prototype
 		var graph = new crow.Graph();
 		for(var i = 0; i < arguments.length; i++){
-			if(arguments[i] instanceof crow.BaseNode && !arguments[i]._initialized){
-				graph._preprocessNode(arguments[i]);
+			if(arguments[i] instanceof crow.BaseNode){
+				arguments[i]._initialize();
 			}
 			newArgs.push(arguments[i]);
 		}
