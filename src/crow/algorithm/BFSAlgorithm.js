@@ -10,6 +10,7 @@ crow.algorithm.BFSAlgorithm = function(graph){
 }
 crow.algorithm.BFSAlgorithm.prototype = new crow.algorithm.SearchAlgorithm();
 crow.algorithm.BFSAlgorithm.prototype.search = function(start, opts){
+	if(typeof opts == "undefined") opts = {};
 	var visited = new crow.Algorithm.NodeMap(false);
 	var pendingVisit = new crow.Algorithm.NodeMap(false);
 
@@ -21,7 +22,7 @@ crow.algorithm.BFSAlgorithm.prototype.search = function(start, opts){
 		var neighbors = el.getNeighbors(this.graph);
 		for(var i = 0; i < neighbors.length; i++){
 			var neighbor = neighbors[i];
-			if(!visited.get(neighbor) && !pendingVisit.get(neighbor) && el.distanceTo(neighbor) < Infinity){
+			if(!visited.get(neighbor) && !pendingVisit.get(neighbor) && el.distanceTo(neighbor) < Infinity && (!opts.filter || opts.filter(neighbor))){
 				queue.push(neighbor);
 				pendingVisit.set(neighbor, true);
 			}
