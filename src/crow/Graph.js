@@ -1,4 +1,5 @@
 goog.provide('crow.Graph');
+goog.require('crow.util.Assert');
 goog.require('crow.Algorithm');
 goog.require('crow.algorithm.LinearAlgorithm');
 goog.require('crow.algorithm.DijkstraAlgorithm');
@@ -49,14 +50,13 @@ crow.Graph = function(){
 		}
 	};
 	/**
-	 * Gets a node at a particular coordinate, or the first node that meets a condition
-	 * 
-	 * O(1) if a coordinate is given
-	 * 
-	 * O(n) if a filter is given (n being number of total nodes)
+	 * <p>Gets a node at a particular coordinate, or the first node that meets a condition
+	 * <p>O(1) if a coordinate is given
+	 * <p>O(n) if a filter is given (n being number of total nodes)
 	 * @param {(number|function(this:crow.BaseNode): boolean)} x_or_filter x-coordinate
 	 *  of element to remove, or a callback that eventually returns true for a node.
 	 * @param {number=} y-coordinate y-coordinate of element to remove (if callback omitted)
+	 * @returns {crow.BaseNode}
 	 */
 	this.getNode = function(x_or_filter, y){
 		if(typeof x_or_filter === "function"){
@@ -81,7 +81,7 @@ crow.Graph = function(){
 	 * <li>pass an options object with a `start` node (optional), an `algorithm` (optional; search-type), and a `filter` (optional): running time varies by algorithm</li>
 	 * <li>pass nothing, in which case all nodes will be returns: O(1)</li></ol>
 	 * @param {(function(this:crow.BaseNode): boolean|{start:crow.BaseNode,algorithm_name:string,filter:function(this.crow.BaseNode)})=} filter or options
-	 * @returns {Array.<crow.BaseNode>}
+	 * @returns {crow.BaseNode[]}
 	 */
 	this.getNodes = function(filter_or_options){
 		switch(typeof filter_or_options){
@@ -103,11 +103,13 @@ crow.Graph = function(){
 		}
 	};
 	
-	// Find the shortest path to a goal.  Pass in an options object with:
-	//  `start`: start node (optional)
-	//  `goal`: end node or end condition (callback is passed each node discovered: return true if match, false otherwise) (required)
-	//  `algo`: shortestPath-type algorithm to use (optional)
-	//  Running time varies by algorithm
+	/**
+	 * Find the shortest path to a goal.
+	 * @param opts Options hash describing what's wanted.
+	 * @param {crow.BaseNode} [opts.start="first node added"] Node from which to begin searching.
+	 * @param {crow.BaseNode|function(this:crow.BaseNode): boolean} opts.goal Target node or condition at which to stop.  If a callback is passed, it will be passed each node that is discovered.  Return true from this callback to signify that the desired node was found.
+	 * @param {String} [opts.algorithm="automatic"] Alias of algorithm to use for the search.
+	 */
 	this.findGoal = function(opts){
 		crow.Algorithm.initializeDataStructures();
 		var start = opts.start || this.nodes[0];
@@ -156,27 +158,28 @@ crow.Graph.fromTilePlane = function(tplane, callback){
 	* that object will be added to the graph.
 	* 
   * See test.js for sample usage.
-  * @param {Array.<string>} array Array of strings encoding your nodes.
+  * @param {String[]} array Array of strings encoding your nodes.
   * @param {function(number, number, string): ?Object} callback The callback that optionally returns a node.  The first parameter is an x-coordinate, the second parameter is a y-coordinate, and the last parameter is a one-character string from a value in the array.
   *
   * @return {crow.Graph} The primed Graph
   */
 crow.Graph.fromArray = function(array, callback){
-		var graph = new crow.Graph();
-		var x, y = 0;
-		for(var i in array){
-		  x = 0;
-			var row = array[i];
-			for(var ch_idx = 0; ch_idx < row.length; ch_idx++){
-				var ch = row.charAt(ch_idx);
-				var node = callback(x, y, ch);
-				if(node) graph.addNode(node);
-				x++;
-			}
-			y++;
+	assert(array instanceof Array, assert.InvalidArgumentType("Array"));
+	var graph = new crow.Graph();
+	var x, y = 0;
+	for(var i = 0; i < array.length; i++){
+	  x = 0;
+		var row = array[i];
+		for(var ch_idx = 0; ch_idx < row.length; ch_idx++){
+			var ch = row.charAt(ch_idx);
+			var node = callback(x, y, ch);
+			if(node) graph.addNode(node);
+			x++;
 		}
-		return graph;
-	};
+		y++;
+	}
+	return graph;
+};
 
 crow.Graph.registerAlgorithm = function(algo, name, isDefaultForType){
 	crow.Graph.algorithm[name] = algo;
