@@ -27,6 +27,9 @@ crow.Algorithm.NodeMap = function(defaultValue){
 crow.Algorithm.PriorityQueue = function(){
 	throw new Error("A PriorityQueue class is required, but none found!");
 };
+/**
+ * One-time initialization of data structure classes used by Crow.
+ */
 crow.Algorithm.initializeDataStructures = function(){
 	crow.Algorithm.PriorityQueue = goog.structs.PriorityQueue;
 	

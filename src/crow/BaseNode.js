@@ -2,7 +2,7 @@ goog.provide('crow.BaseNode');
 
 /**
  * Basic node object.
- * @param {Array} arr Two-element array containing the x- and y-coordinates (in that order) of this element.
+ * @param {Array} [coordinateArray] Two-element array containing the x- and y-coordinates (in that order) of this element.
  * @property {Number} x x-coordinate of this node.
  * @property {Number} y y-coordinate of this node.
  * @property {Number} hash hash value of this node (a semi-unique identifier for this node).
@@ -16,6 +16,9 @@ crow.BaseNode = function(arr){
 	this._initialized = false;
 };
 
+/**
+ * Initializes the node and prepares it for general use.
+ */
 crow.BaseNode.prototype._initialize = function(){
 	if(!this._initialized){
 		this._initialized = true;
@@ -60,7 +63,25 @@ crow.BaseNode.prototype.getY = function(){ return this.y; };
 //   c) leave it at the default (which is manhattan distance)
 // 2) Override the distanceTo method in your derived class to provide completely
 //	 custom behavior 
+/**
+ * A distance algorithm that takes a dx and a dy to calculate distance.
+ * Defaults to Manhattan distance.  Only called from base {@link #distanceTo},
+ * so this method can be ignored if that method is overridden.
+ * @function
+ * @see crow.GraphUtil.distance
+ * @param {Number} dx difference of x-coordinates
+ * @param {Number} dy difference of y-coordinates
+ * @returns {Number} distance
+ */
 crow.BaseNode.prototype.distanceAlgorithm = crow.GraphUtil.distance.manhattan;
+/**
+ * Calculates the distance to another nearby node.  Normally this leverages
+ * {@link #distanceAlgorithm}, but it doesn't have to.
+ * This should always be a positive number.  There is one special value, Infinity,
+ * which the algorithms will consider to be unreachable.
+ * @param {crow.BaseNode} otherNode the other node that we're measuring to.
+ * @returns {Number} distance
+ */
 crow.BaseNode.prototype.distanceTo = function(other){
 	var dx = this.x - other.x,
 		dy = this.y - other.y;
@@ -68,7 +89,7 @@ crow.BaseNode.prototype.distanceTo = function(other){
 	return this.distanceAlgorithm(dx, dy);
 };
 
-/**
+/*
  * Calculate a unique string representing this node in the graph.
  * NOTE: once this node is added to a graph, this method is replaced
  * with a property of the same name containing the result of calling this method.
@@ -78,9 +99,14 @@ crow.BaseNode.prototype.hash = function(){
 	return this.x + "_" + this.y;
 }
 
-// Find neighbors of this node in the provided graph
-// (checks horizontally and vertically, not diagonally)
-crow.BaseNode.prototype.getNeighbors = function(graph){
+/** 
+ * Find neighbors of this node in the provided graph.  Neighbors are nodes to the left/right/above/below, and potentially
+ * diagonally from this node, too, given that option.
+ * @param {crow.Graph} graph Graph in which to check this node
+ * @param {Boolean} [includeDiagonals=false] Whether to include diagonals in check.
+ * @returns {crow.BaseNode[]} neighboring nodes
+ */
+crow.BaseNode.prototype.getNeighbors = function(graph, includeDiagonals){
 	var neighbors = [];
 	var ox = this.x, oy = this.y;
 	var n;
@@ -92,5 +118,17 @@ crow.BaseNode.prototype.getNeighbors = function(graph){
 	if(n) neighbors.push(n);
 	n = graph.getNode(ox, oy + 1);
 	if(n) neighbors.push(n);
+	
+	if(includeDiagonals){
+		n = graph.getNode(ox - 1, oy - 1);
+		if(n) neighbors.push(n);
+		n = graph.getNode(ox + 1, oy - 1);
+		if(n) neighbors.push(n);
+		n = graph.getNode(ox - 1, oy + 1);
+		if(n) neighbors.push(n);
+		n = graph.getNode(ox + 1, oy + 1);
+		if(n) neighbors.push(n);
+	}
+	
 	return neighbors;
 };

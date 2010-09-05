@@ -200,7 +200,14 @@ crow.Graph._lookupAlgorithm = function(name){
 crow.Graph.registerAlgorithm(crow.algorithm.LinearAlgorithm, 'linear', true);
 crow.Graph.registerAlgorithm(crow.algorithm.DijkstraAlgorithm, 'dijkstra', true);
 
+/**
+ * @namespace Collection of utility functions that clients can use
+ */
 crow.GraphUtil = {
+	/**
+	 * @namespace Collection of distance utility functions
+	 * in the form of function(dx, dy){ ... }
+	 */
 	distance: {
 		pythagoras: function(dx, dy){
 			return Math.sqrt(Math.pow(dx, 2) + Math.pow(dy, 2));
