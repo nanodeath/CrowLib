@@ -1,6 +1,8 @@
 goog.provide('crow.BaseNode');
 
 /**
+ * Basic node object.
+ * @param {Array} arr Two-element array containing the x- and y-coordinates (in that order) of this element.
  * @constructor
  */
 crow.BaseNode = function(arr){
@@ -12,7 +14,16 @@ crow.BaseNode = function(arr){
 
 // Override these position methods in your base class to provide location
 // information.  By default, getX and getY return the 'x' and 'y' properties of this node.
+
+/**
+ * Get the x-coordinate of this node.
+ * @returns {Number}
+ */
 crow.BaseNode.prototype.getX = function(){ return this.x; };
+/**
+ * Get the y-coordinate of this node.
+ * @returns {Number}
+ */
 crow.BaseNode.prototype.getY = function(){ return this.y; };
 
 // Calculating distance between nodes.	You have several options:
