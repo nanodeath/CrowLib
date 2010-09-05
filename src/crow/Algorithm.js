@@ -14,11 +14,11 @@ crow.Algorithm = function(){};
 crow.Algorithm.NodeMap = function(defaultValue){
 	var map = {};
 	this.get = function(node){
-		var val = map[node.hash()];
+		var val = map[node.hash];
 		return typeof val !== "undefined" ? val : defaultValue;
 	};
 	this.set = function(node, val){
-		map[node.hash()] = val;
+		map[node.hash] = val;
 	};
 };
 /**

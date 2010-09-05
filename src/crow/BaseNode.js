@@ -18,8 +18,8 @@ crow.BaseNode.prototype.getY = function(){ throw new Error("override me") };
 //	 custom behavior 
 crow.BaseNode.prototype.distanceAlgorithm = function(){ throw new Error("override me with a GraphUtil.distance.* method"); };
 crow.BaseNode.prototype.distanceTo = function(other){
-	var dx = this.getX() - other.getX(),
-		dy = this.getY() - other.getY();
+	var dx = this.x - other.x,
+		dy = this.y - other.y;
 	
 	return this.distanceAlgorithm(dx, dy);
 };
@@ -27,7 +27,7 @@ crow.BaseNode.prototype.distanceTo = function(other){
 crow.BaseNode.prototype.hash = function(clear_cache){
 		var h = this._cachedHash;
 		if(!h || clear_cache){
-			h = this.getX() + "_" + this.getY();
+			h = this.x + "_" + this.y;
 			this._cachedHash = h;
 		}
 		return h;
@@ -37,7 +37,7 @@ crow.BaseNode.prototype.hash = function(clear_cache){
 // (checks horizontally and vertically, not diagonally)
 crow.BaseNode.prototype.getNeighbors = function(graph){
 	var neighbors = [];
-	var ox = this.getX(), oy = this.getY();
+	var ox = this.x, oy = this.y;
 	var n;
 	n = graph.getNode(ox - 1, oy);
 	if(n) neighbors.push(n);

@@ -132,7 +132,7 @@ crow.algorithm.AStarAlgorithm.prototype.findPath = function(start, goal, opts){
 	}
 };
 crow.algorithm.AStarAlgorithm.prototype.estimateDistance = function(start, goal, graph){
-	return crow.GraphUtil.distance.manhattan(start.getX() - goal.getX(), start.getY() - goal.getY());
+	return crow.GraphUtil.distance.manhattan(start.x - goal.x, start.y - goal.y);
 };
 crow.algorithm.AStarAlgorithm.prototype.recalculate = function(){
 	var a = this.algorithm;

@@ -150,19 +150,25 @@ window["test"]["mainTest"] = function(){
 	
 	module("large graph");
 	test("findGoal with a start and an end node, and removing nodes", function(){
+
 		var graph = largeGraph();
+		
 		var path = graph.findGoal({start: graph.getNode(0, 0), goal: graph.getNode(1, 5)});
+
 		equals(path.nodes.length, 13, "Path contains expected number of nodes");
 		same(path.start, new MyNode([0, 0]), "Path has expected start node");
 		same(path.end, new MyNode([1, 5]), "Path has expected end node");
 		equals(path.length, 12, "Path is of expected length");
 		ok(containsNode(path, 4, 4), "Path contains expected midpoint");
 		ok(path.found, "Path indicated end was found");
-		
+
 		var nodeCount = graph.getNodes().length;
+		
 		graph.removeNode(4, 4);
+		
 		var newNodeCount = graph.getNodes().length;
 		equals(nodeCount - newNodeCount, 1, "Graph has correct number of nodes after removing one (on previous path)");
+		
 		path = graph.findGoal({start: graph.getNode(0, 0), goal: graph.getNode(1, 5)});
 		equals(path.nodes.length, 17, "Path contains expected number of nodes");
 		same(path.start, new MyNode([0, 0]), "Path has expected start node");

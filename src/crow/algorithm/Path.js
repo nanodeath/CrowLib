@@ -27,7 +27,7 @@ crow.algorithm.Path.prototype._invalidatePoint = function(e){
 	var x = e.x, y = e.y;
 	for(var i = 0; i < this.nodes.length; i++){
 		var n = this.nodes[i];
-		if(n.getX() == x && n.getY() == y){
+		if(n.x == x && n.y == y){
 			this.nodes = this.nodes.slice(0, i);
 			this.end = null;
 			this.found = false;
@@ -42,7 +42,7 @@ crow.algorithm.Path.prototype._invalidateRegion = function(e){
 	var x2 = x + e.dx, y2 = y + e.dy;
 	for(var i = 0; i < this.nodes.length; i++){
 		var n = this.nodes[i];
-		var nx = n.getX(), ny = n.getY();
+		var nx = n.x, ny = n.y;
 		if(nx >= x && ny >= y && nx < x2 && ny < y2){
 			this.nodes = this.nodes.slice(0, i);
 			this.end = null;
@@ -58,11 +58,11 @@ crow.algorithm.Path.prototype.advanceTo = function(index_or_node){
 		assert(index_or_node >= 0 && index_or_node < this.nodes.length, assert.IndexOutBounds(index_or_node));
 		this.nodes = this.nodes.slice(index_or_node);
 	} else {
-		var x = index_or_node.getX(), y = index_or_node.getY(), i;
+		var x = index_or_node.x, y = index_or_node.y, i;
 		var found = false;
 		for(i = 0; i < this.nodes.length; i++){
 			var n = this.nodes[i];
-			if(n.getX() == x && n.getY() == y){
+			if(n.x == x && n.y == y){
 				found = true;
 				break;
 			}

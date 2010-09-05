@@ -20,17 +20,25 @@ crow.Graph = function(){
 	 * @param {crow.BaseNode} node Node to add to graph.
 	 */
 	this.addNode = function(node){
+		var x = node.getX(), y = node.getY();
+		this._preprocessNode(node);
 		this.nodes.push(node);
-
+		if(!this.map[x]) this.map[x] = {};
+		this.map[x][y] = node;
+	};
+	
+	this._preprocessNode = function(node){
 		var x = node.getX(), y = node.getY();
 		if(typeof x !== "number") throw new Error("Node must have a valid x coord");
 		if(typeof y !== "number") throw new Error("Node must have a valid y coord");
 		x = Math.floor(x);
 		y = Math.floor(y);
-		
-		if(!this.map[x]) this.map[x] = {};
-		this.map[x][y] = node;
+		node.x = x;
+		node.y = y;
+		node.hash = node.hash();
+		node._initialized = true;
 	};
+	
 	// Remove a node at given coordinates from crow.Graph
 	// O(n) where n is number of total nodes
 	/**
@@ -45,7 +53,7 @@ crow.Graph = function(){
 		}
 		for(var i in this.nodes){
 			var node = this.nodes[i];
-			if(node.getX() == x && node.getY() == y){
+			if(node.x == x && node.y == y){
 				this.nodes.splice(i, 1);
 				break;
 			}
