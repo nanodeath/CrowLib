@@ -12,7 +12,7 @@ crow.Graph = function(){
 	// initialize
 	this.nodes = [];
 	this.map = {};
-	this.version = "0";
+	this.version = "0.1.0";
 	this.validator = new goog.events.EventTarget();
 	
 	// methods
