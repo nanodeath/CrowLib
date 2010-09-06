@@ -7,19 +7,21 @@ Usage
 
 Generally speaking, you follow three steps to use Crow in your application:
 
-1. Extend crow.BaseNode with your own class.  See that source file for what methods you must override.
+1. Extend crow.BaseNode with your own class.
 2. Add a collection of instances of your node class to an instance of crow.Graph.
 3. Perform what operations you will, whether that's getNode() or getNodes() or findGoal(), upon the crow.Graph.
+
+For a better step-by-step, check out the [[Basic Usage]] wiki node.
 
 See the test.html in test/ for more examples.  There's even a helper that converts a 2d array of 1s and 0s into a graph.
 
 Example
 =======
-See these examples in action by running the interactive test suite!  Head down to the Testing section below for more details.
+See these examples in action by running the interactive test suite!  Head down to the Testing section below for more details on starting the test server on your own box; or, visit the [official one](http://maxaller.name:4567).
 
 Simple Maze
 -----------
-This example features questionable maze generation using the A* algorithm to generate a simple 16x16 maze.
+This example features questionable maze generation using the A* algorithm to generate a simple 16x16 maze.  Also, it's more of a gridworld than an actual maze...
 
 Dunes and Demise
 ----------------
