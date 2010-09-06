@@ -14,6 +14,7 @@ crow.algorithm.Path = function(opts){
 	this.found = opts.found;
 	this.algorithm = opts.algorithm;
 	this.graph = opts.graph;
+	this.actor = opts.actor;
 	this._baked = false;
 	
 	if(this.graph){
@@ -78,10 +79,15 @@ crow.algorithm.Path.prototype.getNextNode = function(){
 	return this.nodes[1];	
 };
 crow.algorithm.Path.prototype.continueCalculating = function(count){
-	if(this.baked) throw new Error("Can't continue calculating a baked path");
+	if(this._baked) throw new Error("Can't continue calculating a baked path");
 	if(this.found) return true;
 	var lastNode = this.nodes[this.nodes.length-1];
-	var opts = !count ? {} : {limit: count};
+	// if the path was never complete, there may not be any nodes
+	if(!lastNode) lastNode = this.start;
+	
+	var opts = {};
+	if(count) opts.limit = count;
+	if(this.actor) opts.actor = this.actor;
 	var continuedPath = this.algorithm.findPath(lastNode, this.goal, opts);
 	// TODO this node list needs to be pruned, in case continuedPath contains a node in this;
 	// in other words, if the continuedPath backtracks along the current path
@@ -94,7 +100,7 @@ crow.algorithm.Path.prototype.bake = function(){
 	this._baked = true;
 	if(this.graph){
 		this.graph.validator.removeEventListener("invalidatePoint", this._invalidatePoint);
-		this.graph.validator.removeEventListener("invalidateRegion", this._invalidatePoint);
+		this.graph.validator.removeEventListener("invalidateRegion", this._invalidateRegion);
 		this.graph = null;
 	}
 };

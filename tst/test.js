@@ -184,7 +184,7 @@ window["test"]["mainTest"] = function(){
 		var newNewNodeCount = graph.getNodes().length;
 		equals(newNewNodeCount - newNodeCount, 1, "Graph has correct number of nodes after readding deleted node");
 		equals(path.algorithm.graph.nodes.length, graph.getNodes().length);
-		//path = path.recalculate();
+		//path = recalculate();
 		//ok(containsNode(path, 4, 4), "Path contains original expected midpoint");
 		//equals(path.length, 12, "Path is of expected length");
 	});
@@ -285,6 +285,89 @@ window["test"]["mainTest"] = function(){
 		var unlimitedPath = graph.findGoal({start: graph.getNode(0, 0), goal: graph.getNode(7, 5), algorithm: "a*"});
 		ok(path.nodes.length <= unlimitedPath.nodes.length * 2, "resulting path is reasonably efficient (" + path.nodes.length + " vs " + unlimitedPath.nodes.length + " ideal)");
 	});
+	
+	(function(){
+		module("passing actors into findGoal");
+
+		function AnotherNode(arr){ this.x = arr[0]; this.y = arr[1]; };
+		AnotherNode.prototype = new crow.BaseNode();
+		AnotherNode.prototype.distanceAlgorithm = crow.GraphUtil.distance.pythagoras;
+		AnotherNode.prototype.distanceTo = function(other, actor){
+			if(actor instanceof Plane || other.walkable == "1") return crow.BaseNode.prototype.distanceTo.apply(this, arguments);
+			return Infinity;
+		};
+		function Plane(){};
+		function Car(){};
+
+		var graph = crow.Graph.fromArray([
+			"1111",
+			"1001",
+			"1111",
+			"0100"
+		], function(x, y, val){
+			var node = new AnotherNode([x, y]);
+			node.walkable = val == "1";
+			return node;
+		});
+		graph.removeNode(1, 2); // removing node between goal and start
+
+		test("works with A*", function(){		
+			var start = graph.getNode(0, 0);
+			var end = graph.getNode(1, 3);
+
+			var p = new Plane();
+			var c = new Car();
+		
+			var carPath = graph.findGoal({start: start, goal: end, algorithm: "a*", actor: c});
+			ok(!carPath.found, "no route exists to goal for car");		
+
+			var planePath = graph.findGoal({start: start, goal: end, algorithm: "a*", actor: p});
+			ok(planePath.found, "route exists to goal for plane");
+		});
+
+		test("works with Dijkstra", function(){		
+			var start = graph.getNode(0, 0);
+			var end = graph.getNode(1, 3);
+
+			var p = new Plane();
+			var c = new Car();
+		
+			var carPath = graph.findGoal({start: start, goal: end, algorithm: "dijkstra", actor: c});
+			ok(!carPath.found, "no route exists to goal for car");
+		
+			var planePath = graph.findGoal({start: start, goal: end, algorithm: "dijkstra", actor: p});
+			ok(planePath.found, "route exists to goal for plane");
+		});
+		
+		test("works with invalidations", function(){
+			var start = graph.getNode(0, 0);
+			var end = graph.getNode(1, 3);
+
+			var p = new Plane();
+			var c = new Car();
+
+			var algos = ["dijkstra", "a*"];
+			for(var a in algos){
+				var algo = algos[a];
+				
+				var carPath = graph.findGoal({start: start, goal: end, algorithm: algo, actor: c});
+				ok(!carPath.found, "no route exists to goal for car in " + algo);
+				var planePath = graph.findGoal({start: start, goal: end, algorithm: algo, actor: p});
+				ok(planePath.found, "route exists to goal for plane in " + algo);
+			
+				graph.invalidate(0, 3, 3, 1);
+			
+				carPath.continueCalculating();
+				planePath.continueCalculating();
+			
+				ok(!carPath.found, "after invalidating, no route exists to goal for car in " + algo);
+				ok(planePath.found, "after invalidating, route exists to goal for plane in " + algo);
+				
+				carPath.bake();
+				planePath.bake();
+			}
+		});
+	})();
 	
 	module("EffectGames");
 	test("EffectGames extensions not testable", function(){

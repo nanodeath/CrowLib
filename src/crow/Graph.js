@@ -108,6 +108,7 @@ crow.Graph = function(){
 	 * @param opts Options hash describing what's wanted.
 	 * @param {crow.BaseNode} [opts.start="first node added"] Node from which to begin searching.
 	 * @param {crow.BaseNode|function(this:crow.BaseNode): boolean} opts.goal Target node or condition at which to stop.  If a callback is passed, it will be passed each node that is discovered.  Return true from this callback to signify that the desired node was found.
+	 * @param [opts.actor] The actor that will be traversing the path.  Will be passed to the nodes' distanceTo algorithm.
 	 * @param {String} [opts.algorithm="automatic"] Alias of algorithm to use for the search.
 	 */
 	this.findGoal = function(opts){

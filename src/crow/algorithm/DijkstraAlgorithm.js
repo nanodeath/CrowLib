@@ -15,6 +15,7 @@ crow.algorithm.DijkstraAlgorithm.prototype.findPath = function(start, goal, opts
 	this.start = start;
 	this.goal = goal;
 	this.opts = typeof opts === "undefined" ? {} : opts;
+	this.actor = opts.actor;
 
 	this._getWrapperNode(start).distance = 0;
 	var endNode, found;
@@ -46,7 +47,8 @@ crow.algorithm.DijkstraAlgorithm.prototype.findPath = function(start, goal, opts
 		length: found ? endNode.distance : Infinity,
 		found: found,
 		algorithm: this,
-		graph: opts.graph
+		graph: opts.graph,
+		actor: this.actor
 	});
 };
 crow.algorithm.DijkstraAlgorithm.prototype.recalculate = function(){
@@ -78,14 +80,16 @@ crow.algorithm.DijkstraAlgorithm.prototype._process = function(node, endNode){
 			var neighbor = this._getWrapperNode(neighbors[n]);
 			if(neighbor.visited) continue;
 		
-			var neighborDistanceThroughMe = node.distance + node.innerNode.distanceTo(neighbor.innerNode);
+			var neighborDistanceThroughMe = node.distance + node.innerNode.distanceTo(neighbor.innerNode, this.actor);
 			var currentNeighborDistance = neighbor.distance;
 			if(neighborDistanceThroughMe < currentNeighborDistance){
 				neighbor.distance = neighborDistanceThroughMe;
 				neighbor.previous = node;
 				currentNeighborDistance = neighborDistanceThroughMe;
 			}
-			nextNodes.enqueue(currentNeighborDistance, neighbor);
+			if(currentNeighborDistance < Infinity){
+				nextNodes.enqueue(currentNeighborDistance, neighbor);
+			}
 		}
 		node.visited = true;
 		this.visitedList.push(node);

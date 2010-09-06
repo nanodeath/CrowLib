@@ -26,7 +26,8 @@ crow.algorithm.AStarAlgorithm.prototype.findPath = function(start, goal, opts){
 		throw new Error("A* doesn't support using a callback to determine the goal");
 	}
 	if(!opts) opts = {};
-	
+
+	var actor = opts.actor;	
 	this.start = start;
 	this.goal = goal;
 	this.opts = opts;
@@ -68,7 +69,7 @@ crow.algorithm.AStarAlgorithm.prototype.findPath = function(start, goal, opts){
 		for(var n in neighbors){
 			var neighbor = neighbors[n];
 			if(this.evaluated.get(neighbor)) continue;
-			var newGScore = this.gScore.get(currentNode) + currentNode.distanceTo(neighbor);
+			var newGScore = this.gScore.get(currentNode) + currentNode.distanceTo(neighbor, actor);
 			if(newGScore == Infinity) continue;
 			
 			if(!this.toEvaluate.containsValue(neighbor) || newGScore < this.gScore.get(neighbor)){
@@ -91,7 +92,8 @@ crow.algorithm.AStarAlgorithm.prototype.findPath = function(start, goal, opts){
 		length: null,
 		recalculate: this.recalculate,
 		algorithm: this,
-		graph: opts.graph
+		graph: opts.graph,
+		actor: actor
 	};
 
 	if(found){
