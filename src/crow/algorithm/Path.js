@@ -58,9 +58,9 @@ crow.algorithm.Path.prototype._invalidateRegion = function(e){
 };
 
 crow.algorithm.Path.prototype.advanceTo = function(index_or_node){
-	assert(typeof(index_or_node) === "number" || index_or_node instanceof crow.BaseNode, assert.InvalidArgumentType("number or crow.BaseNode"));
+	crow.assert(typeof(index_or_node) === "number" || index_or_node instanceof crow.BaseNode, crow.assert.InvalidArgumentType("number or crow.BaseNode"));
 	if(typeof(index_or_node) === "number"){
-		assert(index_or_node >= 0 && index_or_node < this.nodes.length, assert.IndexOutBounds(index_or_node));
+		crow.assert(index_or_node >= 0 && index_or_node < this.nodes.length, crow.assert.IndexOutBounds(index_or_node));
 		this.nodes = this.nodes.slice(index_or_node);
 	} else {
 		var x = index_or_node.x, y = index_or_node.y, i;

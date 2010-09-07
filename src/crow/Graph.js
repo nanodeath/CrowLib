@@ -167,7 +167,7 @@ crow.Graph.fromTilePlane = function(tplane, callback){
   * @return {crow.Graph} The primed Graph
   */
 crow.Graph.fromArray = function(array, callback){
-	assert(array instanceof Array, assert.InvalidArgumentType("Array"));
+	crow.assert(array instanceof Array, crow.assert.InvalidArgumentType("Array"));
 	var graph = new crow.Graph();
 	var x, y = 0;
 	for(var i = 0; i < array.length; i++){

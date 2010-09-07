@@ -132,5 +132,35 @@ window["test"]["gameOptimizations"] = function(){
 			same([path.nodes[i].getX(), path.nodes[i].getY()], expected[i], "new path: node " + i + " is as expected");
 		}
 	});
-
+	
+	$.getScript("http://www.effectgames.com/effect/engine/engine-1.0b2d.js", function(){
+		module("EffectGames");
+		test("fromTilePlane", function(){
+			var rawMap = [
+				"OXO",
+				"OOO",
+				"OXX"
+			];
+			var map = [];
+			for(var i = 0; i < rawMap.length; i++){
+				var row = rawMap[i];
+				var newRow = [];
+				for(var ch_idx = 0; ch_idx < row.length; ch_idx++){
+					var ch = row.charAt(ch_idx);
+					if(ch == "O") {
+						var n = new Tile();
+						newRow.push(n);
+					} else {
+						newRow.push(undefined);
+					}
+				}
+				map.push(newRow);
+			};
+			var tp = new TilePlane();
+			tp.map = map;
+			console.log(tp);
+			window.maxTilePlane = tp;
+		});
+	});
+	
 }
