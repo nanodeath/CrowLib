@@ -206,6 +206,11 @@ namespace "test" do
 				rm_rf "*.db"
 			end
 		end
+		desc "Rebuilds docs and symlinks /docs to them"
+		task :docs do
+			sh "rake docs"
+			sh "ln -fst test_runner/public/ ../../dist/docs/"
+		end
 	end
 end
 
