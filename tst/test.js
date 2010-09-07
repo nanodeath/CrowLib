@@ -350,9 +350,9 @@ window["test"]["mainTest"] = function(){
 			for(var a in algos){
 				var algo = algos[a];
 				
-				var carPath = graph.findGoal({start: start, goal: end, algorithm: algo, actor: c});
+				var carPath = graph.findGoal({start: start, goal: end, algorithm: algo, baked: false, actor: c});
 				ok(!carPath.found, "no route exists to goal for car in " + algo);
-				var planePath = graph.findGoal({start: start, goal: end, algorithm: algo, actor: p});
+				var planePath = graph.findGoal({start: start, goal: end, algorithm: algo, baked: false, actor: p});
 				ok(planePath.found, "route exists to goal for plane in " + algo);
 			
 				graph.invalidate(0, 3, 3, 1);
@@ -368,6 +368,61 @@ window["test"]["mainTest"] = function(){
 			}
 		});
 	})();
+	
+	module("internal api : memory leaks");
+	test("paths respond as expected when baked/unbaked", function(){
+		var graph = smallGraph();
+		var start = graph.getNode(0, 0);
+		var end = graph.getNode(1, 1);
+
+		var pointInvalidated = false;
+		
+		var oldInvalidatePoint = crow.algorithm.Path.prototype._invalidatePoint;
+		crow.algorithm.Path.prototype._invalidatePoint = function(){
+			pointInvalidated = true;
+		};
+		
+		// First test
+		(function(){
+			var path = graph.findGoal({start: start, goal: end, algorithm: "a*"}); 
+		})();
+		graph.invalidate(0, 0);
+		ok(!pointInvalidated, "out of scope baked-by-default path doesn't receive invalidation event");
+		
+		pointInvalidated = false;
+		var path = graph.findGoal({start: start, goal: end, algorithm: "a*"});
+		
+		graph.invalidate(0, 0);
+		ok(!pointInvalidated, "in scope baked-by-default path doesn't receive invalidation event");
+		
+		// Second test
+		(function(){
+			var path = graph.findGoal({start: start, goal: end, baked: false, algorithm: "a*"}); 
+		})();
+		graph.invalidate(0, 0);
+		ok(pointInvalidated, "out of scope unbaked path receives invalidation event");
+		
+		pointInvalidated = false;
+		var path = graph.findGoal({start: start, goal: end, baked: false, algorithm: "a*"});
+		
+		graph.invalidate(0, 0);
+		ok(pointInvalidated, "in scope unbaked path receives invalidation event");
+		
+		// Third test
+		(function(){
+			var path = graph.findGoal({start: start, goal: end, limit: 1, algorithm: "a*"}); 
+		})();
+		graph.invalidate(0, 0);
+		ok(pointInvalidated, "out of scope path with limit receives invalidation event");
+		
+		pointInvalidated = false;
+		var path = graph.findGoal({start: start, goal: end, limit: 1, algorithm: "a*"});
+		
+		graph.invalidate(0, 0);
+		ok(pointInvalidated, "in scope unbaked path with limit receives invalidation event");
+		
+		crow.algorithm.Path.prototype._invalidatePoint = oldInvalidatePoint;
+	});
 	
 	module("EffectGames");
 	test("EffectGames extensions not testable", function(){

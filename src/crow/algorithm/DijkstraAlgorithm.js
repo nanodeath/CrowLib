@@ -14,7 +14,10 @@ crow.algorithm.DijkstraAlgorithm.prototype.findPath = function(start, goal, opts
 	
 	this.start = start;
 	this.goal = goal;
-	this.opts = typeof opts === "undefined" ? {} : opts;
+	this.opts = opts || {};
+	if(opts.limit){
+		throw new Error("Dijkstra's doesn't support the `limit` option yet");
+	}
 	this.actor = opts.actor;
 
 	this._getWrapperNode(start).distance = 0;
@@ -48,6 +51,7 @@ crow.algorithm.DijkstraAlgorithm.prototype.findPath = function(start, goal, opts
 		found: found,
 		algorithm: this,
 		graph: opts.graph,
+		baked: opts.baked || (typeof opts.baked === "undefined" && !opts.limit),
 		actor: this.actor
 	});
 };

@@ -15,11 +15,15 @@ crow.algorithm.Path = function(opts){
 	this.algorithm = opts.algorithm;
 	this.graph = opts.graph;
 	this.actor = opts.actor;
-	this._baked = false;
-	
-	if(this.graph){
-		this.graph.validator.addEventListener("invalidatePoint", this._invalidatePoint, null, this);
-		this.graph.validator.addEventListener("invalidateRegion", this._invalidateRegion, null, this);
+	if(opts.baked === false){
+		this._baked = false;
+		
+		if(this.graph){
+			this.graph.validator.addEventListener("invalidatePoint", this._invalidatePoint, null, this);
+			this.graph.validator.addEventListener("invalidateRegion", this._invalidateRegion, null, this);
+		}
+	} else {
+		this._baked = true;
 	}
 };
 
@@ -76,10 +80,10 @@ crow.algorithm.Path.prototype.advanceTo = function(index_or_node){
 	}
 };
 crow.algorithm.Path.prototype.getNextNode = function(){
-	return this.nodes[1];	
+	return this.nodes[1];
 };
 crow.algorithm.Path.prototype.continueCalculating = function(count){
-	if(this._baked) throw new Error("Can't continue calculating a baked path");
+	if(this._baked) throw new Error("Can't continue calculating a baked path.  Either pass {baked: false} to findGoal, or don't call .bake() on this path yet.");
 	if(this.found) return true;
 	var lastNode = this.nodes[this.nodes.length-1];
 	// if the path was never complete, there may not be any nodes

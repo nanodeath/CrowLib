@@ -93,6 +93,7 @@ crow.algorithm.AStarAlgorithm.prototype.findPath = function(start, goal, opts){
 		recalculate: this.recalculate,
 		algorithm: this,
 		graph: opts.graph,
+		baked: opts.baked || (typeof opts.baked === "undefined" && !opts.limit),
 		actor: actor
 	};
 

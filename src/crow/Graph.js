@@ -109,7 +109,9 @@ crow.Graph = function(){
 	 * @param {crow.BaseNode} [opts.start="first node added"] Node from which to begin searching.
 	 * @param {crow.BaseNode|function(this:crow.BaseNode): boolean} opts.goal Target node or condition at which to stop.  If a callback is passed, it will be passed each node that is discovered.  Return true from this callback to signify that the desired node was found.
 	 * @param [opts.actor] The actor that will be traversing the path.  Will be passed to the nodes' distanceTo algorithm.
+	 * @param [opts.baked=true] Whether the path will be returned pre-baked.  If baked, the path won't receive invalidations from the graph.  If not baked, the path will receive invalidations, but must have {@link crow.algorithm.Path#bake} called when the path can be discarded.
 	 * @param {String} [opts.algorithm="automatic"] Alias of algorithm to use for the search.
+	 * @returns {crow.algorithm.Path} Path representing this search
 	 */
 	this.findGoal = function(opts){
 		crow.Algorithm.initializeDataStructures();
