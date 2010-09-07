@@ -26,7 +26,7 @@ window["test"]["gameOptimizations"] = function(){
 	
 	test("invalidate point, a*", function(){
 		var graph = tinyGraph();
-		var path = graph.findGoal({start: graph.getNode(0, 0), goal: graph.getNode(2, 2), algorithm: "a*"});
+		var path = graph.findGoal({start: graph.getNode(0, 0), goal: graph.getNode(2, 2), algorithm: "a*", baked: false});
 		
 		var expected = [[0,0],[1,0],[1,1],[1,2],[2,2]];
 		for(var i in expected){
@@ -63,7 +63,7 @@ window["test"]["gameOptimizations"] = function(){
 	
 	test("invalidate area, a*", function(){
 		var graph = tinyGraph();
-		var path = graph.findGoal({start: graph.getNode(0, 0), goal: graph.getNode(2, 2), algorithm: "a*"});
+		var path = graph.findGoal({start: graph.getNode(0, 0), goal: graph.getNode(2, 2), algorithm: "a*", baked: false});
 		
 		var expected = [[0,0],[1,0],[1,1],[1,2],[2,2]];
 		for(var i in expected){
@@ -98,7 +98,7 @@ window["test"]["gameOptimizations"] = function(){
 	
 	test("invalidate point, dijkstra", function(){
 		var graph = tinyGraph();
-		var path = graph.findGoal({start: graph.getNode(0, 0), goal: graph.getNode(2, 2)});
+		var path = graph.findGoal({start: graph.getNode(0, 0), goal: graph.getNode(2, 2), baked: false});
 		
 		var expected = [[0,0],[1,0],[1,1],[1,2],[2,2]];
 		for(var i in expected){

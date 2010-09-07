@@ -192,7 +192,6 @@ window["test"]["fogOfWar"] = function(){
 			var range = 3;
 			this.start = function(){
 				visitedNodes = new crow.Algorithm.NodeMap(false);
-				this.liftFog();
 				this.step();
 			};
 			this.recalculatePath = function(){
