@@ -212,6 +212,10 @@ end
 def generate_debug(files, filename, markers=true)
 	deps = GoogleClosure.instance.calculate_dependencies(files)
 	output = StringIO.new
+	output.puts "// Crow DEBUG"
+	output.puts "var CLOSURE_NO_DEPS = true;"
+	output.puts "// Crow End DEBUG"
+	output.puts
 	deps.each do |d|
 		output.puts("// FILE: #{d}: DeBUG //") if markers
 		count = 0
