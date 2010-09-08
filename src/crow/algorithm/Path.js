@@ -130,8 +130,8 @@ crow.algorithm.Path.prototype.getNextNode = function(){
 };
 
 /**
- * Continue calculating this path, either to the goal, or to a limited number of nodes.  If the goal is already found, does nothing and returns true.
- * @param {Number} [count] If count is omitted, calculate the rest of the path until the goal is reached.  If count is passed, pass it a a limit to the underlying algorithm.
+ * Continue calculating this path, either to the goal, or to a limited number of nodes.  The original algorithm will be reinvoked, using the end of the current path as a starting point, before appending the results of that search to this path.  If the goal is already found, does nothing and returns true.
+ * @param {Number} [count] If count is omitted, calculate the rest of the path until the goal is reached.  If count is passed, pass it as a limit to the underlying algorithm.
  * @throws {Error} If the path is already baked.
  * @see http://github.com/nanodeath/CrowLib/wiki/Making-the-Most-of-Crow
  * @returns true if the goal was reached, false otherwise
