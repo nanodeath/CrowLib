@@ -17,6 +17,13 @@
 	<div id="other_pages">
 		<ul>
 			<li><a href="/benchmark">Benchmarks</a></li>
+			<li>
+<% if @docs_exist %>
+				<a href="/docs/index.html">JSDocumentation</a>
+<% else %>
+				Docs not generated!
+<% end %>
+			</li>
 		</ul>
 	</div>
 	<h2><span>Controls</span></h2>
