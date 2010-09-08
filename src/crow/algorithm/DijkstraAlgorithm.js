@@ -3,6 +3,7 @@ goog.require('crow.algorithm.ShortestPathAlgorithm');
 
 /**
  * @constructor
+ * @private
  */
 crow.algorithm.DijkstraAlgorithm = function(graph){
 	this.graph = graph;
@@ -114,6 +115,7 @@ crow.algorithm.DijkstraAlgorithm.prototype._getWrapperNode = function(node){
 };
 /**
  * @constructor
+ * @private
  */
 crow.algorithm.DijkstraAlgorithm.WrapperNode = function(node){
 	this.innerNode = node;

@@ -5,6 +5,7 @@ goog.require('crow.algorithm.ShortestPathAlgorithm');
  * Kept around as a reminder that recursion can be slow if not wielded carefully
  * @deprecated
  * @constructor
+ * @private
  */
 crow.algorithm.DijkstraAlgorithmRecursive = function(graph){
 	this.graph = graph;

@@ -74,6 +74,7 @@ end
 get "/" do
 	symlink_tests
 	@test_js = LINKED_TEST
+	@docs_exist = File.exist?("public/docs/index.html") && File.exist?("public/docs_private/index.html")
 	erb :home
 end
 
