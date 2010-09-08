@@ -6,6 +6,7 @@ goog.require('crow.algorithm.Path');
  * A* algorithm, which is basically an "informed" Dijkstra's algorithm.
  * It oozes in the direction of your goal node.
  * @constructor
+ * @private
  */
 crow.algorithm.AStarAlgorithm = function(graph){
 	this.graph = graph;

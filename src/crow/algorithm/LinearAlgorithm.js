@@ -3,6 +3,7 @@ goog.require('crow.algorithm.SearchAlgorithm');
 
 /**
  * @constructor
+ * @private
  */
 crow.algorithm.LinearAlgorithm = function(graph){
 	this.graph = graph;

@@ -3,6 +3,7 @@ build
 DEADJOE
 dist
 docs
+docs_private
 .bundle
 test_runner/gems
 test_runner/public/gen/

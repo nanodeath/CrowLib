@@ -98,6 +98,7 @@ OPTIMIZATIONS = {
 directory "build/js"
 directory "dist/js"
 directory "dist/docs"
+directory "dist/docs_private"
 
 # TASKS
 file GoogleClosure::CALC_DEPS_BIN do
@@ -120,11 +121,12 @@ file JsDoc::JAR do
 	sh "svn checkout #{URL} #{JsDoc::CHECKOUT_ROOT}"
 end
 
-task :generate_javascript_docs => ["dist/docs", JsDoc::JAR] do
+task :generate_javascript_docs => ["dist/docs", "dist/docs_private", JsDoc::JAR] do
 	files = SourceList.get.to_a
 	files.reject! {|f| f.starts_with? "build/"}
-	FILES = files.join(' ') # CONFIG[:files].join(' ')
+	FILES = files.join(' ')
 	sh "java -jar #{JsDoc::JAR} #{JsDoc::RUN_JS} -a -t=#{JsDoc::TEMPLATES} #{FILES} -d=dist/docs"
+	sh "java -jar #{JsDoc::JAR} #{JsDoc::RUN_JS} -a -t=#{JsDoc::TEMPLATES} --private #{FILES} -d=dist/docs_private"
 end
 
 task :prepare_build do
@@ -210,6 +212,7 @@ namespace "test" do
 		task :docs do
 			sh "rake docs"
 			sh "ln -fst test_runner/public/ ../../dist/docs/"
+			sh "ln -fst test_runner/public/ ../../dist/docs_private/"
 		end
 	end
 end

@@ -4,6 +4,7 @@ goog.require('crow.algorithm.SearchAlgorithm');
 
 /**
  * @constructor
+ * @private
  */
 crow.algorithm.BFSAlgorithm = function(graph){
 	this.graph = graph;
