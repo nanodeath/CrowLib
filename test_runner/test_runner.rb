@@ -14,6 +14,8 @@ require "rake"
 require "json"
 require "open3"
 
+use Rack::Deflater
+
 ROOT = File.expand_path(File.dirname(__FILE__) + "/../");
 load ROOT + "/Rakefile"
 TEST_FILE = ROOT + "/build/js/crow-test.debug.js"
