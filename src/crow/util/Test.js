@@ -4,14 +4,15 @@ goog.provide('crow.util.Test');
 if(typeof same !== "undefined"){
 	
 	// Wrap the regular same function, because otherwise _cachedHash trips up some of the tests.
-	var newArgs = [];
 	var oldSame = same;
 	var newSame = function(){
+		var newArgs = [];
 		for(var i = 0; i < arguments.length; i++){
-			if(arguments[i] instanceof crow.BaseNode){
-				arguments[i]._initialize();
+			var arg = arguments[i];
+			if(arg instanceof crow.BaseNode){
+				arg._initialize();
 			}
-			newArgs.push(arguments[i]);
+			newArgs.push(arg);
 		}
 		return oldSame.apply(this, newArgs);
 	}
