@@ -1,5 +1,6 @@
 goog.require('crow.Graph');
 goog.require('crow.BaseNode');
+goog.require('crow.algorithm.LPAStarAlgorithm');
 goog.require('crow.util.Test');
 
 window["test"] = window["test"] || {};
@@ -215,6 +216,26 @@ window["test"]["mainTest"] = function(){
 			var graph = smallGraph();
 			graph.findGoal({goal: function(){}, algorithm: "a*"});
 		}, "Callback for goal raised exception");
+	});
+	module("LPA*");
+	test("basic test", function(){
+		var graph = smallGraph();
+		var path = graph.findGoal({goal: graph.getNode(1, 1), algorithm: "lpa*"});
+		equals(path.nodes.length, 3, "Path contains expected number of nodes");
+		same(path.start, new MyNode([0, 0]), "Path has expected start node");
+		same(path.end, new MyNode([1, 1]), "Path has expected end node");
+		equals(path.length, 2, "Path is of expected length");
+		ok(path.found, "Path indicates end was found");
+	});
+	test("bigger test", function(){
+		var graph = largeGraph();
+		var path = graph.findGoal({goal: graph.getNode(7, 5), algorithm: "lpa*"});
+		console.logNodes(path.nodes);
+		equals(path.nodes.length, 13, "Path contains expected number of nodes");
+		same(path.start, new MyNode([0, 0]), "Path has expected start node");
+		same(path.end, new MyNode([7, 5]), "Path has expected end node");
+		equals(path.length, 12, "Path is of expected length");
+		ok(path.found, "Path indicates end was found");
 	});
 	module("procedural path generation: A*");
 	test("stationary", function(){

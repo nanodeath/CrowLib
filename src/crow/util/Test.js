@@ -2,12 +2,11 @@ goog.require('crow.BaseNode');
 goog.provide('crow.util.Test');
 
 if(typeof same !== "undefined"){
+	
 	// Wrap the regular same function, because otherwise _cachedHash trips up some of the tests.
 	var newArgs = [];
 	var oldSame = same;
 	var newSame = function(){
-		// TODO make graph use prototype
-		var graph = new crow.Graph();
 		for(var i = 0; i < arguments.length; i++){
 			if(arguments[i] instanceof crow.BaseNode){
 				arguments[i]._initialize();

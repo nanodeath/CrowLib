@@ -1,5 +1,6 @@
 goog.provide('crow.Algorithm');
 goog.require('goog.structs.PriorityQueue');
+goog.require('goog.structs.AvlTree');
 
 /**
  * Base class for all algorithms.
@@ -41,12 +42,40 @@ crow.Algorithm.NodeMap = function(defaultValue){
 crow.Algorithm.PriorityQueue = function(){
 	throw new Error("A PriorityQueue class is required, but none found!");
 };
+crow.Algorithm.AvlTree = function(){
+	throw new Error("An AvlTree class is required, but none found!");
+};
+crow.Algorithm.AvlPriorityQueue = function(comparator){
+	var newComparator = function(a, b){
+		return comparator(a.key, b.key);
+	};
+	crow.Algorithm.AvlTree.call(this, newComparator);
+};
 /**
  * One-time initialization of data structure classes used by Crow.
  * @private
  */
 crow.Algorithm.initializeDataStructures = function(){
 	crow.Algorithm.PriorityQueue = goog.structs.PriorityQueue;
+	crow.Algorithm.AvlTree = goog.structs.AvlTree;
+	
+	/*
+		** Initialize AvlPriorityQueue prototype
+	*/
+	crow.Algorithm.AvlPriorityQueue.prototype = new crow.Algorithm.AvlTree();
+	crow.Algorithm.AvlPriorityQueue.prototype.enqueue = function(key, value){
+		this.add({key: key, value: value});
+	};
+	crow.Algorithm.AvlPriorityQueue.prototype.dequeue = function(){
+		var val = this.remove(this.getMinimum());
+		if(val != null){
+			return val.value;
+		}
+	};
+	crow.Algorithm.AvlPriorityQueue.prototype.peekKey = function(){
+		var val = this.getMinimum();
+		if(val) return val.key;
+	};
 	
 	crow.Algorithm.initializeDataStructures = function(){};
 };
