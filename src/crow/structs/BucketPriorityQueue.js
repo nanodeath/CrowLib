@@ -1,8 +1,9 @@
 goog.provide('crow.structs.BucketPriorityQueue');
 
-crow.structs.BucketPriorityQueue = function(/*key_comparator, value_comparator*/){
+crow.structs.BucketPriorityQueue = function(key_comparator/*, value_comparator*/){
 	this.arr = [];
 	this.length = 0;
+	this.key_comparator = key_comparator;
 };
 
 crow.structs.BucketPriorityQueue.prototype.enqueue = function(key, value){
@@ -29,11 +30,11 @@ crow.structs.BucketPriorityQueue.prototype.contains = function(value, key_hint){
 		for(var j = 0; j < bucket.length; j++){
 			var bucketValue = bucket[j];
 			if(bucketValue == value){
-				return true;
+				return bucket.key;
 			}
 		}
 	}
-	return false;
+	return null;
 };
 crow.structs.BucketPriorityQueue.prototype.remove = function(value, key_hint){
 	for(var i = 0; i < this.arr.length; i++){
@@ -46,18 +47,31 @@ crow.structs.BucketPriorityQueue.prototype.remove = function(value, key_hint){
 				if(!bucket.length){
 					this.arr.splice(i, 1);
 				}
-				return true;
+				return bucket.key;
 			}
 		}
 	}
-	return false;
+	return null;
 };
+crow.structs.BucketPriorityQueue.prototype.peek = function(){
+	if(this.length) return this.arr[0][0];
+};
+crow.structs.BucketPriorityQueue.prototype.peekKey = function(){
+	if(this.length) return this.arr[0].key;
+};
+
 crow.structs.BucketPriorityQueue.prototype.findBucket = function(key, createIfNotFound){
-	// implemented linearly for now -- can be improved with binary search
+	// TODO implemented linearly for now -- can be improved with binary search
 	var bucket;
+	var kc = this.key_comparator;
 	for(var i = 0; i < this.arr.length; i++){
 		var currentBucket = this.arr[i];
-		if(currentBucket.key == key){
+		if(kc){
+			if(kc(currentBucket.key, key) == 0){
+				bucket = currentBucket;
+				break;
+			}
+		} else if(currentBucket.key == key){
 			bucket = currentBucket;
 			break;
 		}
@@ -68,7 +82,12 @@ crow.structs.BucketPriorityQueue.prototype.findBucket = function(key, createIfNo
 
 		var inserted = false;
 		for(var i = 0; i < this.arr.length && !inserted; i++){
-			if(this.arr[i].key > key){
+			if(kc){
+				if(kc(this.arr[i].key, key) > 0){
+					this.arr.splice(i, 0, bucket);
+					inserted = true;
+				}
+			} else if(this.arr[i].key > key){
 				this.arr.splice(i, 0, bucket);
 				inserted = true;
 			}

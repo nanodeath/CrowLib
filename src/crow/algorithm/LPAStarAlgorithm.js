@@ -1,6 +1,7 @@
 goog.provide('crow.algorithm.LPAStarAlgorithm');
 goog.require('crow.algorithm.ShortestPathAlgorithm');
 goog.require('crow.algorithm.Path');
+goog.require('crow.structs.BucketPriorityQueue');
 
 /**
  * @constructor
@@ -11,12 +12,10 @@ crow.algorithm.LPAStarAlgorithm = function(graph){
 crow.algorithm.LPAStarAlgorithm.prototype = new crow.algorithm.ShortestPathAlgorithm();
 
 (function(){
-	var magicNumber = 0;
 	crow.algorithm.LPAStarAlgorithm.prototype._CalculateKey = function(node){
 		var g = this.g.get(node), rhs = this.rhs.get(node);
 		var grhs = Math.min(g, rhs);
-		// TODO fix this hack
-		return [grhs + this.h(node), grhs + (magicNumber++) * 1e-10];
+		return [grhs + this.h(node), grhs];
 	};
 })();
 
@@ -34,31 +33,15 @@ crow.algorithm.LPAStarAlgorithm.prototype._UpdateVertex = function(node){
 		}
 		this.rhs.set(node, bestScore);
 	}
-	// TODO optimize what follows
-	//if(this.U.contains(node)) {
-		// okay to comment out conditional because remove fails silently
-		//this.U.remove(node);
-		var foundNode = null;
-		this.U.inOrderTraverse(function(uNode){
-			// TODO abstraction bleeding!  shouldn't know about .value
-			if(uNode.value == node){
-				foundNode = uNode;
-				return true;
-			} else {
-				return false;
-			}
-		});
-		if(foundNode){
-			this.U.remove(foundNode);
-		}
-	//}
+
+	this.U.remove(node);
+
 	if(this.g.get(node) != this.rhs.get(node)) this.U.enqueue(this._CalculateKey(node), node);
 };
 
 crow.algorithm.LPAStarAlgorithm.prototype.keyComp = function(k1, k2){
 	if(k1[0] < k2[0] || (k1[0] == k2[0] && k1[1] < k2[1])) return -1;
-	// TODO fix this hack
-	if(k1[0] == k2[0] && Math.abs(k1[1] - k2[1] < 0.00001)) return 0;
+	if(k1[0] == k2[0] && k1[1] == k2[1]) return 0;
 	return 1;
 };
 
@@ -124,7 +107,8 @@ crow.algorithm.LPAStarAlgorithm.prototype.findPath = function(start, goal, opts)
 	this.diagonals = opts.diagonals;
 	
 	//this.U = new crow.Algorithm.AvlTree(this.keyComp);
-	this.U = new crow.Algorithm.AvlPriorityQueue(this.keyComp);
+	//this.U = new crow.Algorithm.AvlPriorityQueue(this.keyComp);
+	this.U = new crow.structs.BucketPriorityQueue(this.keyComp);
 	this.rhs = new crow.Algorithm.NodeMap(Infinity);
 	this.g = new crow.Algorithm.NodeMap(Infinity);
 	this.rhs.set(start, 0);
@@ -150,7 +134,7 @@ crow.algorithm.LPAStarAlgorithm.prototype.findPath = function(start, goal, opts)
 };
 
 crow.algorithm.LPAStarAlgorithm.prototype.mainLoop = function(){
-	while(this.U.getCount() > 0 && 
+	while(this.U.length && 
 		(
 			this.keyComp(this.U.peekKey(), this._CalculateKey(this.goal)) < 0 || 
 			this.rhs.get(this.goal) != this.g.get(this.goal)

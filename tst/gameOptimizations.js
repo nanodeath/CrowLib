@@ -12,7 +12,7 @@ window["test"]["gameOptimizations"] = function(){
 	MyNode.prototype = new crow.BaseNode();
 	MyNode.prototype.getX = function(){ return this.x; };
 	MyNode.prototype.getY = function(){ return this.y; };
-	MyNode.prototype.distanceAlgorithm = crow.GraphUtil.distance.pythagoras;
+	MyNode.prototype.distanceAlgorithm = crow.GraphUtil.distance.manhattan8;
 	
 	var tinyGraph = function(){
 		return crow.Graph.fromArray([
@@ -220,6 +220,7 @@ window["test"]["gameOptimizations"] = function(){
 		}
 	});
 	test("invalidate point, lpa* again", function(){
+		console.log("lpa*2");
 		window.debugLPA = function(algo, dontClear){
 			if(!dontClear){
 				$("#prelude").empty();
@@ -244,6 +245,7 @@ window["test"]["gameOptimizations"] = function(){
 		graph.invalidate(3, 3);
 		//debugLPA(path.algorithm, true);
 		window.lpaGraph = graph;
+		window.lpaPath = path;
 
 		//graph.invalidate(1, 2);
 		
