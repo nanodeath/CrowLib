@@ -15,6 +15,7 @@ crow.algorithm.LPAStarAlgorithm.prototype = new crow.algorithm.ShortestPathAlgor
 	crow.algorithm.LPAStarAlgorithm.prototype._CalculateKey = function(node){
 		var g = this.g.get(node), rhs = this.rhs.get(node);
 		var grhs = Math.min(g, rhs);
+		// TODO fix this hack
 		return [grhs + this.h(node), grhs + (magicNumber++) * 1e-10];
 	};
 })();
@@ -26,9 +27,7 @@ crow.algorithm.LPAStarAlgorithm.prototype._UpdateVertex = function(node){
 		for(var i = 0; i < neighbors.length; i++){
 			var neighbor = neighbors[i];
 			// g + cost value
-			// this works, but only for 4-connected gridworld.
-			// TODO should be refactored in any case
-			var score = this.g.get(neighbor) + 1;
+			var score = this.g.get(neighbor) + node.distanceTo(neighbor);
 			if(score < bestScore){
 				bestScore = score;
 			}
@@ -58,19 +57,15 @@ crow.algorithm.LPAStarAlgorithm.prototype._UpdateVertex = function(node){
 
 crow.algorithm.LPAStarAlgorithm.prototype.keyComp = function(k1, k2){
 	if(k1[0] < k2[0] || (k1[0] == k2[0] && k1[1] < k2[1])) return -1;
+	// TODO fix this hack
 	if(k1[0] == k2[0] && Math.abs(k1[1] - k2[1] < 0.00001)) return 0;
 	return 1;
 };
 
 crow.algorithm.LPAStarAlgorithm.prototype.h = function(node){
-	var dx = node.x - this.goal.x, dy = node.y - this.goal.y;
-	//return crow.GraphUtil.distance.pythagoras(dx, dy);
-	if(this.diagonals){
-		return crow.GraphUtil.distance.manhattan8(dx, dy);
-	} else {
-		return crow.GraphUtil.distance.manhattan(dx, dy);
-	}
+	return node.distanceTo(this.goal);
 };
+
 crow.algorithm.LPAStarAlgorithm.prototype.updateNeighbors = function(node){
 	var neighbors = node.getNeighbors(this.graph, this.diagonals);
 	for(var i = 0; i < neighbors.length; i++){
@@ -78,6 +73,9 @@ crow.algorithm.LPAStarAlgorithm.prototype.updateNeighbors = function(node){
 	}
 };
 crow.algorithm.LPAStarAlgorithm.prototype.debugGraph = function(){
+	function myRound(num){
+		return Math.round(num * 10000) / 10000;
+	}
 	var table = jQuery("<table class='lpa'>");
 	for(var y = 0; y < this.graph.height; y++){
 		var row = jQuery("<tr>");
@@ -85,12 +83,13 @@ crow.algorithm.LPAStarAlgorithm.prototype.debugGraph = function(){
 			var node = this.graph.getNode(x, y);
 			if(node){
 				var key = this._CalculateKey(this.graph.getNode(x, y));
-				key[1] = Math.round(key[1] * 10000) / 10000;
+				key[0] = myRound(key[0]);
+				key[1] = myRound(key[1]);
 				var rhs = this.rhs.get(node), g = this.g.get(node);
 				var keyString = "[" + key[0] + ',' + key[1] + "]";
 				if(rhs == g){
 					var tip = keyString;
-					row.append("<td class='consistent' title='" + tip + "'>" + g + "</td>");
+					row.append("<td class='consistent' title='" + tip + "'>" + myRound(g) + "</td>");
 				} else {
 					var tip = "rhs: " + rhs + ", g: " + g;
 					row.append("<td class='inconsistent' title='" + tip + "'>Infinity<br><span class='key'>" + keyString + "</span></td>");
@@ -175,6 +174,7 @@ crow.algorithm.LPAStarAlgorithm.prototype.resolveResults = function(){
 	var current = this.goal;
 	var found = true;
 	var length = 0;
+	var failsafeMaximum = this.graph.width * this.graph.height, count = 0;
 	while(current != this.start && current){
 		nodes.unshift(current);
 		
@@ -196,6 +196,11 @@ crow.algorithm.LPAStarAlgorithm.prototype.resolveResults = function(){
 			found = false;
 		} else {
 			length += bestDistance;
+		}
+		count++;
+		if(count >= failsafeMaximum){
+			console.log("resolveResults won't terminate");
+			break;
 		}
 	}
 	if(!found){

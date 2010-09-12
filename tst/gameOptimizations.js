@@ -12,7 +12,7 @@ window["test"]["gameOptimizations"] = function(){
 	MyNode.prototype = new crow.BaseNode();
 	MyNode.prototype.getX = function(){ return this.x; };
 	MyNode.prototype.getY = function(){ return this.y; };
-	MyNode.prototype.distanceAlgorithm = crow.GraphUtil.distance.one;
+	MyNode.prototype.distanceAlgorithm = crow.GraphUtil.distance.pythagoras;
 	
 	var tinyGraph = function(){
 		return crow.Graph.fromArray([
@@ -243,6 +243,7 @@ window["test"]["gameOptimizations"] = function(){
 		graph.removeNode(3, 3);
 		graph.invalidate(3, 3);
 		//debugLPA(path.algorithm, true);
+		window.lpaGraph = graph;
 
 		//graph.invalidate(1, 2);
 		
