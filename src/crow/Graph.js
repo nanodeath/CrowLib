@@ -14,6 +14,8 @@ crow.Graph = function(){
 	this.map = {};
 	this.version = "0.1.0";
 	this.validator = new goog.events.EventTarget();
+	this.width = 0;
+	this.height = 0;
 	
 	// methods
 	/**
@@ -24,6 +26,12 @@ crow.Graph = function(){
 		node._initialize();
 		
 		var x = node.getX(), y = node.getY();
+		if(x + 1 > this.width){
+			this.width = x + 1;
+		}
+		if(y + 1 > this.height){
+			this.height = y + 1;
+		}
 		this.nodes.push(node);
 		if(!this.map[x]) this.map[x] = {};
 		this.map[x][y] = node;
@@ -58,11 +66,15 @@ crow.Graph = function(){
 	 * @param {number=} y-coordinate y-coordinate of element to remove (if callback omitted)
 	 * @returns {crow.BaseNode}
 	 */
-	this.getNode = function(x_or_filter, y){
+	this.getNode = function(x_or_filter, y, orBlankNode){
+		var node;
 		if(typeof x_or_filter === "function"){
 			for(var i in this.nodes){
 				var n = this.nodes[i];
-				if(x_or_filter.call(n)) return n;
+				if(x_or_filter.call(n)){
+					node = n;
+					break;
+				}
 			}
 		} else {
 			if(typeof(x_or_filter) !== "number") throw new Error("x coordinate not provided");
@@ -70,10 +82,18 @@ crow.Graph = function(){
 
 			var x_map = this.map[x_or_filter];
 			if(x_map){
-				return x_map[y];
+				node = x_map[y];
 			}
 		}
-		return undefined;
+		if(node){
+			return node;
+		} else if(orBlankNode && typeof x_or_filter === "number"){
+			var node = new crow.BaseNode([x_or_filter, y]);
+			node.isBlank = true;
+			return node;
+		} else {
+			return undefined;
+		}
 	};
 	/**
 	 * Return a collection of nodes.  Has 3 modes:
@@ -220,7 +240,11 @@ crow.GraphUtil = {
 		},
 		manhattan: function(dx, dy){
 			return Math.abs(dx) + Math.abs(dy);
-		}
+		},
+		manhattan8: function(dx, dy){
+			return Math.max(Math.abs(dx), Math.abs(dy));
+		},
+		one: function(){ return 1; }
 	}
 };
 

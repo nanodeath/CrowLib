@@ -10,15 +10,18 @@ crow.algorithm.LPAStarAlgorithm = function(graph){
 }
 crow.algorithm.LPAStarAlgorithm.prototype = new crow.algorithm.ShortestPathAlgorithm();
 
-crow.algorithm.LPAStarAlgorithm.prototype._CalculateKey = function(node){
-	var g = this.g.get(node), rhs = this.rhs.get(node);
-	var grhs = Math.min(g, rhs);
-	return [grhs + this.h(node), grhs];
-};
+(function(){
+	var magicNumber = 0;
+	crow.algorithm.LPAStarAlgorithm.prototype._CalculateKey = function(node){
+		var g = this.g.get(node), rhs = this.rhs.get(node);
+		var grhs = Math.min(g, rhs);
+		return [grhs + this.h(node), grhs + (magicNumber++) * 1e-10];
+	};
+})();
 
 crow.algorithm.LPAStarAlgorithm.prototype._UpdateVertex = function(node){
 	if(node != this.start){
-		var neighbors = node.getNeighbors(this.graph);
+		var neighbors = node.getNeighbors(this.graph, this.diagonals);
 		var bestScore = Infinity;
 		for(var i = 0; i < neighbors.length; i++){
 			var neighbor = neighbors[i];
@@ -55,18 +58,50 @@ crow.algorithm.LPAStarAlgorithm.prototype._UpdateVertex = function(node){
 
 crow.algorithm.LPAStarAlgorithm.prototype.keyComp = function(k1, k2){
 	if(k1[0] < k2[0] || (k1[0] == k2[0] && k1[1] < k2[1])) return -1;
-	if(k1[0] == k2[0] && k1[1] == k2[1]) return 0;
+	if(k1[0] == k2[0] && Math.abs(k1[1] - k2[1] < 0.00001)) return 0;
 	return 1;
 };
 
 crow.algorithm.LPAStarAlgorithm.prototype.h = function(node){
-	return crow.GraphUtil.distance.pythagoras(node.x - this.goal.x, node.y - this.goal.y);
+	var dx = node.x - this.goal.x, dy = node.y - this.goal.y;
+	return crow.GraphUtil.distance.pythagoras(dx, dy);
+	if(this.diagonals){
+		return crow.GraphUtil.distance.manhattan8(dx, dy);
+	} else {
+		return crow.GraphUtil.distance.manhattan(dx, dy);
+	}
 };
 crow.algorithm.LPAStarAlgorithm.prototype.updateNeighbors = function(node){
-	var neighbors = node.getNeighbors(this.graph);
+	var neighbors = node.getNeighbors(this.graph, this.diagonals);
 	for(var i = 0; i < neighbors.length; i++){
 		this._UpdateVertex(neighbors[i]);
 	}
+};
+crow.algorithm.LPAStarAlgorithm.prototype.debugGraph = function(){
+	var table = jQuery("<table class='lpa'>");
+	for(var y = 0; y < this.graph.height; y++){
+		var row = jQuery("<tr>");
+		for(var x = 0; x < this.graph.width; x++){
+			var node = this.graph.getNode(x, y);
+			if(node){
+				var key = this._CalculateKey(this.graph.getNode(x, y));
+				key[1] = Math.round(key[1] * 10000) / 10000;
+				var rhs = this.rhs.get(node), g = this.g.get(node);
+				var keyString = "[" + key[0] + ',' + key[1] + "]";
+				if(rhs == g){
+					var tip = keyString;
+					row.append("<td class='consistent' title='" + tip + "'>" + g + "</td>");
+				} else {
+					var tip = "rhs: " + rhs + ", g: " + g;
+					row.append("<td class='inconsistent' title='" + tip + "'>Infinity<br><span class='key'>" + keyString + "</span></td>");
+				}
+			} else {
+				row.append("<td class='noNode'/>");
+			}
+		}
+		table.append(row);
+	}
+	return table;
 };
 /**
  * Finds the best path from start node to goal node.
@@ -87,6 +122,7 @@ crow.algorithm.LPAStarAlgorithm.prototype.findPath = function(start, goal, opts)
 	this.goal = goal;
 	this.opts = opts;
 	this.graph = opts.graph;
+	this.diagonals = opts.diagonals;
 	
 	//this.U = new crow.Algorithm.AvlTree(this.keyComp);
 	this.U = new crow.Algorithm.AvlPriorityQueue(this.keyComp);
@@ -95,10 +131,30 @@ crow.algorithm.LPAStarAlgorithm.prototype.findPath = function(start, goal, opts)
 	this.rhs.set(start, 0);
 	this.U.enqueue(this._CalculateKey(start), start);
 	
+	this.mainLoop();
+	
+	var results = this.resolveResults();
+		
+	var pathOpts = {
+		nodes: results.nodes,
+		start: start,
+		goal: goal,
+		found: results.found,
+		length: results.length,
+		recalculate: this.recalculate,
+		algorithm: this,
+		baked: opts.baked || (typeof opts.baked === "undefined" && !opts.limit),
+		graph: opts.graph
+	};
+
+	return new crow.algorithm.Path(pathOpts);
+};
+
+crow.algorithm.LPAStarAlgorithm.prototype.mainLoop = function(){
 	while(this.U.getCount() > 0 && 
 		(
-			this.keyComp(this.U.peekKey(), this._CalculateKey(goal)) < 0 || 
-			this.rhs.get(goal) != this.g.get(goal)
+			this.keyComp(this.U.peekKey(), this._CalculateKey(this.goal)) < 0 || 
+			this.rhs.get(this.goal) != this.g.get(this.goal)
 		)){
 		var u = this.U.dequeue();
 		if(this.g.get(u) > this.rhs.get(u)){
@@ -112,16 +168,17 @@ crow.algorithm.LPAStarAlgorithm.prototype.findPath = function(start, goal, opts)
 			this._UpdateVertex(u);
 		}
 	}
+};
 
+crow.algorithm.LPAStarAlgorithm.prototype.resolveResults = function(){
 	var nodes = [];
-	
-	var current = goal;
-	found = true;
+	var current = this.goal;
+	var found = true;
 	var length = 0;
-	while(current != start && current){
+	while(current != this.start && current){
 		nodes.unshift(current);
 		
-		var neighbors = current.getNeighbors(this.graph);
+		var neighbors = current.getNeighbors(this.graph, this.diagonals);
 		var bestScore = Infinity, bestNeighbor = null, distance = 0, bestDistance = 0;
 		for(var i = 0; i < neighbors.length; i++){
 			var neighbor = neighbors[i];
@@ -144,27 +201,56 @@ crow.algorithm.LPAStarAlgorithm.prototype.findPath = function(start, goal, opts)
 	if(!found){
 		nodes = [];
 	}
-	nodes.unshift(start);
-		
-	var pathOpts = {
+	nodes.unshift(this.start);
+	
+	return {
 		nodes: nodes,
-		start: start,
-		goal: goal,
-		found: found,
 		length: length,
-		recalculate: this.recalculate,
-		algorithm: this,
-		graph: opts.graph
+		found: found
 	};
-
-	return new crow.algorithm.Path(pathOpts);
 };
+
 crow.algorithm.LPAStarAlgorithm.prototype.estimateDistance = function(start, goal, graph){
 	return crow.GraphUtil.distance.manhattan(start.getX() - goal.getX(), start.getY() - goal.getY());
 };
 crow.algorithm.LPAStarAlgorithm.prototype.recalculate = function(){
 	var a = this.algorithm;
 	return a.findPath(a.start, a.goal, a.opts);
+};
+
+crow.algorithm.LPAStarAlgorithm.prototype._invalidatePoint = function(path, invalidationEvent){
+	var x = invalidationEvent.x, y = invalidationEvent.y;
+	
+	if(!path.invalidatedPoints){
+		path.invalidatedPoints = [];
+	}
+	path.invalidatedPoints.push([x, y]);
+	var node = path.graph.getNode(x, y, true);
+	var neighbors = node.getNeighbors(path.graph, path.algorithm.diagonals);
+	for(var i = 0; i < neighbors.length; i++){
+		var neighbor = neighbors[i];
+		path.invalidatedPoints.push([neighbor.x, neighbor.y]);
+	}
+	path.found = false;
+};
+crow.algorithm.LPAStarAlgorithm.prototype.continueCalculating = function(path){
+	if(path.invalidatedPoints && path.invalidatedPoints.length > 0){
+		for(var i = 0; i < path.invalidatedPoints.length; i++){
+			var point = path.invalidatedPoints[i];
+			var n = this.graph.getNode(point[0], point[1]);
+			if(n){
+				this._UpdateVertex(n);
+			}
+		}
+		this.mainLoop();
+		path.invalidatedPoints = [];
+		
+		var results = this.resolveResults();
+		this.nodes = results.nodes;
+		this.length = results.length;
+		this.found = results.found;
+	}
+	return this.found;
 };
 
 crow.Graph.registerAlgorithm(crow.algorithm.LPAStarAlgorithm, 'lpa*');

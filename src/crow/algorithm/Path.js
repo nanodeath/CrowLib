@@ -64,32 +64,12 @@ crow.algorithm.Path = function(opts){
 
 crow.algorithm.Path.prototype._invalidatePoint = function(e){
 	if(this._baked) return;
-	var x = e.x, y = e.y;
-	for(var i = 0; i < this.nodes.length; i++){
-		var n = this.nodes[i];
-		if(n.x == x && n.y == y){
-			this.nodes = this.nodes.slice(0, i);
-			this.end = null;
-			this.found = false;
-			break;
-		}
-	}
+	this.algorithm._invalidatePoint(this, e);
 };
 
 crow.algorithm.Path.prototype._invalidateRegion = function(e){
 	if(this._baked) return;
-	var x = e.x, y = e.y;
-	var x2 = x + e.dx, y2 = y + e.dy;
-	for(var i = 0; i < this.nodes.length; i++){
-		var n = this.nodes[i];
-		var nx = n.x, ny = n.y;
-		if(nx >= x && ny >= y && nx < x2 && ny < y2){
-			this.nodes = this.nodes.slice(0, i);
-			this.end = null;
-			this.found = false;
-			break;
-		}
-	}
+	this.algorithm._invalidateRegion(this, e);
 };
 
 /**
@@ -139,19 +119,7 @@ crow.algorithm.Path.prototype.getNextNode = function(){
 crow.algorithm.Path.prototype.continueCalculating = function(count){
 	if(this._baked) throw new Error("Can't continue calculating a baked path.  Either pass {baked: false} to findGoal, or don't call .bake() on this path yet.");
 	if(this.found) return true;
-	var lastNode = this.nodes[this.nodes.length-1];
-	// if the path was never complete, there may not be any nodes
-	if(!lastNode) lastNode = this.start;
-	
-	var opts = {};
-	if(count) opts.limit = count;
-	if(this.actor) opts.actor = this.actor;
-	var continuedPath = this.algorithm.findPath(lastNode, this.goal, opts);
-	// TODO this node list needs to be pruned, in case continuedPath contains a node in this;
-	// in other words, if the continuedPath backtracks along the current path
-	this.nodes = this.nodes.concat(continuedPath.nodes.slice(1)),
-	this.found = continuedPath.found;
-	return this.found;
+	return this.algorithm.continueCalculating(this, count);
 }
 
 

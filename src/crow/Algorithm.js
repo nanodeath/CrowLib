@@ -8,6 +8,50 @@ goog.require('goog.structs.AvlTree');
  * @private
  */
 crow.Algorithm = function(){};
+
+crow.Algorithm.prototype._invalidatePoint = function(path, invalidationEvent){
+	var x = invalidationEvent.x, y = invalidationEvent.y;
+	for(var i = 0; i < path.nodes.length; i++){
+		var n = path.nodes[i];
+		if(n.x == x && n.y == y){
+			path.nodes = path.nodes.slice(0, i);
+			path.end = null;
+			path.found = false;
+			break;
+		}
+	}
+};
+
+crow.Algorithm.prototype._invalidateRegion = function(path, invalidationEvent){
+	var x = invalidationEvent.x, y = invalidationEvent.y;
+	var x2 = x + invalidationEvent.dx, y2 = y + invalidationEvent.dy;
+	for(var i = 0; i < path.nodes.length; i++){
+		var n = path.nodes[i];
+		var nx = n.x, ny = n.y;
+		if(nx >= x && ny >= y && nx < x2 && ny < y2){
+			path.nodes = path.nodes.slice(0, i);
+			path.end = null;
+			path.found = false;
+			break;
+		}
+	}
+};
+
+crow.Algorithm.prototype.continueCalculating = function(path, count){
+	var lastNode = path.nodes[path.nodes.length-1];
+	// if the path was never complete, there may not be any nodes
+	if(!lastNode) lastNode = path.start;
+	
+	var opts = {};
+	if(count) opts.limit = count;
+	if(path.actor) opts.actor = path.actor;
+	var continuedPath = this.findPath(lastNode, path.goal, opts);
+	// TODO this node list needs to be pruned, in case continuedPath contains a node in this;
+	// in other words, if the continuedPath backtracks along the current path
+	path.nodes = path.nodes.concat(continuedPath.nodes.slice(1)),
+	path.found = continuedPath.found;
+	return path.found;
+}
 /**
  * A map from nodes (using their hash) to arbitrary values
  * @constructor
@@ -46,9 +90,14 @@ crow.Algorithm.AvlTree = function(){
 	throw new Error("An AvlTree class is required, but none found!");
 };
 crow.Algorithm.AvlPriorityQueue = function(comparator){
-	var newComparator = function(a, b){
-		return comparator(a.key, b.key);
-	};
+	var newComparator;
+	if(comparator){
+		newComparator = function(a, b){
+			return comparator(a.key, b.key);
+		};
+	} else {
+		throw new Error("Comparator is required");
+	}
 	crow.Algorithm.AvlTree.call(this, newComparator);
 };
 /**

@@ -97,3 +97,20 @@ table.latest_commits .sha1 {
 table.latest_commits .sha1_remaining {
 	color: #aaa;
 }
+
+table.lpa{
+	border: 1px solid black;
+	text-align: center;
+}
+table.lpa td {
+	border: 1px solid gray;
+	padding: 2px;
+	width: 50px;
+	height: 50px;
+}
+table.lpa td.inconsistent {
+	background-color: #888;
+}
+table.lpa td.noNode {
+	background-color: #111;
+}

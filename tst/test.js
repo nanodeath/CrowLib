@@ -230,13 +230,13 @@ window["test"]["mainTest"] = function(){
 	test("bigger test", function(){
 		var graph = largeGraph();
 		var path = graph.findGoal({goal: graph.getNode(7, 5), algorithm: "lpa*"});
-		console.logNodes(path.nodes);
 		equals(path.nodes.length, 13, "Path contains expected number of nodes");
 		same(path.start, new MyNode([0, 0]), "Path has expected start node");
 		same(path.end, new MyNode([7, 5]), "Path has expected end node");
 		equals(path.length, 12, "Path is of expected length");
 		ok(path.found, "Path indicates end was found");
 	});
+	
 	module("procedural path generation: A*");
 	test("stationary", function(){
 		var limit = 8;
@@ -251,7 +251,6 @@ window["test"]["mainTest"] = function(){
 		var unlimitedPath = graph.findGoal({start: graph.getNode(0, 0), goal: graph.getNode(7, 5), algorithm: "a*"});
 		ok(path.nodes.length <= unlimitedPath.nodes.length * 1.5, "path is pretty efficient (" + path.nodes.length + " vs " + unlimitedPath.nodes.length + " ideal)");
 	});
-	
 	test("moving along path", function(){
 		var limit = 8;
 		var graph = largeGraph();

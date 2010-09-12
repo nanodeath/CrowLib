@@ -6,6 +6,7 @@ goog.provide('crow.BaseNode');
  * @property {Number} x x-coordinate of this node.
  * @property {Number} y y-coordinate of this node.
  * @property {Number} hash hash value of this node (a semi-unique identifier for this node).
+ * @property {Boolean} isBlank whether this is a "blank" node or not.  Blank nodes are created on the fly when {@link crow.Graph#getNode} is called at an invalid location (and true is passed for the required arg).
  * @constructor
  */
 crow.BaseNode = function(arr){
@@ -13,6 +14,7 @@ crow.BaseNode = function(arr){
 		this.x = arr[0];
 		this.y = arr[1];
 	}
+	this.isBlank = false;
 	this._initialized = false;
 };
 
