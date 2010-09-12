@@ -225,6 +225,7 @@ window["test"]["gameOptimizations"] = function(){
 				$("#prelude").empty();
 			}
 			$("#prelude").append(algo.debugGraph());
+			
 		}
 	
 		var graph = lpaGraph2();
@@ -235,13 +236,13 @@ window["test"]["gameOptimizations"] = function(){
 		// are no longer valid after that point
 		graph.removeNode(1, 3);
 		graph.invalidate(1, 3);
-		debugLPA(path.algorithm, true);
+		//debugLPA(path.algorithm, true);
 		graph.removeNode(2, 3);
 		graph.invalidate(2, 3);
-		debugLPA(path.algorithm, true);
+		//debugLPA(path.algorithm, true);
 		graph.removeNode(3, 3);
 		graph.invalidate(3, 3);
-		debugLPA(path.algorithm, true);
+		//debugLPA(path.algorithm, true);
 
 		//graph.invalidate(1, 2);
 		

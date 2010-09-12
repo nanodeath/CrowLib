@@ -64,7 +64,7 @@ crow.algorithm.LPAStarAlgorithm.prototype.keyComp = function(k1, k2){
 
 crow.algorithm.LPAStarAlgorithm.prototype.h = function(node){
 	var dx = node.x - this.goal.x, dy = node.y - this.goal.y;
-	return crow.GraphUtil.distance.pythagoras(dx, dy);
+	//return crow.GraphUtil.distance.pythagoras(dx, dy);
 	if(this.diagonals){
 		return crow.GraphUtil.distance.manhattan8(dx, dy);
 	} else {
@@ -245,6 +245,7 @@ crow.algorithm.LPAStarAlgorithm.prototype.continueCalculating = function(path){
 		this.mainLoop();
 		path.invalidatedPoints = [];
 		
+	//return;
 		var results = this.resolveResults();
 		this.nodes = results.nodes;
 		this.length = results.length;
