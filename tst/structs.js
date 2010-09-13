@@ -49,19 +49,19 @@ window["test"]["structures"] = function(){
 	});
 	test("contains", function(){
 		window.q = this.populatedQ;
-		ok(this.populatedQ.contains("element_0_0") != null);
-		ok(this.populatedQ.contains("element_1_0") != null);
-		ok(this.populatedQ.contains("element_3_2") != null);
-		ok(this.populatedQ.contains("element_8_0") != null);
+		ok(this.populatedQ.contains("element_0_0"));
+		ok(this.populatedQ.contains("element_1_0"));
+		ok(this.populatedQ.contains("element_3_2"));
+		ok(this.populatedQ.contains("element_8_0"));
 		this.populatedQ.dequeue();
-		ok(!this.populatedQ.contains("element_0_0") != null);
+		ok(!this.populatedQ.contains("element_0_0"));
 		this.populatedQ.dequeue();
-		ok(!this.populatedQ.contains("element_1_0") != null);
+		ok(!this.populatedQ.contains("element_1_0"));
 	});
 	test("remove", function(){
 		var arr = ["element_0_0", "element_1_0", "element_3_2", "element_8_0"];
 		for(var i = 0; i < arr.length; i++){
-			ok(this.populatedQ.contains(arr[i]) != null);
+			ok(this.populatedQ.contains(arr[i]));
 		}
 		for(var i = 0; i < arr.length; i++){
 			ok(this.populatedQ.remove(arr[i]) != null);
