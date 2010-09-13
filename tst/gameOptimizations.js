@@ -177,6 +177,7 @@ window["test"]["gameOptimizations"] = function(){
 	
 	test("invalidate point, lpa*", function(){
 		window.debugLPA = function(algo){
+			return;
 			$("#prelude").empty().append(algo.debugGraph());
 		}
 	

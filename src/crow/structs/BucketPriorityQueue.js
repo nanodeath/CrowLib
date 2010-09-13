@@ -3,7 +3,17 @@ goog.provide('crow.structs.BucketPriorityQueue');
 crow.structs.BucketPriorityQueue = function(key_comparator/*, value_comparator*/){
 	this.arr = [];
 	this.length = 0;
-	this.key_comparator = key_comparator;
+	if(key_comparator){
+		this.key_comparator = key_comparator
+	} else {
+		this.key_comparator = this.DEFAULT_KEY_COMPARATOR;;
+	}
+};
+
+crow.structs.BucketPriorityQueue.prototype.DEFAULT_KEY_COMPARATOR = function(k1, k2){
+	if(k1 < k2) return -1;
+	if(k1 > k2) return 1;
+	return 0;
 };
 
 crow.structs.BucketPriorityQueue.prototype.enqueue = function(key, value){
@@ -61,40 +71,43 @@ crow.structs.BucketPriorityQueue.prototype.peekKey = function(){
 };
 
 crow.structs.BucketPriorityQueue.prototype.findBucket = function(key, createIfNotFound){
-	// TODO implemented linearly for now -- can be improved with binary search
 	var bucket;
 	var kc = this.key_comparator;
-	for(var i = 0; i < this.arr.length; i++){
-		var currentBucket = this.arr[i];
-		if(kc){
-			if(kc(currentBucket.key, key) == 0){
-				bucket = currentBucket;
-				break;
-			}
-		} else if(currentBucket.key == key){
+	var lowerBound = 0, upperBound = this.arr.length-1;
+	var min = 0, max = this.arr.length - 1, mid, comp;
+	while(min <= max){
+		mid = min + Math.floor((max - min) / 2);
+		var currentBucket = this.arr[mid];
+		comp = kc(currentBucket.key, key);
+		if(comp < 0){
+			min = mid + 1;
+		} else if(comp > 0){
+			max = mid - 1;
+		} else {
 			bucket = currentBucket;
 			break;
 		}
 	}
+
 	if(!bucket && createIfNotFound){
 		bucket = [];
 		bucket.key = key;
-
+		//this.arr.splice(min, 0, bucket);
+		///*
 		var inserted = false;
-		for(var i = 0; i < this.arr.length && !inserted; i++){
-			if(kc){
-				if(kc(this.arr[i].key, key) > 0){
-					this.arr.splice(i, 0, bucket);
-					inserted = true;
-				}
-			} else if(this.arr[i].key > key){
+		for(var i = mid; i < this.arr.length && !inserted; i++){
+			// "mid" is a good starting point, and will usually be within 2
+			// indexes of the correct bucket.
+			if(kc(this.arr[i].key, key) > 0){
 				this.arr.splice(i, 0, bucket);
 				inserted = true;
 			}
 		}
+		//console.log("min,mid,max was %d,%d,%d, i was %d (guessed %d)", min, mid, max, i, guess);
 		if(!inserted){
 			this.arr.push(bucket);
 		}
+		//*/
 	}
 	return bucket;
 };
