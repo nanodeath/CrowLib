@@ -6,6 +6,7 @@ goog.require('crow.algorithm.AStarAlgorithm');
 goog.require('crow.algorithm.BFSAlgorithm');
 goog.require('crow.algorithm.DijkstraAlgorithm');
 goog.require('crow.algorithm.LinearAlgorithm');
+goog.require('crow.algorithm.LPAStarAlgorithm');
 goog.require('crow.algorithm.SearchAlgorithm');
 goog.require('crow.algorithm.ShortestPathAlgorithm');
 goog.require('crow.structs.BucketPriorityQueue');

@@ -3,21 +3,21 @@ goog.require('crow.algorithm.ShortestPathAlgorithm');
 goog.require('crow.algorithm.Path');
 goog.require('crow.structs.BucketPriorityQueue');
 
+
 /**
  * @constructor
+ * @class LPA*, good when the graph between two stationary targets changes a lot, fair bit of overhead otherwise.
  */
 crow.algorithm.LPAStarAlgorithm = function(graph){
 	this.graph = graph;
 }
 crow.algorithm.LPAStarAlgorithm.prototype = new crow.algorithm.ShortestPathAlgorithm();
 
-(function(){
-	crow.algorithm.LPAStarAlgorithm.prototype._CalculateKey = function(node){
-		var g = this.g.get(node), rhs = this.rhs.get(node);
-		var grhs = Math.min(g, rhs);
-		return [grhs + this.h(node), grhs];
-	};
-})();
+crow.algorithm.LPAStarAlgorithm.prototype._CalculateKey = function(node){
+	var g = this.g.get(node), rhs = this.rhs.get(node);
+	var grhs = Math.min(g, rhs);
+	return [grhs + this.h(node), grhs];
+};
 
 crow.algorithm.LPAStarAlgorithm.prototype._UpdateVertex = function(node){
 	if(node != this.start){
@@ -39,22 +39,35 @@ crow.algorithm.LPAStarAlgorithm.prototype._UpdateVertex = function(node){
 	if(this.g.get(node) != this.rhs.get(node)) this.U.enqueue(this._CalculateKey(node), node);
 };
 
+/**
+ * @private
+ */
 crow.algorithm.LPAStarAlgorithm.prototype.keyComp = function(k1, k2){
 	if(k1[0] < k2[0] || (k1[0] == k2[0] && k1[1] < k2[1])) return -1;
 	if(k1[0] == k2[0] && k1[1] == k2[1]) return 0;
 	return 1;
 };
 
+/**
+ * @private
+ */
 crow.algorithm.LPAStarAlgorithm.prototype.h = function(node){
 	return node.distanceTo(this.goal);
 };
 
+/**
+ * @private
+ */
 crow.algorithm.LPAStarAlgorithm.prototype.updateNeighbors = function(node){
 	var neighbors = node.getNeighbors(this.graph, this.diagonals);
 	for(var i = 0; i < neighbors.length; i++){
 		this._UpdateVertex(neighbors[i]);
 	}
 };
+
+/**
+ * @private
+ */
 crow.algorithm.LPAStarAlgorithm.prototype.debugGraph = function(){
 	function myRound(num){
 		return Math.round(num * 10000) / 10000;
@@ -93,6 +106,7 @@ crow.algorithm.LPAStarAlgorithm.prototype.debugGraph = function(){
  * @param {Number} [opts.limit] Maximum number of nodes to check in this pass.
  *   Note that there won't necessarily be this many nodes returned in the (partial) path.
  *   To continue checking from where the path left off, see {@link crow.algorithm.Path#continueCalculating}.
+ * @returns {crow.algorithm.Path}
  */
 crow.algorithm.LPAStarAlgorithm.prototype.findPath = function(start, goal, opts){
 	if(typeof goal === "function"){
@@ -103,7 +117,6 @@ crow.algorithm.LPAStarAlgorithm.prototype.findPath = function(start, goal, opts)
 	this.start = start;
 	this.goal = goal;
 	this.opts = opts;
-	this.graph = opts.graph;
 	this.diagonals = opts.diagonals;
 	
 	//this.U = new crow.Algorithm.AvlTree(this.keyComp);
@@ -133,6 +146,9 @@ crow.algorithm.LPAStarAlgorithm.prototype.findPath = function(start, goal, opts)
 	return new crow.algorithm.Path(pathOpts);
 };
 
+/**
+ * @private
+ */
 crow.algorithm.LPAStarAlgorithm.prototype.mainLoop = function(){
 	while(this.U.length && 
 		(
@@ -153,6 +169,9 @@ crow.algorithm.LPAStarAlgorithm.prototype.mainLoop = function(){
 	}
 };
 
+/**
+ * @private
+ */
 crow.algorithm.LPAStarAlgorithm.prototype.resolveResults = function(){
 	var nodes = [];
 	var current = this.goal;
@@ -199,9 +218,9 @@ crow.algorithm.LPAStarAlgorithm.prototype.resolveResults = function(){
 	};
 };
 
-crow.algorithm.LPAStarAlgorithm.prototype.estimateDistance = function(start, goal, graph){
-	return crow.GraphUtil.distance.manhattan(start.getX() - goal.getX(), start.getY() - goal.getY());
-};
+/**
+ * @private
+ */
 crow.algorithm.LPAStarAlgorithm.prototype.recalculate = function(){
 	var a = this.algorithm;
 	return a.findPath(a.start, a.goal, a.opts);
@@ -222,6 +241,10 @@ crow.algorithm.LPAStarAlgorithm.prototype._invalidatePoint = function(path, inva
 	}
 	path.found = false;
 };
+
+/**
+ * @private
+ */
 crow.algorithm.LPAStarAlgorithm.prototype.continueCalculating = function(path){
 	if(path.invalidatedPoints && path.invalidatedPoints.length > 0){
 		for(var i = 0; i < path.invalidatedPoints.length; i++){
@@ -234,7 +257,6 @@ crow.algorithm.LPAStarAlgorithm.prototype.continueCalculating = function(path){
 		this.mainLoop();
 		path.invalidatedPoints = [];
 		
-	//return;
 		var results = this.resolveResults();
 		this.nodes = results.nodes;
 		this.length = results.length;
