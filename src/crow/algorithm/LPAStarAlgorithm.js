@@ -202,7 +202,7 @@ crow.algorithm.LPAStarAlgorithm.prototype.resolveResults = function(){
 		}
 		count++;
 		if(count >= failsafeMaximum){
-			console.log("resolveResults won't terminate");
+			throw new Error("resolveResults won't terminate");
 			break;
 		}
 	}
