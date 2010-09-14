@@ -24,48 +24,46 @@ goog.provide('crow.AlgorithmResolver');
  *  Boolean-type attributes can be either true or false for an algorithm.
  */
  
-crow.AlgorithmResolver = function(graph){
-	this.graph = graph;
-};
-
-crow.AlgorithmResolver.prototype.getAlgorithm = function(opts){
-	return this.getAlgorithms(opts).dequeue();
-};
-crow.AlgorithmResolver.prototype.getAlgorithms = function(opts){
-	if(!opts) opts = {};
+crow.AlgorithmResolver = {
+	getAlgorithm: function(opts){
+		return this.getAlgorithms(opts).dequeue();
+	},
+	getAlgorithms: function(opts){
+		if(!opts) opts = {};
 	
-	// set default opts
-	if(typeof opts.heuristics_allowed === "undefined") opts.heuristics_allowed = true;
+		// set default opts
+		if(typeof opts.heuristics_allowed === "undefined") opts.heuristics_allowed = true;
 	
-	var algos = crow.Graph.algorithm;
-	var queue = new crow.structs.BucketPriorityQueue(crow.structs.BucketPriorityQueue.REVERSE_KEY_COMPARATOR);
-	for(var i in algos){
-		var algo = algos[i];
-		var attributes = algo.attributes;
-		if(attributes){
-			var score = 0;
+		var algos = crow.Graph.algorithm;
+		var queue = new crow.structs.BucketPriorityQueue(crow.structs.BucketPriorityQueue.REVERSE_KEY_COMPARATOR);
+		for(var i in algos){
+			var algo = algos[i];
+			var attributes = algo.attributes;
+			if(attributes){
+				var score = 0;
 			
-			if(typeof opts.min_speed !== "undefined" && opts.min_speed > attributes.min_speed){
-				score -= Infinity;
-			} else {
-				score += attributes.min_speed;
-			}
+				if(typeof opts.min_speed !== "undefined" && opts.min_speed > attributes.min_speed){
+					score -= Infinity;
+				} else {
+					score += attributes.min_speed;
+				}
 		
-			if(
-					(opts.moving_start && !attributes.moving_start) ||
-					(opts.moving_goal && !attributes.moving_goal) ||
-					(opts.unstable_graph && !attributes.unstable_graph) ||
-					(!opts.heuristics_allowed && attributes.heuristics_allowed) || // if heuristics are not allowed but algorithm uses heuristics
-					(opts.goal_is_node && !attributes.goal_is_node) ||
-					(opts.goal_is_callback && !attributes.goal_is_callback)
-				){
-				score -= Infinity;
-			}
+				if(
+						(opts.moving_start && !attributes.moving_start) ||
+						(opts.moving_goal && !attributes.moving_goal) ||
+						(opts.unstable_graph && !attributes.unstable_graph) ||
+						(!opts.heuristics_allowed && attributes.heuristics_allowed) || // if heuristics are not allowed but algorithm uses heuristics
+						(opts.goal_is_node && !attributes.goal_is_node) ||
+						(opts.goal_is_callback && !attributes.goal_is_callback)
+					){
+					score -= Infinity;
+				}
 			
-			if(score > -Infinity){
-				queue.enqueue(score, algo);
+				if(score > -Infinity){
+					queue.enqueue(score, algo);
+				}
 			}
 		}
+		return queue;
 	}
-	return queue;
 };

@@ -1,6 +1,7 @@
 goog.provide('crow.algorithm.AStarAlgorithm');
 goog.require('crow.algorithm.ShortestPathAlgorithm');
 goog.require('crow.algorithm.Path');
+goog.require('crow.Graph');
 
 /**
  * A* algorithm, which is basically an "informed" Dijkstra's algorithm.
@@ -156,4 +157,5 @@ crow.algorithm.AStarAlgorithm.attributes = {
 };
 // end //
 
-crow.Graph.registerAlgorithm(crow.algorithm.AStarAlgorithm, 'a*');
+crow.algorithm.AStarAlgorithm.alias = "a*";
+crow.Graph.registerAlgorithm(crow.algorithm.AStarAlgorithm);

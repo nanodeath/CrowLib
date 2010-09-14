@@ -2,7 +2,7 @@ goog.provide('crow.algorithm.LPAStarAlgorithm');
 goog.require('crow.algorithm.ShortestPathAlgorithm');
 goog.require('crow.algorithm.Path');
 goog.require('crow.structs.BucketPriorityQueue');
-
+goog.require('crow.Graph');
 
 /**
  * @constructor
@@ -278,4 +278,5 @@ crow.algorithm.LPAStarAlgorithm.attributes = {
 };
 // end //
 
-crow.Graph.registerAlgorithm(crow.algorithm.LPAStarAlgorithm, 'lpa*');
+crow.algorithm.LPAStarAlgorithm.alias = "lpa*";
+crow.Graph.registerAlgorithm(crow.algorithm.LPAStarAlgorithm);

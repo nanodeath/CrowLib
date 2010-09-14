@@ -1,5 +1,7 @@
 goog.provide('crow.algorithm.DijkstraAlgorithm');
 goog.require('crow.algorithm.ShortestPathAlgorithm');
+goog.require('crow.algorithm.Path');
+goog.require('crow.Graph');
 
 /**
  * @constructor
@@ -125,7 +127,7 @@ crow.algorithm.DijkstraAlgorithm.WrapperNode = function(node){
 };
 
 // Attributes for AlgorithmResolver //
-crow.algorithm.LPAStarAlgorithm.attributes = {
+crow.algorithm.DijkstraAlgorithm.attributes = {
 	min_speed: -2,
 	// Works with:
 	moving_start: false,
@@ -136,3 +138,6 @@ crow.algorithm.LPAStarAlgorithm.attributes = {
 	goal_is_callback: true
 };
 // end //
+
+crow.algorithm.DijkstraAlgorithm.alias = "dijkstra";
+crow.Graph.registerAlgorithm(crow.algorithm.DijkstraAlgorithm);

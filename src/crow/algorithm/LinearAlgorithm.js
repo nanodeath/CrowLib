@@ -1,5 +1,6 @@
 goog.provide('crow.algorithm.LinearAlgorithm');
 goog.require('crow.algorithm.SearchAlgorithm');
+goog.require('crow.Graph');
 
 /**
  * @constructor
@@ -26,3 +27,6 @@ crow.algorithm.LinearAlgorithm.prototype.search = function(start, opts){
 	}
 	return list;
 };
+
+crow.algorithm.LinearAlgorithm.alias = "linear";
+crow.Graph.registerAlgorithm(crow.algorithm.LinearAlgorithm);

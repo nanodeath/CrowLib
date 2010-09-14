@@ -32,4 +32,5 @@ crow.algorithm.BFSAlgorithm.prototype.search = function(start, opts){
 	return list;
 };
 
-crow.Graph.registerAlgorithm(crow.algorithm.BFSAlgorithm, 'bfs');
+crow.algorithm.BFSAlgorithm.alias = "bfs";
+crow.Graph.registerAlgorithm(crow.algorithm.BFSAlgorithm);

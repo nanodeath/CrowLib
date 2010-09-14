@@ -2,6 +2,7 @@ goog.provide('crow.Algorithm');
 goog.require('goog.structs.PriorityQueue');
 goog.require('goog.structs.AvlTree');
 
+
 /**
  * Base class for all algorithms.
  * @constructor

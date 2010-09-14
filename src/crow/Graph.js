@@ -1,8 +1,6 @@
 goog.provide('crow.Graph');
 goog.require('crow.util.Assert');
 goog.require('crow.Algorithm');
-goog.require('crow.algorithm.LinearAlgorithm');
-goog.require('crow.algorithm.DijkstraAlgorithm');
 goog.require('goog.events.EventTarget');
 
 /**
@@ -12,7 +10,7 @@ crow.Graph = function(){
 	// initialize
 	this.nodes = [];
 	this.map = {};
-	this.version = "0.1.0";
+	this.version = "0";
 	this.validator = new goog.events.EventTarget();
 	this.width = 0;
 	this.height = 0;
@@ -111,7 +109,7 @@ crow.Graph = function(){
 				});
 			case "object":
 				var start = filter_or_options.start || this.nodes[0];
-				var algo = crow.Graph._lookupAlgorithm(filter_or_options.algorithm) || crow.Graph.defaultAlgorithm.search;
+				var algo = crow.Graph._lookupAlgorithm(filter_or_options.algorithm) || crow.Graph._lookupAlgorithm("linear");
 				if(!(algo.prototype instanceof crow.algorithm.SearchAlgorithm)) throw new Error("only compatible with SearchAlgorithms")
 				return (new algo(this)).search(start, {
 					filter: filter_or_options.filter
@@ -138,7 +136,7 @@ crow.Graph = function(){
 		var start = opts.start || this.nodes[0];
 		var goal = opts.goal;
 		if(!goal) throw new Error("To find a goal, one must provide a goal...");
-		var algo = crow.Graph._lookupAlgorithm(opts.algorithm) || crow.Graph.defaultAlgorithm.shortestPath;
+		var algo = crow.Graph._lookupAlgorithm(opts.algorithm) || crow.AlgorithmResolver.getAlgorithm();
 		if(!(algo.prototype instanceof crow.algorithm.ShortestPathAlgorithm)) throw new Error("only compatible with ShortestPathAlgorithms");
 		opts.graph = this;
 		return (new algo(this)).findPath(start, goal, opts);
@@ -204,27 +202,20 @@ crow.Graph.fromArray = function(array, callback){
 	return graph;
 };
 
-crow.Graph.registerAlgorithm = function(algo, name, isDefaultForType){
-	crow.Graph.algorithm[name] = algo;
-	if(isDefaultForType){
-		var instance = new algo();
-		if(instance instanceof crow.algorithm.SearchAlgorithm){
-			crow.Graph.defaultAlgorithm.search = algo;
-		} else if(instance instanceof crow.algorithm.ShortestPathAlgorithm){
-			crow.Graph.defaultAlgorithm.shortestPath = algo;
-		}
+crow.Graph.registerAlgorithm = function(algo){
+	var alias = algo.alias;
+	if(!alias){
+		throw new Error("No alias found for algorithm");
 	}
+	crow.Graph.algorithm[alias] = algo;
 };
-crow.Graph._lookupAlgorithm = function(name){
-	if(name){
-		var algo = crow.Graph.algorithm[name];
+crow.Graph._lookupAlgorithm = function(alias){
+	if(alias){
+		var algo = crow.Graph.algorithm[alias];
 		if(algo) return algo;
-		else throw new Error("Algorithm `" + name + "` not found");
+		else throw new Error("Algorithm `" + alias + "` not found");
 	} else return null;
 };
-
-crow.Graph.registerAlgorithm(crow.algorithm.LinearAlgorithm, 'linear', true);
-crow.Graph.registerAlgorithm(crow.algorithm.DijkstraAlgorithm, 'dijkstra', true);
 
 /**
  * @namespace Collection of utility functions that clients can use
