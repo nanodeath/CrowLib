@@ -193,8 +193,6 @@ window["test"]["gameOptimizations"] = function(){
 		// are no longer valid after that point
 		graph.removeNode(1, 3);
 		graph.invalidate(1, 3);
-
-		//graph.invalidate(1, 2);
 		
 		// After we invalidate the point, we can regenerate the rest of the graph
 
@@ -221,7 +219,6 @@ window["test"]["gameOptimizations"] = function(){
 		}
 	});
 	test("invalidate point, lpa* again", function(){
-		console.log("lpa*2");
 		window.debugLPA = function(algo, dontClear){
 			if(!dontClear){
 				$("#prelude").empty();
@@ -238,17 +235,12 @@ window["test"]["gameOptimizations"] = function(){
 		// are no longer valid after that point
 		graph.removeNode(1, 3);
 		graph.invalidate(1, 3);
-		//debugLPA(path.algorithm, true);
 		graph.removeNode(2, 3);
 		graph.invalidate(2, 3);
-		//debugLPA(path.algorithm, true);
 		graph.removeNode(3, 3);
 		graph.invalidate(3, 3);
-		//debugLPA(path.algorithm, true);
 		window.lpaGraph = graph;
 		window.lpaPath = path;
-
-		//graph.invalidate(1, 2);
 		
 		// After we invalidate the point, we can regenerate the rest of the graph
 
@@ -281,7 +273,6 @@ window["test"]["gameOptimizations"] = function(){
 			};
 			var tp = new TilePlane();
 			tp.map = map;
-			console.log(tp);
 			window.maxTilePlane = tp;
 		});
 	});
