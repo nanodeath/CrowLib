@@ -123,3 +123,16 @@ crow.algorithm.DijkstraAlgorithm.WrapperNode = function(node){
 	this.previous = null;
 	this.distance = Infinity;
 };
+
+// Attributes for AlgorithmResolver //
+crow.algorithm.LPAStarAlgorithm.attributes = {
+	min_speed: -2,
+	// Works with:
+	moving_start: false,
+	moving_goal: false,
+	unstable_graph: false,
+	heuristics_allowed: false,
+	goal_is_node: true,
+	goal_is_callback: true
+};
+// end //

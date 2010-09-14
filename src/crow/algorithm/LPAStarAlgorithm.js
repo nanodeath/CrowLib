@@ -265,4 +265,17 @@ crow.algorithm.LPAStarAlgorithm.prototype.continueCalculating = function(path){
 	return this.found;
 };
 
+// Attributes for AlgorithmResolver //
+crow.algorithm.LPAStarAlgorithm.attributes = {
+	min_speed: 0,
+	// Works with:
+	moving_start: false,
+	moving_goal: false,
+	unstable_graph: true,
+	heuristics_allowed: true,
+	goal_is_node: true,
+	goal_is_callback: false
+};
+// end //
+
 crow.Graph.registerAlgorithm(crow.algorithm.LPAStarAlgorithm, 'lpa*');

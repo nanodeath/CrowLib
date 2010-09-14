@@ -9,6 +9,7 @@ goog.require('crow.algorithm.LinearAlgorithm');
 goog.require('crow.algorithm.LPAStarAlgorithm');
 goog.require('crow.algorithm.SearchAlgorithm');
 goog.require('crow.algorithm.ShortestPathAlgorithm');
+goog.require('crow.AlgorithmResolver');
 goog.require('crow.structs.BucketPriorityQueue');
 
 /**

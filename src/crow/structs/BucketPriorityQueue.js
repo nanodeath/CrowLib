@@ -25,6 +25,12 @@ crow.structs.BucketPriorityQueue.DEFAULT_KEY_COMPARATOR = function(k1, k2){
 	return 0;
 };
 
+crow.structs.BucketPriorityQueue.REVERSE_KEY_COMPARATOR = function(k2, k1){
+	if(k1 < k2) return -1;
+	if(k1 > k2) return 1;
+	return 0;
+};
+
 /**
  * Enqueue a value into the queue with the provided priority.
  * @param {*} key key (priority) associated with this value.  The key should be compatible with the key_comparator passed in the constructor.  If no key_comparator was passed in, this key will be compared using standard "<", ">", and "==" operators.

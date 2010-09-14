@@ -143,4 +143,17 @@ crow.algorithm.AStarAlgorithm.prototype.recalculate = function(){
 	return a.findPath(a.start, a.goal, a.opts);
 };
 
+// Attributes for AlgorithmResolver //
+crow.algorithm.AStarAlgorithm.attributes = {
+	min_speed: 2,
+	// Works with:
+	moving_start: false,
+	moving_goal: false,
+	unstable_graph: false,
+	heuristics_allowed: true,
+	goal_is_node: true,
+	goal_is_callback: false
+};
+// end //
+
 crow.Graph.registerAlgorithm(crow.algorithm.AStarAlgorithm, 'a*');
