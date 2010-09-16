@@ -105,6 +105,7 @@ crow.structs.BucketPriorityQueue.prototype.remove = function(value, key_hint){
 					if(!bucket.length){
 						this.arr.splice(i, 1);
 					}
+					this.length--;
 					return bucketValue;
 				}
 			}

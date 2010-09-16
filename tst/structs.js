@@ -61,10 +61,13 @@ window["test"]["structures"] = function(){
 	test("remove", function(){
 		var arr = ["element_0_0", "element_1_0", "element_3_2", "element_8_0"];
 		for(var i = 0; i < arr.length; i++){
-			ok(this.populatedQ.contains(arr[i]));
+			ok(this.populatedQ.contains(arr[i]), "contains okay");
 		}
 		for(var i = 0; i < arr.length; i++){
-			ok(this.populatedQ.remove(arr[i]) != null);
+			ok(this.populatedQ.remove(arr[i]), "remove okay");
+		}
+		for(var i = 0, l = this.populatedQ.length; i < l; i++){
+			ok(this.populatedQ.dequeue(), "dequeued okay");
 		}
 	});
 	test("enqueue with custom key comparator", function(){
