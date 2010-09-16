@@ -175,7 +175,6 @@ crow.algorithm.LPAStarAlgorithm.prototype.mainLoop = function(){
 crow.algorithm.LPAStarAlgorithm.prototype.resolveResults = function(){
 	var nodes = [];
 	var current = this.goal;
-	var found = true;
 	var length = 0;
 	var failsafeMaximum = this.graph.width * this.graph.height, count = 0;
 	while(current != this.start && current){
@@ -195,9 +194,7 @@ crow.algorithm.LPAStarAlgorithm.prototype.resolveResults = function(){
 			}
 		}
 		current = bestNeighbor;
-		if(!bestNeighbor){
-			found = false;
-		} else {
+		if(bestNeighbor){
 			length += bestDistance;
 		}
 		count++;
@@ -206,6 +203,7 @@ crow.algorithm.LPAStarAlgorithm.prototype.resolveResults = function(){
 			break;
 		}
 	}
+	var found = current == this.start;
 	if(!found){
 		nodes = [];
 	}
@@ -258,11 +256,11 @@ crow.algorithm.LPAStarAlgorithm.prototype.continueCalculating = function(path){
 		path.invalidatedPoints = [];
 		
 		var results = this.resolveResults();
-		this.nodes = results.nodes;
-		this.length = results.length;
-		this.found = results.found;
+		path.nodes = results.nodes;
+		path.length = results.length;
+		path.found = results.found;
 	}
-	return this.found;
+	return path.found;
 };
 
 // Attributes for AlgorithmResolver //

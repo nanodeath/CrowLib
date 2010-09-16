@@ -198,9 +198,9 @@ window["test"]["gameOptimizations"] = function(){
 
 		path.continueCalculating();
 		debugLPA(path.algorithm);
-				return;
-		ok(!path.found, "deleted only available path; can't find new path");
-		
+
+		ok(path.found, "found a new path");
+		return;		
 		var expected = [[0,0],[1,0],[1,1]];
 		for(var i in expected){
 			same([path.nodes[i].getX(), path.nodes[i].getY()], expected[i], "busted: path node " + i + " is as expected");
