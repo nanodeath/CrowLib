@@ -109,7 +109,7 @@ crow.Graph = function(){
 				});
 			case "object":
 				var start = filter_or_options.start || this.nodes[0];
-				var algo = crow.Graph._lookupAlgorithm(filter_or_options.algorithm) || crow.Graph._lookupAlgorithm("linear");
+				var algo = crow.Graph._lookupAlgorithm(filter_or_options.algorithm || "linear");
 				if(!(algo.prototype instanceof crow.algorithm.SearchAlgorithm)) throw new Error("only compatible with SearchAlgorithms")
 				return (new algo(this)).search(start, {
 					filter: filter_or_options.filter
@@ -209,12 +209,18 @@ crow.Graph.registerAlgorithm = function(algo){
 	}
 	crow.Graph.algorithm[alias] = algo;
 };
-crow.Graph._lookupAlgorithm = function(alias){
-	if(alias){
-		var algo = crow.Graph.algorithm[alias];
+crow.Graph._lookupAlgorithm = function(alias_or_opts){
+	// TODO switch back to switch statement
+	var type = typeof alias_or_opts;
+	if(type === "string"){
+		var algo = crow.Graph.algorithm[alias_or_opts];
 		if(algo) return algo;
-		else throw new Error("Algorithm `" + alias + "` not found");
-	} else return null;
+		throw new Error("Algorithm `" + alias_or_opts + "` not found");
+	} else if(type === "object" || type === "undefined"){
+		var algo = crow.AlgorithmResolver.getAlgorithm(alias_or_opts);
+		if(algo) return algo;
+	}
+	return null;
 };
 
 /**
