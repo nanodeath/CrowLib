@@ -80,9 +80,11 @@ window["test"]["perfTests"] = function(){
 	];
 
 	function benchmark(func){
-		var date = new Date();
-		func();
-		return new Date() - date;
+		var start = new Date();
+		var subtract = func();
+		var end = new Date();
+		if(typeof subtract !== "number") subtract = 0;
+		return end - start - subtract;
 	}
 	
 	function makeTests(tests){
@@ -121,14 +123,18 @@ window["test"]["perfTests"] = function(){
 					var runs = t.runs;
 					
 					var count;
+					var setupTime = 0;
 					var testCallback = function(){
 						count = 0;
-						var graph = new crow.Graph();
-						for(var j = 0; j < t.size; j++){
-							for(var k = 0; k < t.size; k++){
-								graph.addNode(new MyNode([j, k]));
+						var graph;
+						setupTime += benchmark(function(){
+							graph = new crow.Graph();
+							for(var j = 0; j < t.size; j++){
+								for(var k = 0; k < t.size; k++){
+									graph.addNode(new MyNode([j, k]));
+								}
 							}
-						}
+						});
 					
 						var start = graph.getNode(0, 0), goal = graph.getNode(t.size - 1, t.size - 1);
 						var path = graph.findGoal({startNode: start, goal: goal, algorithm: t.algo, baked: false});
@@ -139,13 +145,15 @@ window["test"]["perfTests"] = function(){
 							var x = path.nodes[j].x, y = path.nodes[j].y;
 							nodesToInvalidate.push([x, y]);
 						}
-						for(var j in nodesToInvalidate){
-							var n = nodesToInvalidate[j];
-							console.log("invalidating %d,%d", x, y);
-							graph.removeNode(n[0], n[1]);
-							graph.invalidate(n[0], n[1]);
-							count++;
-						}
+						setupTime += benchmark(function(){
+							for(var j in nodesToInvalidate){
+								var n = nodesToInvalidate[j];
+								console.log("invalidating %d,%d", x, y);
+								graph.removeNode(n[0], n[1]);
+								graph.invalidate(n[0], n[1]);
+								count++;
+							}
+						});
 						if(path.found) throw new Error("should not be found after graph modification")
 						path.continueCalculating();
 						if(!path.found) throw new Error("should be found after continuing");
@@ -158,7 +166,8 @@ window["test"]["perfTests"] = function(){
 					var average = total / runs;
 					
 					ok(average <= t.expectedTime, "Graph takes <=" + t.expectedTime + "ms to evaluate (" + average + "ms) on modern browsers (removed " + count + ")");
-					testResults[testName] = average;					
+					testResults[testName] = average;
+					return setupTime / runs;
 				};
 			};
 			var testName = "Graph size " + currentTest.size + " with " + currentTest.algo;

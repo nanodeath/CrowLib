@@ -1,4 +1,5 @@
 goog.require('crow.structs.BucketPriorityQueue');
+goog.require('crow.structs.NDArray');
 
 window["test"] = window["test"] || {};
 window["test"]["structures"] = function(){
@@ -82,5 +83,81 @@ window["test"]["structures"] = function(){
 		for(var i = 0; i < expected.length; i++){
 			equals(this.keyQ.dequeue(), expected[i], "Element " + i + " is as expected");
 		}
+	});
+	
+	module("NDArray");
+	test("1d:add", function(){
+		var arr = new crow.structs.NDArray(1);
+		arr.add("foo", 4);
+		raises(function(){
+			arr.add("bar", 4, 5);
+		}, "Can't add too deep");
+		raises(function(){
+			arr.add("bar");
+		}, "Can't add too shallow");
+	});
+	test("1d:get", function(){
+		var arr = new crow.structs.NDArray(1);
+		arr.add("cat", 2);
+		arr.add("dog", 30);
+		equals(arr.get(2), "cat");
+		equals(arr.get(30), "dog");
+		equals(arr.get(3), undefined);
+		raises(function(){
+			arr.get(4, 5);
+		}, "Can't get too deep");
+		raises(function(){
+			arr.get();
+		}, "Can't add too shallow");
+	});
+	test("1d:each", function(){
+		var arr = new crow.structs.NDArray(1);
+		arr.add("cat", 2);
+		arr.add("dog", 30);
+		var results = [];
+		arr.each(function(val, x){
+			results.push([val, x]);
+		});
+		same(results[0], ["cat", 2]);
+		same(results[1], ["dog", 30]);
+	});
+	
+	test("2d:add", function(){
+		var arr = new crow.structs.NDArray(2);
+		arr.add("foo", 4, 5);
+		arr.add("foo2", 2, 3);
+		arr.add("foo3", 9, 10);
+		raises(function(){
+			arr.add("bar", 4, 5, 6);
+		}, "Can't add too deep");
+		raises(function(){
+			arr.add("bar", 4);
+		}, "Can't add too shallow");
+	});
+	test("2d:get", function(){
+		var arr = new crow.structs.NDArray(2);
+		arr.add("cat", 2, 3);
+		arr.add("dog", 30, 31);
+		equals(arr.get(2, 3), "cat");
+		equals(arr.get(30, 31), "dog");
+		equals(arr.get(3, 5), undefined);	
+		raises(function(){
+			arr.get(1, 2, 3);
+		}, "Can't get too deep");
+		raises(function(){
+			arr.get(1);
+		}, "Can't add too shallow");
+	});
+	test("2d:get", function(){
+		var arr = new crow.structs.NDArray(2);
+		arr.add("cat", 2, 3);
+		arr.add("dog", 30, 31);
+		var results = [];
+		arr.each(function(val, x, y){
+			results.push([val, x, y]);
+		});
+		same(results[0], ["cat", 2, 3]);
+		same(results[1], ["dog", 30, 31]);
+
 	});
 };

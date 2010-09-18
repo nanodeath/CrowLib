@@ -11,6 +11,7 @@ goog.require('crow.algorithm.SearchAlgorithm');
 goog.require('crow.algorithm.ShortestPathAlgorithm');
 goog.require('crow.AlgorithmResolver');
 goog.require('crow.structs.BucketPriorityQueue');
+goog.require('crow.structs.NDArray');
 
 /**
  * @namespace for the entire Crow library

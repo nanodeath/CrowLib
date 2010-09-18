@@ -2,6 +2,7 @@ goog.provide('crow.algorithm.LPAStarAlgorithm');
 goog.require('crow.algorithm.ShortestPathAlgorithm');
 goog.require('crow.algorithm.Path');
 goog.require('crow.structs.BucketPriorityQueue');
+goog.require('crow.structs.NDArray');
 goog.require('crow.Graph');
 
 /**
@@ -228,14 +229,14 @@ crow.algorithm.LPAStarAlgorithm.prototype._invalidatePoint = function(path, inva
 	var x = invalidationEvent.x, y = invalidationEvent.y;
 	
 	if(!path.invalidatedPoints){
-		path.invalidatedPoints = [];
+		path.invalidatedPoints = new crow.structs.NDArray(2);
 	}
-	path.invalidatedPoints.push([x, y]);
+	path.invalidatedPoints.add(true, x, y);
 	var node = path.graph.getNode(x, y, true);
 	var neighbors = node.getNeighbors(path.graph, path.algorithm.diagonals);
 	for(var i = 0; i < neighbors.length; i++){
 		var neighbor = neighbors[i];
-		path.invalidatedPoints.push([neighbor.x, neighbor.y]);
+		path.invalidatedPoints.add(true, neighbor.x, neighbor.y);
 	}
 	path.found = false;
 };
@@ -244,16 +245,16 @@ crow.algorithm.LPAStarAlgorithm.prototype._invalidatePoint = function(path, inva
  * @private
  */
 crow.algorithm.LPAStarAlgorithm.prototype.continueCalculating = function(path){
-	if(path.invalidatedPoints && path.invalidatedPoints.length > 0){
-		for(var i = 0; i < path.invalidatedPoints.length; i++){
-			var point = path.invalidatedPoints[i];
-			var n = this.graph.getNode(point[0], point[1]);
+	if(path.invalidatedPoints){
+		var algo = this;
+		path.invalidatedPoints.each(function(val, x, y){
+			var n = algo.graph.getNode(x, y);
 			if(n){
-				this._UpdateVertex(n);
+				algo._UpdateVertex(n);
 			}
-		}
+		});
 		this.mainLoop();
-		path.invalidatedPoints = [];
+		path.invalidatedPoints = new crow.structs.NDArray(2);
 		
 		var results = this.resolveResults();
 		path.nodes = results.nodes;

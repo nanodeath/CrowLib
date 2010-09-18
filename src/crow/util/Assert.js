@@ -5,5 +5,6 @@ crow.assert = function(bool, msg){
 }
 
 crow.assert.InvalidArgumentType = function(expectedType){ return "Invalid argument type, expected " + expectedType; };
+crow.assert.IncorrectArgumentCount = function(actualCount, expectedCount){ return "Incorrect argument count, got " + actualCount + " but expected " + expectedCount; };
 crow.assert.IndexOutBounds = function(number){ return "Index out of bounds (<0 or >length), was " + number; };
 crow.assert.AbstractMethod = function(methodName){ return "Method " + methodName + " is abstract; must be overridden"; };
