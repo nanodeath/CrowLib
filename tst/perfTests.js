@@ -118,14 +118,12 @@ window["test"]["perfTests"] = function(){
 			};
 			
 			var generateRegenTest = function(t, testName){
-				if(t.size <= 2) return;
+				if(t.size <= 7) return;
 				return function(){
 					var runs = t.runs;
 					
-					var count;
 					var setupTime = 0;
 					var testCallback = function(){
-						count = 0;
 						var graph;
 						setupTime += benchmark(function(){
 							graph = new crow.Graph();
@@ -139,24 +137,17 @@ window["test"]["perfTests"] = function(){
 						var start = graph.getNode(0, 0), goal = graph.getNode(t.size - 1, t.size - 1);
 						var path = graph.findGoal({startNode: start, goal: goal, algorithm: t.algo, baked: false});
 						if(!path.found) throw new Error("should be found");
-						// Removes all nodes between the halfway point and the end
-						var nodesToInvalidate = [];
-						for(var j = Math.floor(path.nodes.length / 2); j < path.nodes.length - 1; j++){
-							var x = path.nodes[j].x, y = path.nodes[j].y;
-							nodesToInvalidate.push([x, y]);
+						
+						for(var i = 0; i < 5; i++){
+							var nodeIndex = Math.floor(path.nodes.length / 2);
+							var n = path.nodes[nodeIndex];
+							graph.removeNode(n.x, n.y);
+							graph.invalidate(n.x, n.y);
+							
+							if(path.found) throw new Error("should not be found after graph modification: " + i)
+							path.continueCalculating();
+							if(!path.found) throw new Error("should be found after continuing: " + i);
 						}
-						setupTime += benchmark(function(){
-							for(var j in nodesToInvalidate){
-								var n = nodesToInvalidate[j];
-								console.log("invalidating %d,%d", x, y);
-								graph.removeNode(n[0], n[1]);
-								graph.invalidate(n[0], n[1]);
-								count++;
-							}
-						});
-						if(path.found) throw new Error("should not be found after graph modification")
-						path.continueCalculating();
-						if(!path.found) throw new Error("should be found after continuing");
 					};
 					var total = benchmark(function(){
 						for(var j = 0; j < t.runs; j++){
@@ -165,14 +156,14 @@ window["test"]["perfTests"] = function(){
 					});
 					var average = total / runs;
 					
-					ok(average <= t.expectedTime, "Graph takes <=" + t.expectedTime + "ms to evaluate (" + average + "ms) on modern browsers (removed " + count + ")");
+					ok(average <= t.expectedTime, "Graph takes <=" + t.expectedTime + "ms to evaluate (" + average + "ms)");
 					testResults[testName] = average;
 					return setupTime / runs;
 				};
 			};
 			var testName = "Graph size " + currentTest.size + " with " + currentTest.algo;
 			test(testName, generateTest(currentTest, testName));
-			testName = "Graph size " + currentTest.size + " with " + currentTest.algo + " and half graph removal";
+			testName = "Graph size " + currentTest.size + " with " + currentTest.algo + " and 5 graph permutations";
 			var testToRun = generateRegenTest(currentTest, testName);
 			if(testToRun) test(testName, testToRun);
 		}
