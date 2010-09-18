@@ -70,7 +70,7 @@ window["test"]["perfTests"] = function(){
 		},
 		{
 			size: 10,
-			runs: 10,
+			runs: 25,
 			expectedTime: 10
 		},
 		{
@@ -95,22 +95,28 @@ window["test"]["perfTests"] = function(){
 			var generateTest = function(t, testName){
 				return function(){
 					var runs = t.runs;
-			
+					
+					var setupTime = 0;
 					var testCallback = function(){
-						var graph = new crow.Graph();
-						for(var j = 0; j < t.size; j++){
-							for(var k = 0; k < t.size; k++){
-								graph.addNode(new MyNode([j, k]));
+						var graph;
+						setupTime += benchmark(function(){
+							graph = new crow.Graph();
+							for(var j = 0; j < t.size; j++){
+								for(var k = 0; k < t.size; k++){
+									graph.addNode(new MyNode([j, k]));
+								}
 							}
-						}
-						graph.findGoal({startNode: graph.getNode(0, 0), goal: graph.getNode(t.size - 1, t.size - 1), algorithm: t.algo});
+						});
+						
+						var start = graph.getNode(0, 0), goal = graph.getNode(t.size - 1, t.size - 1);
+						graph.findGoal({start: start, goal: goal, algorithm: t.algo});
 					};
 					var total = benchmark(function(){
 						for(var j = 0; j < t.runs; j++){
 							testCallback();
 						}
 					});
-					var average = total / runs;
+					var average = (total - setupTime) / runs;
 	
 					ok(average <= t.expectedTime, "Graph takes <=" + t.expectedTime + "ms to evaluate (" + average + "ms) on modern browsers");
 					testResults[testName] = average;
@@ -120,6 +126,7 @@ window["test"]["perfTests"] = function(){
 			var generateRegenTest = function(t, testName){
 				if(t.size <= 7) return;
 				return function(){
+
 					var runs = t.runs;
 					
 					var setupTime = 0;
@@ -135,14 +142,18 @@ window["test"]["perfTests"] = function(){
 						});
 					
 						var start = graph.getNode(0, 0), goal = graph.getNode(t.size - 1, t.size - 1);
-						var path = graph.findGoal({startNode: start, goal: goal, algorithm: t.algo, baked: false});
-						if(!path.found) throw new Error("should be found");
+					
+						var path = graph.findGoal({start: start, goal: goal, algorithm: t.algo, baked: false});
+
+						if(!path.found) throw new Error("should be found");		
 						
 						for(var i = 0; i < 5; i++){
-							var nodeIndex = Math.floor(path.nodes.length / 2);
-							var n = path.nodes[nodeIndex];
-							graph.removeNode(n.x, n.y);
-							graph.invalidate(n.x, n.y);
+							setupTime += benchmark(function(){
+								var nodeIndex = Math.floor(path.nodes.length / 2);
+								var n = path.nodes[nodeIndex];
+								graph.removeNode(n.x, n.y);
+								graph.invalidate(n.x, n.y);
+							});
 							
 							if(path.found) throw new Error("should not be found after graph modification: " + i)
 							path.continueCalculating();
@@ -154,11 +165,10 @@ window["test"]["perfTests"] = function(){
 							testCallback();
 						}
 					});
-					var average = total / runs;
+					var average = (total - setupTime) / runs;
 					
 					ok(average <= t.expectedTime, "Graph takes <=" + t.expectedTime + "ms to evaluate (" + average + "ms)");
 					testResults[testName] = average;
-					return setupTime / runs;
 				};
 			};
 			var testName = "Graph size " + currentTest.size + " with " + currentTest.algo;
@@ -180,24 +190,4 @@ window["test"]["perfTests"] = function(){
 			$.post("/benchmark", {name: n, useragent: {string: navigator.userAgent, version: $.browser.version, webkit: $.browser.webkit, opera: $.browser.opera, msie: $.browser.msie, mozilla: $.browser.mozilla}, results: testResults});
 		}
 	});
-	/*
-	module("findGoal: Dijkstra");
-	test("base cost", function(){
-		var runs = 1000;
-		var graph = crow.Graph.fromArray(tinyGraphArray, function(x, y){
-			return new MyNode([x, y]);
-		});
-		var testCallback = function(){
-			graph.findGoal({startNode: graph.getNode(0, 0), goal: graph.getNode(1, 1)})
-		};
-		var total = benchmark(function(){
-			for(var i = 0; i < runs; i++){
-				testCallback();
-			}
-		});
-		var average = total / runs;
-		
-		ok(average < 1, "Rudimentary graph takes <1ms to evaluate (" + average + "ms) on modern browsers");
-	});
-	*/
 }
