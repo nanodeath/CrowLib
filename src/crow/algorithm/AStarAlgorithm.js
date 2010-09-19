@@ -98,7 +98,7 @@ crow.algorithm.AStarAlgorithm.prototype.findPath = function(start, goal, opts){
 
 	if(found){
 		var endNode = this._getWrapperNode(goal);
-		nodes.unshift(endNode.parent.innerNode);
+		nodes.unshift(endNode.innerNode);
 		var node = endNode.parent;
 		while(node){
 			nodes.unshift(node.innerNode);
