@@ -27,61 +27,58 @@ crow.algorithm.AStarAlgorithm.prototype.findPath = function(start, goal, opts){
 	if(typeof goal === "function"){
 		throw new Error("A* doesn't support using a callback to determine the goal");
 	}
+	this._wrapperNode = new crow.Algorithm.NodeMap();
 	if(!opts) opts = {};
 
 	var actor = opts.actor;	
 	this.start = start;
 	this.goal = goal;
 	this.opts = opts;
+	
+	start = this._getWrapperNode(start);
 
-	this.evaluated = new crow.Algorithm.NodeMap(false);
 	this.evaluatedList = [];
 	this.toEvaluate = new crow.Algorithm.PriorityQueue();
 	this.toEvaluate.enqueue(0, start);
-	this.parent = new crow.Algorithm.NodeMap();
 	
 	// gScore is distance of a node n from the starting point
-	this.gScore = new crow.Algorithm.NodeMap();
 	// hScore is the estimated distance between a node n and the goal
-	this.hScore = new crow.Algorithm.NodeMap();
 	// fScore is the total estimated distance of route through a node
-	this.fScore = new crow.Algorithm.NodeMap();
 	
 	var estimateDistance = this.estimateDistance;
 	
-	this.gScore.set(start, 0);
-	this.hScore.set(start, estimateDistance(start, goal, this.graph));
+
+	start.gScore = 0;
+	start.hScore = start.innerNode.distanceTo(goal, actor);
 	var found = false, currentNode;
 	while(currentNode = this.toEvaluate.dequeue()){
-		if(currentNode === goal){
+		if(currentNode.innerNode === goal){
 			found = true;
 			break;
-		} else if(this.evaluated.get(currentNode)){
+		} else if(currentNode.evaluated){
 			// normally this wouldn't be necessary, but if we check the same neighbor twice,
 			// it may get added to the toEvaluate list twice
 			continue;
 		}
-		this.evaluated.set(currentNode, true);
+		currentNode.evaluated = true;
 		this.evaluatedList.push(currentNode);
 		if(opts.limit && this.evaluatedList.length >= opts.limit){
 			break;
 		}
 		
-		var neighbors = currentNode.getNeighbors(this.graph);
+		var neighbors = currentNode.innerNode.getNeighbors(this.graph);
 		for(var n in neighbors){
-			var neighbor = neighbors[n];
-			if(this.evaluated.get(neighbor)) continue;
-			var newGScore = this.gScore.get(currentNode) + currentNode.distanceTo(neighbor, actor);
+			var neighbor = this._getWrapperNode(neighbors[n]);
+			if(neighbor.evaluated) continue;
+			var newGScore = currentNode.gScore + currentNode.innerNode.distanceTo(neighbor.innerNode, actor);
 			if(newGScore == Infinity) continue;
 			
-			if(!this.toEvaluate.containsValue(neighbor) || newGScore < this.gScore.get(neighbor)){
-				this.parent.set(neighbor, currentNode);
-				this.gScore.set(neighbor, newGScore);
-				var hScore = estimateDistance(neighbor, goal);
-				this.hScore.set(neighbor, hScore);
-				var fScore = newGScore + hScore;
-				this.fScore.set(neighbor, fScore);
-				this.toEvaluate.enqueue(fScore, neighbor);
+			if(!this.toEvaluate.containsValue(neighbor) || newGScore < neighbor.gScore){
+				neighbor.parent = currentNode;
+				neighbor.gScore = newGScore;
+				neighbor.hScore = neighbor.innerNode.distanceTo(goal, actor);
+				neighbor.fScore = newGScore + neighbor.hScore;
+				this.toEvaluate.enqueue(neighbor.fScore, neighbor);
 			}
 		}
 	}
@@ -89,7 +86,7 @@ crow.algorithm.AStarAlgorithm.prototype.findPath = function(start, goal, opts){
 	var nodes = [];	
 	var pathOpts = {
 		nodes: nodes,
-		start: start,
+		start: start.innerNode,
 		goal: goal,
 		length: null,
 		recalculate: this.recalculate,
@@ -100,16 +97,15 @@ crow.algorithm.AStarAlgorithm.prototype.findPath = function(start, goal, opts){
 	};
 
 	if(found){
-		if(goal){
-			nodes.unshift(goal);
-			var node = this.parent.get(goal);
-			while(node){
-				nodes.unshift(node);
-				node = this.parent.get(node);
-			}
+		var endNode = this._getWrapperNode(goal);
+		nodes.unshift(endNode.parent.innerNode);
+		var node = endNode.parent;
+		while(node){
+			nodes.unshift(node.innerNode);
+			node = node.parent;
 		}
-		pathOpts.end = goal;
-		pathOpts.length = this.gScore.get(goal);
+		pathOpts.end = endNode.innerNode;
+		pathOpts.length = endNode.gScore;
 		pathOpts.found = true;
 		
 		return new crow.algorithm.Path(pathOpts);
@@ -118,11 +114,11 @@ crow.algorithm.AStarAlgorithm.prototype.findPath = function(start, goal, opts){
 		// but I think it's good enough, since we do analyze nodes in
 		// a particular order (favoring the more promising nodes)
 		var bestNode = this.evaluatedList[this.evaluatedList.length-1];
-		nodes.unshift(bestNode);
-		var node = this.parent.get(bestNode);
+		nodes.unshift(bestNode.innerNode);
+		var node = bestNode.parent;
 		while(node){
-			nodes.unshift(node);
-			node = this.parent.get(node);
+			nodes.unshift(node.innerNode);
+			node = node.parent;
 		}
 	
 		pathOpts.end = null;
@@ -136,12 +132,25 @@ crow.algorithm.AStarAlgorithm.prototype.findPath = function(start, goal, opts){
 		return new crow.algorithm.Path(pathOpts);
 	}
 };
-crow.algorithm.AStarAlgorithm.prototype.estimateDistance = function(start, goal, graph){
-	return crow.GraphUtil.distance.manhattan(start.x - goal.x, start.y - goal.y);
+
+crow.algorithm.AStarAlgorithm.prototype._getWrapperNode = function(node){
+	var w = this._wrapperNode.get(node);
+	if(w) return w;
+	w = new crow.algorithm.AStarAlgorithm.WrapperNode(node);
+	this._wrapperNode.set(node, w);
+	return w;
 };
-crow.algorithm.AStarAlgorithm.prototype.recalculate = function(){
-	var a = this.algorithm;
-	return a.findPath(a.start, a.goal, a.opts);
+/**
+ * @constructor
+ * @private
+ */
+crow.algorithm.AStarAlgorithm.WrapperNode = function(node){
+	this.innerNode = node;
+	this.evaluated = false;
+	this.parent;
+	this.gScore;
+	this.hScore;
+	this.fScore;
 };
 
 // Attributes for AlgorithmResolver //
