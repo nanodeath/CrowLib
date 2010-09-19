@@ -187,7 +187,6 @@ window["test"]["gameOptimizations"] = function(){
 	
 		var graph = lpaGraph();
 		var path = graph.findGoal({start: graph.getNode(3, 0), goal: graph.getNode(0, 5), algorithm: "lpa*", baked: false, diagonals: true});
-		debugLPA(path.algorithm);
 		var expected = [[3,0],[2,0],[1,1],[1,2],[1,3],[1,4],[0,5]];
 		for(var i in expected){
 			same([path.nodes[i].getX(), path.nodes[i].getY()], expected[i], "initial: path node " + i + " is as expected");
@@ -201,7 +200,6 @@ window["test"]["gameOptimizations"] = function(){
 		// After we invalidate the point, we can regenerate the rest of the graph
 
 		path.continueCalculating();
-		debugLPA(path.algorithm);
 
 		ok(path.found, "found a new path");
 		return;		
@@ -233,7 +231,6 @@ window["test"]["gameOptimizations"] = function(){
 	
 		var graph = lpaGraph2();
 		var path = graph.findGoal({start: graph.getNode(0, 0), goal: graph.getNode(0, 5), algorithm: "lpa*", baked: false, diagonals: true});
-		debugLPA(path.algorithm);
 
 		// Now we remove a point and signal to our graph that any paths containing that point
 		// are no longer valid after that point
@@ -246,22 +243,17 @@ window["test"]["gameOptimizations"] = function(){
 		// After we invalidate the point, we can regenerate the rest of the graph
 
 		path.continueCalculating();
-		debugLPA(path.algorithm, true);
 	});
 	
 	test("a* optimum performance", function(){
 		var graph = mountainTunnel();
 		var aPath = graph.findGoal({start: graph.getNode(0, 3), goal: graph.getNode(4, 3), algorithm: "a*", baked: false});
 		var lpaPath = graph.findGoal({start: graph.getNode(0, 3), goal: graph.getNode(4, 3), algorithm: "lpa*", baked: false});
-		console.logNodes(aPath.nodes, "a*");
-		console.logNodes(lpaPath.nodes, "lpa*");
 		graph.removeNode(3, 3, true);
-		console.logNodes(aPath.nodes, "a* partial");
-		console.logNodes(lpaPath.nodes, "lpa* partial");
 		aPath.continueCalculating();
 		lpaPath.continueCalculating();
-		console.logNodes(aPath.nodes, "a* redone");
-		console.logNodes(lpaPath.nodes, "lpa* redone");
+		ok(aPath.found, "a* path found");
+		ok(lpaPath.found, "lpa* path found");
 	});
 	
 	$.getScript("http://www.effectgames.com/effect/engine/engine-1.0b2d.js", function(){
