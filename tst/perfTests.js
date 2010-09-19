@@ -109,7 +109,8 @@ window["test"]["perfTests"] = function(){
 						});
 						
 						var start = graph.getNode(0, 0), goal = graph.getNode(t.size - 1, t.size - 1);
-						graph.findGoal({start: start, goal: goal, algorithm: t.algo});
+						var path = graph.findGoal({start: start, goal: goal, algorithm: t.algo});
+						if(!path.found) throw new Error("should be found");		
 					};
 					var total = benchmark(function(){
 						for(var j = 0; j < t.runs; j++){
