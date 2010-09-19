@@ -37,7 +37,7 @@ crow.algorithm.DijkstraAlgorithm.prototype.findPath = function(start, goal, opts
 	}
 
 	var path = [];
-	if(endNode){
+	if(endNode.distance < Infinity){
 		path.unshift(endNode.innerNode);
 		var node = endNode.previous;
 		while(node){

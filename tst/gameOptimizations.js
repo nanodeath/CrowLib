@@ -66,6 +66,22 @@ window["test"]["gameOptimizations"] = function(){
 		});
 	}
 	
+	function mountainTunnel(){
+		var graph = crow.Graph.fromArray([
+			"00111",
+			"00101",
+			"00101",
+			"11111",
+			"10001",
+			"11111"
+		], function(x, y, val){
+			if(val === "1"){
+				return new MyNode([x, y]);
+			}
+		});
+		return graph;
+	}
+	
 	test("invalidate point, a*", function(){
 		var graph = tinyGraph();
 		var path = graph.findGoal({start: graph.getNode(0, 0), goal: graph.getNode(2, 2), algorithm: "a*", baked: false});
@@ -85,11 +101,7 @@ window["test"]["gameOptimizations"] = function(){
 		
 		ok(!path.found, "deleted only available path; can't find new path");
 		
-		var expected = [[0,0],[1,0],[1,1]];
-		for(var i in expected){
-			same([path.nodes[i].getX(), path.nodes[i].getY()], expected[i], "busted: path node " + i + " is as expected");
-		}
-		equals(path.nodes.length, 3, "busted path is indeed shorter");
+		equals(path.nodes.length, 1, "busted path is shorter");
 		
 		// Now let's add another node making it possible to find the goal
 		graph.addNode(new MyNode([2, 1]));
@@ -117,11 +129,7 @@ window["test"]["gameOptimizations"] = function(){
 		graph.removeNode(1, 2);
 		graph.invalidate(0, 1, 2, 2);
 
-		var expected = [[0,0],[1,0]];
-		for(var i in expected){
-			same([path.nodes[i].getX(), path.nodes[i].getY()], expected[i], "incomplete: path node " + i + " is as expected");
-		}
-		equals(path.nodes.length, 2, "incomplete path is indeed shorter");
+		equals(path.nodes.length, 1, "incomplete path is shorter");
 				
 		// After we invalidate the point, we can regenerate the rest of the graph		
 		ok(!path.found, "deleted only available path; can't find new path");
@@ -157,11 +165,7 @@ window["test"]["gameOptimizations"] = function(){
 		
 		ok(!path.found, "deleted only available path; can't find new path");
 		
-		var expected = [[0,0],[1,0],[1,1]];
-		for(var i in expected){
-			same([path.nodes[i].getX(), path.nodes[i].getY()], expected[i], "busted: path node " + i + " is as expected");
-		}
-		equals(path.nodes.length, 3, "busted path is indeed shorter");
+		equals(path.nodes.length, 1, "busted path is indeed shorter");
 		
 		// Now let's add another node making it possible to find the goal
 		graph.addNode(new MyNode([2, 1]));
@@ -233,12 +237,9 @@ window["test"]["gameOptimizations"] = function(){
 
 		// Now we remove a point and signal to our graph that any paths containing that point
 		// are no longer valid after that point
-		graph.removeNode(1, 3);
-		graph.invalidate(1, 3);
-		graph.removeNode(2, 3);
-		graph.invalidate(2, 3);
-		graph.removeNode(3, 3);
-		graph.invalidate(3, 3);
+		graph.removeNode(1, 3, true);
+		graph.removeNode(2, 3, true);
+		graph.removeNode(3, 3, true);
 		window.lpaGraph = graph;
 		window.lpaPath = path;
 		
@@ -246,6 +247,21 @@ window["test"]["gameOptimizations"] = function(){
 
 		path.continueCalculating();
 		debugLPA(path.algorithm, true);
+	});
+	
+	test("a* optimum performance", function(){
+		var graph = mountainTunnel();
+		var aPath = graph.findGoal({start: graph.getNode(0, 3), goal: graph.getNode(4, 3), algorithm: "a*", baked: false});
+		var lpaPath = graph.findGoal({start: graph.getNode(0, 3), goal: graph.getNode(4, 3), algorithm: "lpa*", baked: false});
+		console.logNodes(aPath.nodes, "a*");
+		console.logNodes(lpaPath.nodes, "lpa*");
+		graph.removeNode(3, 3, true);
+		console.logNodes(aPath.nodes, "a* partial");
+		console.logNodes(lpaPath.nodes, "lpa* partial");
+		aPath.continueCalculating();
+		lpaPath.continueCalculating();
+		console.logNodes(aPath.nodes, "a* redone");
+		console.logNodes(lpaPath.nodes, "lpa* redone");
 	});
 	
 	$.getScript("http://www.effectgames.com/effect/engine/engine-1.0b2d.js", function(){

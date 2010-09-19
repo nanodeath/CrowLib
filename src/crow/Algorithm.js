@@ -15,7 +15,8 @@ crow.Algorithm.prototype._invalidatePoint = function(path, invalidationEvent){
 	for(var i = 0; i < path.nodes.length; i++){
 		var n = path.nodes[i];
 		if(n.x == x && n.y == y){
-			path.nodes = path.nodes.slice(0, i);
+			// Invalidating a point in the middle means we need to start over
+			path.nodes = path.nodes.slice(0, 1);
 			path.end = null;
 			path.found = false;
 			break;
@@ -30,7 +31,7 @@ crow.Algorithm.prototype._invalidateRegion = function(path, invalidationEvent){
 		var n = path.nodes[i];
 		var nx = n.x, ny = n.y;
 		if(nx >= x && ny >= y && nx < x2 && ny < y2){
-			path.nodes = path.nodes.slice(0, i);
+			path.nodes = path.nodes.slice(0, 1);
 			path.end = null;
 			path.found = false;
 			break;

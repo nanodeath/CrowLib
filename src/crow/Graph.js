@@ -41,8 +41,9 @@ crow.Graph = function(){
 	 * Removes a node from the graph.
 	 * @param {number} x x-coordinate (0-indexed)
 	 * @param {number} y y-coordinate (0-indexed)
+	 * @param {boolean} [alsoInvalidate=false] Whether to also invalidate the position of the removed node.
 	 */
-	this.removeNode = function(x, y){
+	this.removeNode = function(x, y, alsoInvalidate){
 		if(this.map[x] && this.map[x][y]){
 			delete this.map[x][y];
 			if(this.map[x].length == 0) delete this.map[x];
@@ -53,6 +54,9 @@ crow.Graph = function(){
 				this.nodes.splice(i, 1);
 				break;
 			}
+		}
+		if(alsoInvalidate){
+			this.invalidate(x, y);
 		}
 	};
 	/**

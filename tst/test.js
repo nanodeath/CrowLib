@@ -312,7 +312,7 @@ window["test"]["mainTest"] = function(){
 		AnotherNode.prototype = new crow.BaseNode();
 		AnotherNode.prototype.distanceAlgorithm = crow.GraphUtil.distance.pythagoras;
 		AnotherNode.prototype.distanceTo = function(other, actor){
-			if(actor instanceof Plane || other.walkable == "1") return crow.BaseNode.prototype.distanceTo.apply(this, arguments);
+			if(actor instanceof Plane || other.walkable) return crow.BaseNode.prototype.distanceTo.apply(this, arguments);
 			return Infinity;
 		};
 		function Plane(){};

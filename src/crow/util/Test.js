@@ -20,11 +20,12 @@ if(typeof same !== "undefined"){
 }
 
 if(typeof console !== "undefined"){
-	console.logNodes = function(nodes){
+	console.logNodes = function(nodes, msg){
+		msg = msg ? msg + ": " : "";
 		var output = [];
 		for(var i = 0; i < nodes.length; i++){
 			output.push("[" + nodes[i].getX() + "," + nodes[i].getY() + "]");
 		}
-		console.log(output.join(","));	
+		console.log(msg + output.join(",") + " (length " + nodes.length + ")");
 	};
 }
