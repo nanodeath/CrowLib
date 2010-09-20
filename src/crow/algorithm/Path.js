@@ -101,6 +101,20 @@ crow.algorithm.Path.prototype.advanceTo = function(index_or_node){
 	}
 };
 
+crow.algorithm.Path.prototype.moveGoal = function(newGoal){
+	this.goal = newGoal;
+	this.algorithm.previousGoal = this.algorithm.goal;
+	this.algorithm.goal = newGoal;
+	this.found = false;
+};
+
+crow.algorithm.Path.prototype.moveStart = function(newStart){
+	this.start = newStart;
+	this.algorithm.previousStart = this.algorithm.start;
+	this.algorithm.start = newStart;
+	this.found = false;
+};
+
 /**
  * Gets the next node in the path.
  * @returns {crow.BaseNode} the next node in the path

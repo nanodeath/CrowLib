@@ -28,7 +28,7 @@ crow.algorithm.FRAStarAlgorithm.prototype.ComputePriority = function(node){
 };
 
 crow.algorithm.FRAStarAlgorithm.prototype.TestClosedList = function(node){
-	return node == this.start || (node.expanded && node.parent);
+	return node == this.start || !!(node.expanded && node.parent);
 }
 
 crow.algorithm.FRAStarAlgorithm.prototype.ComputeShortestPath = function(){
@@ -55,7 +55,7 @@ crow.algorithm.FRAStarAlgorithm.prototype.ComputeShortestPath = function(){
 
 crow.algorithm.FRAStarAlgorithm.prototype.UpdateParent = function(clockwise){
 	var node = this.cell;
-	var neighbors = node.getNeighbors(this.graph, this.diagonals);
+	var neighbors = node.innerNode.getNeighbors(this.graph, this.diagonals);
 	// neighbors are by default clockwise -- if we want them counter-clockwise, we must reverse the array
 	if(!clockwise) neighbors = neighbors.reverse();
 	var parent = node.parent;
@@ -96,9 +96,11 @@ crow.algorithm.FRAStarAlgorithm.prototype.Step3 = function(){
 	// find all elements rooted at the previous start that
 	// don't contain the new start in their shortest path
 	var bfs = new crow.algorithm.BFSAlgorithm(this.graph);
+	var getWrapper = this._getWrapperNode;
+	var algo = this;
 	var nodes = bfs.search(this.previousStart.innerNode, {
 		filter: function(node){
-			var a = this._getWrapperNode(node).ancestors();
+			var a = getWrapper.call(algo, node).ancestors();
 			return a.indexOf(oldStart) >= 0 && a.indexOf(newStart) < 0;
 		}
 	});
@@ -111,7 +113,7 @@ crow.algorithm.FRAStarAlgorithm.prototype.Step3 = function(){
 
 crow.algorithm.FRAStarAlgorithm.prototype.FindPerimeter = function(startNode, includingNode){
 	var perimeter = [includingNode];
-	var neighbors = startNode.innerNode.getNeighbors(this.graph, this.diagonals);
+	var neighbors = startNode.innerNode.getNeighbors(this.graph, this.diagonals, true);
 	var i;
 	for(i = 0; i < neighbors.length; i++){
 		var neighbor = neighbors[i];
@@ -120,18 +122,22 @@ crow.algorithm.FRAStarAlgorithm.prototype.FindPerimeter = function(startNode, in
 		}
 	}
 	var node = startNode;
-	i++;
 	for(var j = 0; j < neighbors.length; j++){
 		var k = (i + j) % neighbors.length;
 		var neighbor = neighbors[k];
 		if(neighbor){
+			neighbor = this._getWrapperNode(neighbor);
 			if(!this.TestClosedList(neighbor)){
 				if(perimeter[perimeter.length-1] != neighbor){
 					perimeter.push(neighbor);
 				}
-			} else if(neighbor != startNode) {
-				neighbors = neighbor.getNeighbors(this.graph, this.diagonals);
+			} else if(neighbor == startNode){
+				break;
+			} else {
+				node = neighbor;
+				neighbors = node.innerNode.getNeighbors(this.graph, this.diagonals, true);
 				i = k + 3;
+				j = -1;
 			}
 		}
 	}
@@ -152,11 +158,11 @@ crow.algorithm.FRAStarAlgorithm.prototype.Step5 = function(){
 	});
 	var newNodes = [];
 	this.openSet.each(function(node){
-		var neighbors = node.innerNode.getNeighbors(this.graph, this.diagonals);
+		var neighbors = node.innerNode.getNeighbors(algo.graph, algo.diagonals);
 		for(var i = 0; i < neighbors.length; i++){
 			var neighbor = neighbors[i];
 			var newG = neighbor.g + neighbor.distanceTo(node);
-			if(this.TestClosedList(neighbor) && node.g > newG){
+			if(algo.TestClosedList(neighbor) && node.g > newG){
 				node.g = newG;
 				node.parent = neighbor;
 				newNodes.push(node);
@@ -233,23 +239,24 @@ crow.algorithm.FRAStarAlgorithm.prototype.findPath = function(start, goal, opts)
 };
 
 crow.algorithm.FRAStarAlgorithm.prototype.continueCalculating = function(path){
-	if(path.start == path.goal) return;
-	if(this.TestClosedList(this.goal)){
-		if(path.goal != this.goal){	// Target has changed
-			var newGoalOnPath = false;
+	this.start = this._getWrapperNode(this.start);
+	this.goal = this._getWrapperNode(this.goal);
+	if(this.previousStart) this.previousStart = this._getWrapperNode(this.previousStart);
+	if(this.previousGoal) this.previousGoal = this._getWrapperNode(this.previousGoal);
+	
+	if(this.start == this.goal) return;
+	//if(this.TestClosedList(this.goal)){
+		if(this.goal != this.previousGoal){	// Target has changed
 			for(var i in path.nodes){ // but is it still on the path?
 				var node = path.nodes[i];
 				if(node == path.goal){
-					newGoalOnPath = true;
-					break;
+					path.found = true;
+					return true;
 				}
 			}
 			if(this.start == this.goal){
 				return;
 			}
-			this.previousStart = this.start;
-			this.start = path.start;
-			this.goal = path.goal;
 			if(this.start != this.previousStart){
 				this.Step2();
 				this.anchor = this.start.parent;
@@ -257,17 +264,19 @@ crow.algorithm.FRAStarAlgorithm.prototype.continueCalculating = function(path){
 				this.openListIncomplete = true;
 			}
 		}
-	}
-	if(!this.TestCLosedList(this.goal)){
+	//}
+	if(!this.TestClosedList(this.goal)){
 		if(this.openListIncomplete){
 			this.iteration++;
 			this.Step5();
 		}
 	}
-	return;
+	path.found = true;
+	path.nodes = this.goal.ancestors(true).concat(this.goal.innerNode);
 };
 
 crow.algorithm.FRAStarAlgorithm.prototype._getWrapperNode = function(node){
+	if(node instanceof crow.algorithm.FRAStarAlgorithm.WrapperNode) return node;
 	var w = this._wrapperNode.get(node);
 	if(w) return w;
 	w = new crow.algorithm.FRAStarAlgorithm.WrapperNode(node);

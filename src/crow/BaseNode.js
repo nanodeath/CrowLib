@@ -112,14 +112,14 @@ crow.BaseNode.prototype.hash = function(){
 crow.BaseNode.prototype.getNeighbors = function(graph, includeDiagonals, includeNulls){
 	var ox = this.x, oy = this.y;
 	var rawNeighbors = [];
-	rawNeighbors.push(                    graph.getNode(ox + 1, oy    ));
-	rawNeighbors.push(includeDiagonals && graph.getNode(ox + 1, oy + 1));
-	rawNeighbors.push(                    graph.getNode(ox    , oy + 1));
-	rawNeighbors.push(includeDiagonals && graph.getNode(ox - 1, oy + 1));
-	rawNeighbors.push(                    graph.getNode(ox - 1, oy    ));
-	rawNeighbors.push(includeDiagonals && graph.getNode(ox - 1, oy - 1));
-	rawNeighbors.push(                    graph.getNode(ox    , oy - 1));
-	rawNeighbors.push(includeDiagonals && graph.getNode(ox + 1, oy - 1));
+	rawNeighbors.push(                     graph.getNode(ox + 1, oy    ));
+	if(includeDiagonals) rawNeighbors.push(graph.getNode(ox + 1, oy + 1));
+	rawNeighbors.push(                     graph.getNode(ox    , oy + 1));
+	if(includeDiagonals) rawNeighbors.push(graph.getNode(ox - 1, oy + 1));
+	rawNeighbors.push(                     graph.getNode(ox - 1, oy    ));
+	if(includeDiagonals) rawNeighbors.push(graph.getNode(ox - 1, oy - 1));
+	rawNeighbors.push(                     graph.getNode(ox    , oy - 1));
+	if(includeDiagonals) rawNeighbors.push(graph.getNode(ox + 1, oy - 1));
 	var neighbors = [];
 	for(var i in rawNeighbors){
 		var neighbor = rawNeighbors[i];
