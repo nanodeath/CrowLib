@@ -103,34 +103,31 @@ crow.BaseNode.prototype.hash = function(){
 
 /** 
  * Find neighbors of this node in the provided graph.  Neighbors are nodes to the left/right/above/below, and potentially
- * diagonally from this node, too, given that option.
+ * diagonally from this node, too, given that option.  Nodes are returned clockwise from the due-right position.
  * @param {crow.Graph} graph Graph in which to check this node
  * @param {Boolean} [includeDiagonals=false] Whether to include diagonals in check.
+ * @param {Boolean} [includeNulls=false] If true, a null will be pushed onto the neighbor list if the neighbor doesn't exist
  * @returns {crow.BaseNode[]} neighboring nodes
  */
-crow.BaseNode.prototype.getNeighbors = function(graph, includeDiagonals){
-	var neighbors = [];
+crow.BaseNode.prototype.getNeighbors = function(graph, includeDiagonals, includeNulls){
 	var ox = this.x, oy = this.y;
-	var n;
-	n = graph.getNode(ox - 1, oy);
-	if(n) neighbors.push(n);
-	n = graph.getNode(ox + 1, oy);
-	if(n) neighbors.push(n);
-	n = graph.getNode(ox, oy - 1);
-	if(n) neighbors.push(n);
-	n = graph.getNode(ox, oy + 1);
-	if(n) neighbors.push(n);
-	
-	if(includeDiagonals){
-		n = graph.getNode(ox - 1, oy - 1);
-		if(n) neighbors.push(n);
-		n = graph.getNode(ox + 1, oy - 1);
-		if(n) neighbors.push(n);
-		n = graph.getNode(ox - 1, oy + 1);
-		if(n) neighbors.push(n);
-		n = graph.getNode(ox + 1, oy + 1);
-		if(n) neighbors.push(n);
+	var rawNeighbors = [];
+	rawNeighbors.push(                    graph.getNode(ox + 1, oy    ));
+	rawNeighbors.push(includeDiagonals && graph.getNode(ox + 1, oy + 1));
+	rawNeighbors.push(                    graph.getNode(ox    , oy + 1));
+	rawNeighbors.push(includeDiagonals && graph.getNode(ox - 1, oy + 1));
+	rawNeighbors.push(                    graph.getNode(ox - 1, oy    ));
+	rawNeighbors.push(includeDiagonals && graph.getNode(ox - 1, oy - 1));
+	rawNeighbors.push(                    graph.getNode(ox    , oy - 1));
+	rawNeighbors.push(includeDiagonals && graph.getNode(ox + 1, oy - 1));
+	var neighbors = [];
+	for(var i in rawNeighbors){
+		var neighbor = rawNeighbors[i];
+		if(neighbor) {
+			neighbors.push(neighbor);
+		} else if(includeNulls) {
+			neighbors.push(null);
+		}
 	}
-	
 	return neighbors;
 };

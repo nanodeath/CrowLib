@@ -128,6 +128,17 @@ crow.structs.BucketPriorityQueue.prototype.peekKey = function(){
 	if(this.length) return this.arr[0].key;
 };
 
+crow.structs.BucketPriorityQueue.prototype.each = function(callback){
+	for(var i = 0; i < this.arr.length; i++){
+		var bucket = this.arr[i];
+		if(bucket){
+			for(var j = 0; j < bucket.length; j++){
+				callback(bucket[j], i);
+			}
+		}
+	}
+};
+
 /**
  * Find the bucket given a particular key using binary search.
  * @private

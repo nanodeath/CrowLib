@@ -388,6 +388,29 @@ window["test"]["mainTest"] = function(){
 		});
 	})();
 	
+	module("FRA*", {
+		setup: function(){
+			this.graph1 = crow.Graph.fromArray([
+				"11111",
+				"11101",
+				"11101",
+				"11101",
+				"11101"
+			], function(x, y, val){
+				if(val == "1"){
+					return new MyNode([x, y]);
+				}
+			});
+		}
+	});
+	
+	test("basic test", function(){
+		var start = this.graph1.getNode(0, 1);
+		var goal = this.graph1.getNode(4, 3);
+		var path = this.graph1.findGoal({start: start, goal: goal, algorithm: "fra*", baked: false});
+		console.log(path);
+	});
+	
 	module("internal api : memory leaks");
 	test("paths respond as expected when baked/unbaked", function(){
 		var graph = smallGraph();
