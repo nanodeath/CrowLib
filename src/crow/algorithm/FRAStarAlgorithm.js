@@ -160,8 +160,8 @@ crow.algorithm.FRAStarAlgorithm.prototype.Step5 = function(){
 	this.openSet.each(function(node){
 		var neighbors = node.innerNode.getNeighbors(algo.graph, algo.diagonals);
 		for(var i = 0; i < neighbors.length; i++){
-			var neighbor = neighbors[i];
-			var newG = neighbor.g + neighbor.distanceTo(node);
+			var neighbor = algo._getWrapperNode(neighbors[i]);
+			var newG = neighbor.g + neighbor.innerNode.distanceTo(node.innerNode);
 			if(algo.TestClosedList(neighbor) && node.g > newG){
 				node.g = newG;
 				node.parent = neighbor;
@@ -243,6 +243,28 @@ crow.algorithm.FRAStarAlgorithm.prototype.resolveResults = function(opts, found)
 	return new crow.algorithm.Path(pathOpts);
 };
 
+crow.algorithm.FRAStarAlgorithm.prototype.updateStart = function(path){
+	var foundStart = false;
+	for(var i = 0; i < path.nodes.length; i++){
+		if(path.nodes[i] == this.start.innerNode){
+			// if the index of start is 3, for example, this will remove the first 3
+			// elements from the path.nodes
+			path.nodes.splice(0, i);
+			foundStart = true;
+			break;
+		}
+	}
+	if(foundStart){
+		var length = 0;
+		for(var i = 0; i < path.nodes.length - 1; i++){
+			length += path.nodes[i].distanceTo(path.nodes[i+1]);
+		}
+		path.length = length;
+	} else {
+		throw new Error("Present (start) position not found on path!  FRA* only works if this agent follows the path towards the target.");
+	}
+};
+
 crow.algorithm.FRAStarAlgorithm.prototype.continueCalculating = function(path){
 	this.start = this._getWrapperNode(this.start);
 	this.goal = this._getWrapperNode(this.goal);
@@ -282,6 +304,7 @@ crow.algorithm.FRAStarAlgorithm.prototype.continueCalculating = function(path){
 						// target on path?
 						var node = path.nodes[i];
 						if(node == this.goal.innerNode){
+							this.updateStart(path);
 							return true;
 						}
 					}

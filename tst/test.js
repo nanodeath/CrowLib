@@ -412,6 +412,8 @@ window["test"]["mainTest"] = function(){
 		for(var i = 0; i < path.nodes.length; i++){
 			same(path.nodes[i], new MyNode([expected[i][0], expected[i][1]]), "Node " + i + " in original path");
 		}
+		same(path.length, 8, "Original path of expected length");
+		
 		start = this.graph1.getNode(1, 1);
 		goal = this.graph1.getNode(4, 4)
 		path.moveStart(start);
@@ -421,6 +423,16 @@ window["test"]["mainTest"] = function(){
 		for(var i = 0; i < path.nodes.length; i++){
 			same(path.nodes[i], new MyNode([expected[i][0], expected[i][1]]), "Node " + i + " in revised path");
 		}
+		same(path.length, 8, "New path of expected length");
+		
+		start = path.nodes[1];
+		path.moveStart(start);
+		path.continueCalculating();
+		expected = [[2,1],[2,0],[3,0],[4,0],[4,1],[4,2],[4,3],[4,4]];
+		for(var i = 0; i < path.nodes.length; i++){
+			same(path.nodes[i], new MyNode([expected[i][0], expected[i][1]]), "Node " + i + " in revised path");
+		}
+		same(path.length, 7, "New path #2 of expected length");
 	});
 	
 	module("internal api : memory leaks");
