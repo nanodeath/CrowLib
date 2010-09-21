@@ -206,33 +206,38 @@ crow.algorithm.FRAStarAlgorithm.prototype.findPath = function(start, goal, opts)
 	this.openSet = new crow.structs.BucketPriorityQueue();
 	this.openSet.enqueue(0, start);
 	
-	var found = this.ComputeShortestPath();
+	this.state = 1;
+	var path = this.resolveResults(opts, false);
+	this.continueCalculating(path);
+	return path;
+};
+
+crow.algorithm.FRAStarAlgorithm.prototype.resolveResults = function(opts, found){
 	var pathOpts;
 	if(found){
-		this.openListIncomplete = false;
 		var nodes = this.goal.ancestors(true).concat(this.goal.innerNode);
 		pathOpts = {
 			nodes: nodes,
-			start: start.innerNode,
-			goal: goal.innerNode,
+			start: this.start.innerNode,
+			goal: this.goal.innerNode,
 			found: true,
-			length: goal.g,
+			length: this.goal.g,
 			algorithm: this,
 			graph: opts.graph,
 			baked: opts.baked || (typeof opts.baked === "undefined"),
-			actor: actor
+			actor: opts.actor
 		};
 	} else {
 		pathOpts = {
 			nodes: [],
-			start: start.innerNode,
-			goal: goal.innerNode,
+			start: this.start.innerNode,
+			goal: this.goal.innerNode,
 			found: false,
 			length: Infinity,
 			algorithm: this,
 			graph: opts.graph,
 			baked: opts.baked || (typeof opts.baked === "undefined"),
-			actor: actor
+			actor: opts.actor
 		};
 	}
 	return new crow.algorithm.Path(pathOpts);
@@ -244,35 +249,73 @@ crow.algorithm.FRAStarAlgorithm.prototype.continueCalculating = function(path){
 	if(this.previousStart) this.previousStart = this._getWrapperNode(this.previousStart);
 	if(this.previousGoal) this.previousGoal = this._getWrapperNode(this.previousGoal);
 	
-	if(this.start == this.goal) return;
-	//if(this.TestClosedList(this.goal)){
-		if(this.goal != this.previousGoal){	// Target has changed
-			for(var i in path.nodes){ // but is it still on the path?
-				var node = path.nodes[i];
-				if(node == path.goal){
-					path.found = true;
-					return true;
+	while(true){
+		switch(this.state){
+			case 1:
+				if(this.start == this.goal){
+					this.state = true;
+				} else {
+					var found = this.ComputeShortestPath();
+					var newPath = this.resolveResults({}, found);
+					path.found = found;
+					path.nodes = newPath.nodes;
+					path.length = this.goal.g;
+					if(found){
+						this.openListIncomplete = false;
+						this.state = 3;
+					} else {
+						this.state = false;
+					}
 				}
-			}
-			if(this.start == this.goal){
-				return;
-			}
-			if(this.start != this.previousStart){
-				this.Step2();
-				this.anchor = this.start.parent;
-				this.Step3();
-				this.openListIncomplete = true;
-			}
-		}
-	//}
-	if(!this.TestClosedList(this.goal)){
-		if(this.openListIncomplete){
-			this.iteration++;
-			this.Step5();
+				break;
+			case 3:
+				if(this.TestClosedList(this.goal)){
+					this.state = 4;
+				} else {
+					this.state = 5;
+				}
+				break;
+			case 4:
+				var onPath = false;
+				if(/* target not caught */ this.start != this.goal){
+					for(var i in path.nodes){
+						// target on path?
+						var node = path.nodes[i];
+						if(node == this.goal.innerNode){
+							return true;
+						}
+					}
+				}
+				if(this.start == this.goal){
+					this.state = true;
+				} else {
+					if(this.start != this.previousStart){
+						this.Step2();
+						this.anchor = this.start.parent;
+						this.Step3();
+						this.openListIncomplete = true;
+					}
+					this.state = 3;
+				}
+				break;
+			case 5:
+				if(this.openListIncomplete){
+					this.iteration++;
+					this.Step5();
+				}
+				this.state = 1;
+				break;
+			case true:
+				var newPath = this.resolveResults();
+				path.nodes = newPath;
+				path.length = newPath.length;
+				return true;
+			case false:
+				path.nodes = [];
+				path.length = Infinity;
+				return false;
 		}
 	}
-	path.found = true;
-	path.nodes = this.goal.ancestors(true).concat(this.goal.innerNode);
 };
 
 crow.algorithm.FRAStarAlgorithm.prototype._getWrapperNode = function(node){

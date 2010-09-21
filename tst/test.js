@@ -409,8 +409,6 @@ window["test"]["mainTest"] = function(){
 		var goal = this.graph1.getNode(4, 3);
 		var path = this.graph1.findGoal({start: start, goal: goal, algorithm: "fra*", baked: false});
 		var expected = [[0,1],[1,1],[2,1],[2,0],[3,0],[4,0],[4,1],[4,2],[4,3]];
-		console.log(path);
-		console.logNodes(path.nodes);
 		for(var i = 0; i < path.nodes.length; i++){
 			same(path.nodes[i], new MyNode([expected[i][0], expected[i][1]]), "Node " + i + " in original path");
 		}
@@ -423,9 +421,6 @@ window["test"]["mainTest"] = function(){
 		for(var i = 0; i < path.nodes.length; i++){
 			same(path.nodes[i], new MyNode([expected[i][0], expected[i][1]]), "Node " + i + " in revised path");
 		}
-		window.goal = path.algorithm._getWrapperNode(goal);
-		console.log(path);
-		console.logNodes(path.nodes);
 	});
 	
 	module("internal api : memory leaks");
