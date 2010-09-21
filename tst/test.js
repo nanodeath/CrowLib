@@ -433,6 +433,24 @@ window["test"]["mainTest"] = function(){
 			same(path.nodes[i], new MyNode([expected[i][0], expected[i][1]]), "Node " + i + " in revised path");
 		}
 		same(path.length, 7, "New path #2 of expected length");
+		
+		start = path.nodes[path.nodes.length-2];
+		path.moveStart(start);
+		path.continueCalculating();
+		expected = [[4,3],[4,4]];
+		for(var i = 0; i < path.nodes.length; i++){
+			same(path.nodes[i], new MyNode([expected[i][0], expected[i][1]]), "Node " + i + " in revised path");
+		}
+		same(path.length, 1, "Almost-there path of expected length");
+		
+		start = path.nodes[1];
+		path.moveStart(start);
+		path.continueCalculating();
+		expected = [[4,4]];
+		for(var i = 0; i < path.nodes.length; i++){
+			same(path.nodes[i], new MyNode([expected[i][0], expected[i][1]]), "Node " + i + " in revised path");
+		}
+		same(path.length, 0, "Completed path of expected length");
 	});
 	
 	module("internal api : memory leaks");

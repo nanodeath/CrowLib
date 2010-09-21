@@ -213,6 +213,7 @@ crow.algorithm.FRAStarAlgorithm.prototype.findPath = function(start, goal, opts)
 };
 
 crow.algorithm.FRAStarAlgorithm.prototype.resolveResults = function(opts, found){
+	if(!opts) opts = {};
 	var pathOpts;
 	if(found){
 		var nodes = this.goal.ancestors(true).concat(this.goal.innerNode);
@@ -278,7 +279,7 @@ crow.algorithm.FRAStarAlgorithm.prototype.continueCalculating = function(path){
 					this.state = true;
 				} else {
 					var found = this.ComputeShortestPath();
-					var newPath = this.resolveResults({}, found);
+					var newPath = this.resolveResults(null, found);
 					path.found = found;
 					path.nodes = newPath.nodes;
 					path.length = this.goal.g;
@@ -330,7 +331,7 @@ crow.algorithm.FRAStarAlgorithm.prototype.continueCalculating = function(path){
 				break;
 			case true:
 				var newPath = this.resolveResults();
-				path.nodes = newPath;
+				path.nodes = newPath.nodes;
 				path.length = newPath.length;
 				return true;
 			case false:
