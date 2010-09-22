@@ -107,6 +107,9 @@ crow.Algorithm.AvlPriorityQueue = function(comparator){
  * @private
  */
 crow.Algorithm.initializeDataStructures = function(){
+	for(var i in crow.algorithm){
+		crow.algorithm[i].prototype.klass = crow.algorithm[i];
+	}
 	crow.Algorithm.PriorityQueue = goog.structs.PriorityQueue;
 	crow.Algorithm.AvlTree = goog.structs.AvlTree;
 	
