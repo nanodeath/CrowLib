@@ -330,9 +330,8 @@ crow.algorithm.FRAStarAlgorithm.prototype.continueCalculating = function(path){
 				this.state = 1;
 				break;
 			case true:
-				var newPath = this.resolveResults();
-				path.nodes = newPath.nodes;
-				path.length = newPath.length;
+				path.nodes = [path.goal];
+				path.length = 0;
 				return true;
 			case false:
 				path.nodes = [];
