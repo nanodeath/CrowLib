@@ -416,8 +416,8 @@ window["test"]["mainTest"] = function(){
 		
 		start = this.graph1.getNode(1, 1);
 		goal = this.graph1.getNode(4, 4)
-		path.moveStart(start);
-		path.moveGoal(goal);
+		path.advanceTo(start);
+		path.moveTarget(goal);
 		path.continueCalculating();
 		expected = [[1,1],[2,1],[2,0],[3,0],[4,0],[4,1],[4,2],[4,3],[4,4]];
 		for(var i = 0; i < path.nodes.length; i++){
@@ -426,7 +426,7 @@ window["test"]["mainTest"] = function(){
 		same(path.length, 8, "New path of expected length");
 		
 		start = path.nodes[1];
-		path.moveStart(start);
+		path.advanceTo(start);
 		path.continueCalculating();
 		expected = [[2,1],[2,0],[3,0],[4,0],[4,1],[4,2],[4,3],[4,4]];
 		for(var i = 0; i < path.nodes.length; i++){
@@ -435,7 +435,7 @@ window["test"]["mainTest"] = function(){
 		same(path.length, 7, "New path #2 of expected length");
 		
 		start = path.nodes[path.nodes.length-2];
-		path.moveStart(start);
+		path.advanceTo(start);
 		path.continueCalculating();
 		expected = [[4,3],[4,4]];
 		for(var i = 0; i < path.nodes.length; i++){
@@ -444,7 +444,7 @@ window["test"]["mainTest"] = function(){
 		same(path.length, 1, "Almost-there path of expected length");
 		
 		start = path.nodes[1];
-		path.moveStart(start);
+		path.advanceTo(start);
 		path.continueCalculating();
 		expected = [[4,4]];
 		for(var i = 0; i < path.nodes.length; i++){

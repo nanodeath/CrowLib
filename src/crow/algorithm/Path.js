@@ -80,20 +80,25 @@ crow.algorithm.Path.prototype.advanceTo = function(index_or_node){
 	crow.assert(typeof(index_or_node) === "number" || index_or_node instanceof crow.BaseNode, crow.assert.InvalidArgumentType("number or crow.BaseNode"));
 	if(typeof(index_or_node) === "number"){
 		crow.assert(index_or_node >= 0 && index_or_node < this.nodes.length, crow.assert.IndexOutBounds(index_or_node));
-		this.nodes = this.nodes.slice(index_or_node);
+		return this.advanceTo(this.nodes[index_or_node]);
 	} else {
 		var x = index_or_node.x, y = index_or_node.y, i;
 		var found = false;
 		for(i = 0; i < this.nodes.length; i++){
 			var n = this.nodes[i];
-			if(n.x == x && n.y == y){
+			if(n.x === x && n.y === y){
 				found = true;
 				break;
 			}
 		}
 		if(found){
-			this.advanceTo(i);
+			this.start = index_or_node;
+			this.found = false;
+			if(this.algorithm.moveStart){
+				this.algorithm.moveStart(this, index_or_node);
+			}
 		} else {
+			// NOTE this maybe should throw an exception?
 			this.nodes = [index_or_node];
 			this.found = false;
 			this.end = null;
@@ -101,18 +106,15 @@ crow.algorithm.Path.prototype.advanceTo = function(index_or_node){
 	}
 };
 
-crow.algorithm.Path.prototype.moveGoal = function(newGoal){
-	this.goal = newGoal;
-	this.algorithm.previousGoal = this.algorithm.goal;
-	this.algorithm.goal = newGoal;
+crow.algorithm.Path.prototype.moveTarget = function(newGoal){
+	if(!this.algorithm.klass.attributes.moving_goal){
+		throw new Error(crow.assert.IllegalMethodCall("moveGoal", "This method is intended only to be used with algorithms that support moving targets."));
+	}
+	this.goal = newGoal;	
 	this.found = false;
-};
-
-crow.algorithm.Path.prototype.moveStart = function(newStart){
-	this.start = newStart;
-	this.algorithm.previousStart = this.algorithm.start;
-	this.algorithm.start = newStart;
-	this.found = false;
+	if(this.algorithm.moveTarget){
+		this.algorithm.moveTarget(this, newGoal);
+	}
 };
 
 /**

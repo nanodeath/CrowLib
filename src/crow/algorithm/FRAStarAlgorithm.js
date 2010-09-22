@@ -341,6 +341,21 @@ crow.algorithm.FRAStarAlgorithm.prototype.continueCalculating = function(path){
 	}
 };
 
+crow.algorithm.FRAStarAlgorithm.prototype.moveStart = function(path, newStart){
+	// FIXME see moveTarget
+	this.previousStart = this.start;
+	this.start = newStart;
+}
+
+crow.algorithm.FRAStarAlgorithm.prototype.moveTarget = function(path, newTarget){
+	// FIXME previous goal should really only be set once per iteration
+	// through the state labeled `main loop`.
+	// As such, calling moveTarget twice before calling continueCalculating
+	// is somewhat undefined at this point.
+	this.previousGoal = this.goal;
+	this.goal = newTarget;
+};
+
 crow.algorithm.FRAStarAlgorithm.prototype._getWrapperNode = function(node){
 	if(node instanceof crow.algorithm.FRAStarAlgorithm.WrapperNode) return node;
 	var w = this._wrapperNode.get(node);
