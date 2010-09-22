@@ -298,7 +298,7 @@ crow.algorithm.FRAStarAlgorithm.prototype.continueCalculating = function(path){
 					this.state = 5;
 				}
 				break;
-			case 4:
+			case 4: /* main loop */
 				var onPath = false;
 				if(/* target not caught */ this.start != this.goal){
 					for(var i in path.nodes){
@@ -375,8 +375,8 @@ crow.algorithm.FRAStarAlgorithm.WrapperNode.prototype.ancestors = function(inner
 crow.algorithm.FRAStarAlgorithm.attributes = {
 	min_speed: 2,
 	// Works with:
-	moving_start: false,
-	moving_goal: false,
+	moving_start: true,
+	moving_goal: true,
 	unstable_graph: false,
 	heuristics_allowed: true,
 	goal_is_node: true,
