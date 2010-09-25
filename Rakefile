@@ -58,12 +58,14 @@ class GoogleClosure
 		if(!files.is_a? Array)
 			files = files.to_a
 		end
-		files = files.map {|f| "--input=#{f}"}
+		files = files.sort.map {|f| "--input=#{f}"}
 		path = [LIBRARY_ROOT]
 		if(CONFIG[:path]) then path += CONFIG[:path] end
 		path.map! {|d| "--path=#{d}" }
 		puts "Checking dependencies..."
-		%x[#{CALC_DEPS_BIN} #{files.join(' ')} #{path.join(' ')}].split
+		command = "#{CALC_DEPS_BIN} #{files.join(' ')} #{path.join(' ')}"
+		puts command
+		%x[#{command}].split
 	end
 end
 
