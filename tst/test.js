@@ -311,8 +311,8 @@ window["test"]["mainTest"] = function(){
 		function AnotherNode(arr){ this.x = arr[0]; this.y = arr[1]; };
 		AnotherNode.prototype = new crow.BaseNode();
 		AnotherNode.prototype.distanceAlgorithm = crow.GraphUtil.distance.pythagoras;
-		AnotherNode.prototype.distanceTo = function(other, actor){
-			if(actor instanceof Plane || other.walkable) return crow.BaseNode.prototype.distanceTo.apply(this, arguments);
+		AnotherNode.prototype.distanceToGoal = function(other, actor){
+			if(actor instanceof Plane || other.walkable) return crow.BaseNode.prototype.distanceToGoal.apply(this, arguments);
 			return Infinity;
 		};
 		function Plane(){};

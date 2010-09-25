@@ -16,7 +16,7 @@ crow.algorithm.LPAStarAlgorithm.prototype = new crow.algorithm.ShortestPathAlgor
 
 crow.algorithm.LPAStarAlgorithm.prototype._CalculateKey = function(node){
 	var startDist = Math.min(node.g, node.rhs);
-	return [startDist + node.innerNode.distanceTo(this.goal.innerNode), startDist];
+	return [startDist + node.innerNode.distanceToGoal(this.goal.innerNode), startDist];
 };
 
 crow.algorithm.LPAStarAlgorithm.prototype._UpdateVertex = function(node){
@@ -26,7 +26,7 @@ crow.algorithm.LPAStarAlgorithm.prototype._UpdateVertex = function(node){
 		for(var i = 0; i < neighbors.length; i++){
 			var neighbor = this._getWrapperNode(neighbors[i]);
 			// g + cost value
-			var score = neighbor.g + node.innerNode.distanceTo(neighbor.innerNode);
+			var score = neighbor.g + node.innerNode.distanceToNeighbor(neighbor.innerNode);
 			if(score < bestScore){
 				bestScore = score;
 			}
@@ -52,7 +52,7 @@ crow.algorithm.LPAStarAlgorithm.prototype.keyComp = function(k1, k2){
  * @private
  */
 crow.algorithm.LPAStarAlgorithm.prototype.h = function(node){
-	return node.distanceTo(this.goal);
+	return node.distanceToGoal(this.goal);
 };
 
 /**
@@ -185,7 +185,7 @@ crow.algorithm.LPAStarAlgorithm.prototype.resolveResults = function(){
 		for(var i = 0; i < neighbors.length; i++){
 			var neighbor = this._getWrapperNode(neighbors[i]);
 			// g + cost value
-			distance = current.innerNode.distanceTo(neighbor.innerNode);
+			distance = current.innerNode.distanceToNeighbor(neighbor.innerNode);
 			var score = neighbor.g + distance;
 			if(score < bestScore){
 				bestScore = score;

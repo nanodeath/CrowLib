@@ -87,7 +87,7 @@ crow.algorithm.DijkstraAlgorithm.prototype._process = function(node, endNode){
 			var neighbor = this._getWrapperNode(neighbors[n]);
 			if(neighbor.visited) continue;
 		
-			var neighborDistanceThroughMe = node.distance + node.innerNode.distanceTo(neighbor.innerNode, this.actor);
+			var neighborDistanceThroughMe = node.distance + node.innerNode.distanceToNeighbor(neighbor.innerNode, this.actor);
 			var currentNeighborDistance = neighbor.distance;
 			if(neighborDistanceThroughMe < currentNeighborDistance){
 				neighbor.distance = neighborDistanceThroughMe;

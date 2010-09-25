@@ -23,7 +23,7 @@ crow.algorithm.BFSAlgorithm.prototype.search = function(start, opts){
 		var neighbors = el.getNeighbors(this.graph);
 		for(var i = 0; i < neighbors.length; i++){
 			var neighbor = neighbors[i];
-			if(!visited.get(neighbor) && !pendingVisit.get(neighbor) && el.distanceTo(neighbor) < Infinity && (!opts.filter || opts.filter(neighbor))){
+			if(!visited.get(neighbor) && !pendingVisit.get(neighbor) && el.distanceToNeighbor(neighbor) < Infinity && (!opts.filter || opts.filter(neighbor))){
 				queue.push(neighbor);
 				pendingVisit.set(neighbor, true);
 			}

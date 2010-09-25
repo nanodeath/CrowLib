@@ -11,9 +11,9 @@ window["test"]["dunesAndDemise"] = function(){
 	MyNode.prototype.getX = function(){ return this.arr[0]; };
 	MyNode.prototype.getY = function(){ return this.arr[1]; };
 	MyNode.prototype.distanceAlgorithm = crow.GraphUtil.distance.manhattan;
-	MyNode.prototype.distanceTo = function(other){
-		var baseDistance = crow.BaseNode.prototype.distanceTo.apply(this, arguments);
-		var realDistance = baseDistance * (this.resistance + other.resistance) / 2;
+	MyNode.prototype.distanceToNeighbor = function(neighbor, actor){
+		var baseDistance = crow.BaseNode.prototype.distanceToGoal.apply(this, arguments);
+		var realDistance = baseDistance * (this.resistance + neighbor.resistance) / 2;
 		return realDistance;
 	};
 	MyNode.prototype.resistance = 1.0;
@@ -60,7 +60,7 @@ window["test"]["dunesAndDemise"] = function(){
 	});
 	test("Dijkstra's Algorithm finds good path", function(){
 		var graph = generateGraph();
-		var path = graph.findGoal({start: graph.getNode(0, 0), goal: graph.getNode(5, 4)});
+		var path = graph.findGoal({start: graph.getNode(0, 0), goal: graph.getNode(5, 4), algorithm: "dijkstra"});
 		ok(path.found, "found route");
 		var expected = [[0,0],[0,1],[0,2],[1,2],[2,2],[2,3],[3,3],[4,3],[5,3],[5,4]];
 		for(var i in expected){

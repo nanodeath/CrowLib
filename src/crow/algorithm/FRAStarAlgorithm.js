@@ -24,7 +24,7 @@ crow.algorithm.FRAStarAlgorithm.prototype.InitializeCell = function(node){
 };
 
 crow.algorithm.FRAStarAlgorithm.prototype.ComputePriority = function(node){
-	return node.g + node.innerNode.distanceTo(this.goal.innerNode);
+	return node.g + node.innerNode.distanceToGoal(this.goal.innerNode);
 };
 
 crow.algorithm.FRAStarAlgorithm.prototype.TestClosedList = function(node){
@@ -40,7 +40,7 @@ crow.algorithm.FRAStarAlgorithm.prototype.ComputeShortestPath = function(){
 			var neighbor = this._getWrapperNode(neighbors[n]);
 			if(!this.TestClosedList(neighbor)){
 				this.InitializeCell(neighbor);
-				var newG = node.g + node.innerNode.distanceTo(neighbor.innerNode);
+				var newG = node.g + node.innerNode.distanceToNeighbor(neighbor.innerNode);
 				if(neighbor.g > newG){
 					neighbor.g = newG;
 					neighbor.parent = node;
@@ -72,7 +72,7 @@ crow.algorithm.FRAStarAlgorithm.prototype.UpdateParent = function(clockwise){
 		for(var i = 0; i < neighbors.length; i++){
 			var j = (i + index) % neighbors.length;
 			var neighbor = this._getWrapperNode(neighbors[j]);
-			if(neighbor.g == node.g + node.innerNode.distanceTo(neighbor.innerNode) && this.TestClosedList(neighbor)){
+			if(neighbor.g == node.g + node.innerNode.distanceToNeighbor(neighbor.innerNode) && this.TestClosedList(neighbor)){
 				neighbor.parent = node;
 				this.cell = neighbor;
 				return true;
@@ -161,7 +161,7 @@ crow.algorithm.FRAStarAlgorithm.prototype.Step5 = function(){
 		var neighbors = node.innerNode.getNeighbors(algo.graph, algo.diagonals);
 		for(var i = 0; i < neighbors.length; i++){
 			var neighbor = algo._getWrapperNode(neighbors[i]);
-			var newG = neighbor.g + neighbor.innerNode.distanceTo(node.innerNode);
+			var newG = neighbor.g + neighbor.innerNode.distanceToNeighbor(node.innerNode);
 			if(algo.TestClosedList(neighbor) && node.g > newG){
 				node.g = newG;
 				node.parent = neighbor;
@@ -258,7 +258,7 @@ crow.algorithm.FRAStarAlgorithm.prototype.updateStart = function(path){
 	if(foundStart){
 		var length = 0;
 		for(var i = 0; i < path.nodes.length - 1; i++){
-			length += path.nodes[i].distanceTo(path.nodes[i+1]);
+			length += path.nodes[i].distanceToNeighbor(path.nodes[i+1]);
 		}
 		path.length = length;
 	} else {

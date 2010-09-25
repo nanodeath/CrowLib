@@ -17,13 +17,14 @@ window["test"]["fogOfWar"] = function(){
 		return !this.foggy && !this.isWalkable;
 	};
 	MyNode.prototype.distanceAlgorithm = crow.GraphUtil.distance.manhattan;
-	MyNode.prototype.distanceTo = function(other){
+	MyNode.prototype.distanceToGoal = function(other){
 		if(other.isKnownWall()){
 			return Infinity;
 		} else {
-			return crow.BaseNode.prototype.distanceTo.apply(this, arguments);
+			return crow.BaseNode.prototype.distanceToGoal.apply(this, arguments);
 		}
 	};
+	//MyNode.prototype.distanceToNeighbor = MyNode.prototype.distanceToGoal;
 	
 	var mazeGraph = new function(){
 		this.array = [];
@@ -234,10 +235,12 @@ window["test"]["fogOfWar"] = function(){
 				}
 				var nextNode = nodes[1];
 
-				x = nextNode.getX(), y = nextNode.getY();
+				if(nextNode){
+					x = nextNode.getX(), y = nextNode.getY();
 
-				var me = this;
-				setTimeout(function(){me.step.call(me)}, 500);
+					var me = this;
+					setTimeout(function(){me.step.call(me)}, 500);
+				}
 			};
 			this.draw = function(){
 				canvas.appendTo(getCell(x, y));
@@ -256,7 +259,7 @@ window["test"]["fogOfWar"] = function(){
 				var nodes = graph.getNodes();
 				for(var i in nodes){
 					var n = nodes[i];
-					if(n.distanceTo(currentNode) <= range && n.foggy){
+					if(n.distanceToGoal(currentNode) <= range && n.foggy){
 						n.foggy = false;
 						getCell(n.getX(), n.getY()).closest("td").removeClass("foggy");
 					}

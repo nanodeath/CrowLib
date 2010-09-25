@@ -49,7 +49,7 @@ crow.algorithm.AStarAlgorithm.prototype.findPath = function(start, goal, opts){
 	
 
 	start.gScore = 0;
-	start.hScore = start.innerNode.distanceTo(goal, actor);
+	start.hScore = start.innerNode.distanceToGoal(goal, actor);
 	var found = false, currentNode;
 	while(currentNode = this.toEvaluate.dequeue()){
 		if(currentNode.innerNode === goal){
@@ -70,13 +70,13 @@ crow.algorithm.AStarAlgorithm.prototype.findPath = function(start, goal, opts){
 		for(var n in neighbors){
 			var neighbor = this._getWrapperNode(neighbors[n]);
 			if(neighbor.evaluated) continue;
-			var newGScore = currentNode.gScore + currentNode.innerNode.distanceTo(neighbor.innerNode, actor);
+			var newGScore = currentNode.gScore + currentNode.innerNode.distanceToNeighbor(neighbor.innerNode, actor);
 			if(newGScore == Infinity) continue;
 			
 			if(!this.toEvaluate.containsValue(neighbor) || newGScore < neighbor.gScore){
 				neighbor.parent = currentNode;
 				neighbor.gScore = newGScore;
-				neighbor.hScore = neighbor.innerNode.distanceTo(goal, actor);
+				neighbor.hScore = neighbor.innerNode.distanceToGoal(goal, actor);
 				neighbor.fScore = newGScore + neighbor.hScore;
 				this.toEvaluate.enqueue(neighbor.fScore, neighbor);
 			}

@@ -37,6 +37,7 @@ crow.BaseNode.prototype._initialize = function(){
 		
 		delete this.getX;
 		delete this.getY;
+		if(!this.distanceToNeighbor) this.distanceToNeighbor = this.distanceToGoal;
 	}
 };
 
@@ -76,20 +77,25 @@ crow.BaseNode.prototype.getY = function(){ return this.y; };
  * @returns {Number} distance
  */
 crow.BaseNode.prototype.distanceAlgorithm = crow.GraphUtil.distance.manhattan;
-/**
- * Calculates the distance to another nearby node.  Normally this leverages
- * {@link #distanceAlgorithm}, but it doesn't have to.
- * This should always be a positive number.  There is one special value, Infinity,
- * which the algorithms will consider to be unreachable.
- * @param {crow.BaseNode} otherNode the other node that we're measuring to.
- * @returns {Number} distance
- */
-crow.BaseNode.prototype.distanceTo = function(other){
+
+crow.BaseNode.prototype.distanceToGoal = function(other, actor){
 	var dx = this.x - other.x,
 		dy = this.y - other.y;
 	
 	return this.distanceAlgorithm(dx, dy);
 };
+
+/**
+ * Calculates the distance to a neighboring node.  Normally this leverages
+ * {@link #distanceAlgorithm}, but it doesn't have to.
+ * This should always be a positive number.  There is one special value, Infinity,
+ * which the algorithms will consider to be unreachable.  If not specified, it will
+ * default to this node's distanceToGoal method.
+ * @function
+ * @param {crow.BaseNode} otherNode the other node that we're measuring to.
+ * @returns {Number} distance
+ */
+crow.BaseNode.prototype.distanceToNeighbor = null;
 
 /*
  * Calculate a unique string representing this node in the graph.
