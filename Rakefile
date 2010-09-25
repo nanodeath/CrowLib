@@ -219,6 +219,7 @@ end
 
 def generate_debug(files, filename, markers=true)
 	deps = GoogleClosure.instance.calculate_dependencies(files)
+	deps.each_with_index {|d, i| puts "#{i}. #{d}"}
 	output = StringIO.new
 	output.puts "// Crow DEBUG"
 	output.puts "var CLOSURE_NO_DEPS = true;"
