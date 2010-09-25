@@ -15,33 +15,49 @@ crow.algorithm.FRAStarAlgorithm = function(graph){
 }
 crow.algorithm.FRAStarAlgorithm.prototype = new crow.algorithm.ShortestPathAlgorithm();
 
-crow.algorithm.FRAStarAlgorithm.prototype.InitializeCell = function(node){
-	if(node.generatedIteration != this.iteration){
-		node.g = Infinity;
-		node.generatedIteration = this.iteration;
-		node.expanded = false;
-	}
-};
+/**
+ * Initializes a cell -- this must happen to each cell we come across,
+ * and once per iteration (i.e. each time we invoke the A* part)
+ * @param {crow.algorithm.FRAStarAlgorithm.WrapperNode} node the node to initialize
+ * @deprecated
+ */
 
+/**
+ * Get the priority (as for a priority queue) of the provided node.
+ * @param {crow.algorithm.FRAStarAlgorithm.WrapperNode} node the node to check
+ * @returns a number representing the priority
+ */
 crow.algorithm.FRAStarAlgorithm.prototype.ComputePriority = function(node){
 	return node.g + node.innerNode.distanceToGoal(this.goal.innerNode);
 };
 
+/**
+ * Whether this node is in the closed list.  We don't actually keep a list
+ * data structure, but rather test each node when we come across it for the closed
+ * conditions.
+ * @param {crow.algorithm.FRAStarAlgorithm.WrapperNode} node the node to test
+ * @returns a boolean, indicating true if in the closed list
+ */
 crow.algorithm.FRAStarAlgorithm.prototype.TestClosedList = function(node){
 	return node == this.start || !!(node.expanded && node.parent);
 }
 
+/**
+ * This is the "main loop" so to speak -- basically the same as A* here.
+ * It discovers all the nodes that need to be expanded, expands them, and expands
+ * their neighbors with the appropriate priority.
+ */
 crow.algorithm.FRAStarAlgorithm.prototype.ComputeShortestPath = function(){
 	while(node = this.openSet.dequeue()){
-		if(node.expanded) continue; // if we enqueue the same element twice we may have already expanded it
+		if(node.expanded) continue; // Nonstandard: if we enqueue the same element twice we may have already expanded it
 		node.expanded = true;
 		var neighbors = node.innerNode.getNeighbors(this.graph, this.neighbors);
 		for(var n in neighbors){
 			var neighbor = this._getWrapperNode(neighbors[n]);
 			if(!this.TestClosedList(neighbor)){
-				this.InitializeCell(neighbor);
+				neighbor.initialize();
 				var newG = node.g + node.innerNode.distanceToNeighbor(neighbor.innerNode);
-				if(neighbor.g > newG){
+				if(newG < neighbor.g){
 					neighbor.g = newG;
 					neighbor.parent = node;
 					this.openSet.enqueue(this.ComputePriority(neighbor), neighbor);
@@ -53,6 +69,12 @@ crow.algorithm.FRAStarAlgorithm.prototype.ComputeShortestPath = function(){
 	return false;
 };
 
+/**
+ * Checks whether the this.cell should be the parent of any of its neighbors, then call again on the neighbor.
+ * @private
+ * @param {Boolean} clockwise whether to rotate clockwise from the current parent or not
+ * @returns true if a neighbor's parent property was modified (and we should call this method again)
+ */
 crow.algorithm.FRAStarAlgorithm.prototype.UpdateParent = function(clockwise){
 	var node = this.cell;
 	var neighbors = node.innerNode.getNeighbors(this.graph, this.diagonals);
@@ -75,13 +97,20 @@ crow.algorithm.FRAStarAlgorithm.prototype.UpdateParent = function(clockwise){
 			if(neighbor.g == node.g + node.innerNode.distanceToNeighbor(neighbor.innerNode) && this.TestClosedList(neighbor)){
 				neighbor.parent = node;
 				this.cell = neighbor;
-				return true;
+				return true; // returning true will cause this function to execute again in Step2
 			}
 		}
 	}
-	return false;
+	return false; // returning false means this is the last time this function should execute
 }
 
+/**
+ * This is the (optional) Changing Parents step.  The new start cell needs to be
+ * on the former shortest path between the old start cell and the goal in order
+ * for the calculated distances to be relevant.  In the event that it's not, this
+ * step will update it and any connected cells that need to be updated.
+ * @private
+ */
 crow.algorithm.FRAStarAlgorithm.prototype.Step2 = function(){
 	// TODO this isn't very Javascript-y: it was just copied from the paper
 	this.cell = this.start;
@@ -154,7 +183,7 @@ crow.algorithm.FRAStarAlgorithm.prototype.Step5 = function(){
 	var initCell = this.InitializeCell;
 	var algo = this;
 	this.openSet.each(function(node){
-		initCell.call(algo, node);
+		node.initialize();
 	});
 	var newNodes = [];
 	this.openSet.each(function(node){
@@ -185,10 +214,10 @@ crow.algorithm.FRAStarAlgorithm.prototype.Step5 = function(){
  *   To continue checking from where the path left off, see {@link crow.algorithm.Path#continueCalculating}.
  */
 crow.algorithm.FRAStarAlgorithm.prototype.findPath = function(start, goal, opts){
+	crow.algorithm.ShortestPathAlgorithm.prototype.findPath.apply(this, arguments);
 	if(typeof goal === "function"){
 		throw new Error("A* doesn't support using a callback to determine the goal");
 	}
-	this._wrapperNode = new crow.Algorithm.NodeMap();
 	if(!opts) opts = {};
 
 	var actor = opts.actor;	
@@ -199,8 +228,10 @@ crow.algorithm.FRAStarAlgorithm.prototype.findPath = function(start, goal, opts)
 	this.opts = opts;
 	
 	this.iteration = 1;
-	this.InitializeCell(start);
+	start.initialize();
 	start.g = 0;
+	console.log(start);
+	console.log(goal);
 
 	this.evaluatedList = [];
 	this.openSet = new crow.structs.BucketPriorityQueue();
@@ -356,14 +387,6 @@ crow.algorithm.FRAStarAlgorithm.prototype.moveTarget = function(path, newTarget)
 	this.goal = newTarget;
 };
 
-crow.algorithm.FRAStarAlgorithm.prototype._getWrapperNode = function(node){
-	if(node instanceof crow.algorithm.FRAStarAlgorithm.WrapperNode) return node;
-	var w = this._wrapperNode.get(node);
-	if(w) return w;
-	w = new crow.algorithm.FRAStarAlgorithm.WrapperNode(node);
-	this._wrapperNode.set(node, w);
-	return w;
-};
 /**
  * @constructor
  * @private
@@ -376,11 +399,22 @@ crow.algorithm.FRAStarAlgorithm.WrapperNode = function(node){
 	this.parent = null;
 };
 
-crow.algorithm.FRAStarAlgorithm.WrapperNode.prototype.ancestors = function(innerNode){
+crow.algorithm.FRAStarAlgorithm.prototype._getWrapperNode = crow.Algorithm.wrapperNodeGetterTemplate(crow.algorithm.FRAStarAlgorithm.WrapperNode);
+
+crow.algorithm.FRAStarAlgorithm.WrapperNode.prototype.initialize = function(){
+	var algoIteration = this.algorithm.iteration;
+	if(this.generatedIteration != algoIteration){
+		this.g = Infinity;
+		this.generatedIteration = algoIteration;
+		this.expanded = false;
+	}
+};
+
+crow.algorithm.FRAStarAlgorithm.WrapperNode.prototype.ancestors = function(useRawNodes){
 	var ancestors = [];
 	var p = this.parent;
 	while(p){
-		ancestors.unshift(innerNode ? p.innerNode : p);
+		ancestors.unshift(useRawNodes ? p.innerNode : p);
 		p = p.parent;
 	}
 	return ancestors;

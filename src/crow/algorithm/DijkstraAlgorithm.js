@@ -4,6 +4,11 @@ goog.require('crow.algorithm.Path');
 goog.require('crow.Graph');
 
 /**
+ * Calculates shortest paths from a start point to every other point
+ * in the graph -- because of this (it's an uninformed search algorithm)
+ * it is very slow, providing much more information that most people need.
+ * However, if you don't know ahead of time which node you're looking for,
+ * you don't have much choice.
  * @constructor
  * @private
  */
@@ -12,14 +17,14 @@ crow.algorithm.DijkstraAlgorithm = function(graph){
 }
 crow.algorithm.DijkstraAlgorithm.prototype = new crow.algorithm.ShortestPathAlgorithm();
 crow.algorithm.DijkstraAlgorithm.prototype.findPath = function(start, goal, opts){
-	this._wrapperNode = new crow.Algorithm.NodeMap();
+	crow.algorithm.ShortestPathAlgorithm.prototype.findPath.apply(this, arguments);
 	this.visitedList = [];
 	
 	this.start = start;
 	this.goal = goal;
 	this.opts = opts || {};
 	if(opts.limit){
-		throw new Error("Dijkstra's doesn't support the `limit` option yet");
+		throw new Error("Dijkstra's doesn't support the `limit` option.");
 	}
 	this.actor = opts.actor;
 
@@ -28,11 +33,11 @@ crow.algorithm.DijkstraAlgorithm.prototype.findPath = function(start, goal, opts
 
 	// Algorithm commenceth	
 	if(typeof goal === "function"){
-		this._process(start);
-		endNode = this._determineClosestEndNode(goal);
+		this.mainLoop(start);
+		endNode = this.determineClosestEndNode(goal);
 		found = !!endNode;
 	} else {
-		found = this._process(start, goal);
+		found = this.mainLoop(start, goal);
 		endNode = this._getWrapperNode(goal);
 	}
 
@@ -58,13 +63,15 @@ crow.algorithm.DijkstraAlgorithm.prototype.findPath = function(start, goal, opts
 		actor: this.actor
 	});
 };
-crow.algorithm.DijkstraAlgorithm.prototype.recalculate = function(){
-	var a = this.algorithm;
-	return a.findPath(a.start, a.goal, a.opts);
-};
-// If we have a filter function that determines the end node, there could be multiple end nodes...
-// this function finds the closest end node.
-crow.algorithm.DijkstraAlgorithm.prototype._determineClosestEndNode = function(goal){
+/**
+ * If we have a filter function that determines the end node, 
+ * there could be multiple end nodes...
+ * this function finds the closest.
+ * @private
+ * @param {function(crow.BaseNode): boolean} goal function that returns true if the provided node constitutes a goal state
+ * @returns {crow.algorithm.DijkstraAlgorithm.WrapperNode} goal node closest to start
+ */
+crow.algorithm.DijkstraAlgorithm.prototype.determineClosestEndNode = function(goal){
 	var closest, closestDistance = Infinity;
 	for(var i in this.visitedList){
 		var node = this.visitedList[i];
@@ -78,7 +85,14 @@ crow.algorithm.DijkstraAlgorithm.prototype._determineClosestEndNode = function(g
 	}
 	return closest;
 };
-crow.algorithm.DijkstraAlgorithm.prototype._process = function(node, endNode){
+
+/**
+ * Main loop of Dijkstra's algorithm.  Iteratively executes.
+ * @param {crow.BaseNode} node start point from which to begin searching
+ * @param {crow.BaseNode} [endNode] point at which to stop searching.  if ommitted, entire graph will be explored.
+ * @returns true if an endNode was provided and it was found, false otherwise.
+ */
+crow.algorithm.DijkstraAlgorithm.prototype.mainLoop = function(node, endNode){
 	var nextNodes = new crow.Algorithm.PriorityQueue();
 	node = this._getWrapperNode(node);
 	while(node != null){
@@ -108,13 +122,7 @@ crow.algorithm.DijkstraAlgorithm.prototype._process = function(node, endNode){
 	// base case: target not found; alternatively, a target wasn't given
 	return false;
 };
-crow.algorithm.DijkstraAlgorithm.prototype._getWrapperNode = function(node){
-	var w = this._wrapperNode.get(node);
-	if(w) return w;
-	w = new crow.algorithm.DijkstraAlgorithm.WrapperNode(node);
-	this._wrapperNode.set(node, w);
-	return w;
-};
+
 /**
  * @constructor
  * @private
@@ -125,6 +133,11 @@ crow.algorithm.DijkstraAlgorithm.WrapperNode = function(node){
 	this.previous = null;
 	this.distance = Infinity;
 };
+
+/**
+ * @private
+ */
+crow.algorithm.DijkstraAlgorithm.prototype._getWrapperNode = crow.Algorithm.wrapperNodeGetterTemplate(crow.algorithm.DijkstraAlgorithm.WrapperNode);
 
 // Attributes for AlgorithmResolver //
 crow.algorithm.DijkstraAlgorithm.attributes = {

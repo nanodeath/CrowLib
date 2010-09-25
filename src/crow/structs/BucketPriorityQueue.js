@@ -37,6 +37,7 @@ crow.structs.BucketPriorityQueue.REVERSE_KEY_COMPARATOR = function(k2, k1){
  * @param {*} value value to store in the queue.
  */
 crow.structs.BucketPriorityQueue.prototype.enqueue = function(key, value){
+	// TODO allow the value to have a priority attribute or method
 	this.findBucket(key, true).push(value);
 	this.length++;
 };

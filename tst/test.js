@@ -189,6 +189,17 @@ window["test"]["mainTest"] = function(){
 		//equals(path.length, 12, "Path is of expected length");
 	});
 	
+	module("Dijkstra's");
+	test("basic test", function(){
+		var graph = smallGraph();
+		var path = graph.findGoal({goal: graph.getNode(1, 1), algorithm: "dijkstra"});
+		equals(path.nodes.length, 3, "Path contains expected number of nodes");
+		same(path.start, new MyNode([0, 0]), "Path has expected start node");
+		same(path.end, new MyNode([1, 1]), "Path has expected end node");
+		equals(path.length, 2, "Path is of expected length");
+		ok(path.found, "Path indicates end was found");	
+	});
+
 	module("A*");
 	test("basic test", function(){
 		var graph = smallGraph();

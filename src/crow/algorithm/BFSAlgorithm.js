@@ -3,6 +3,9 @@ goog.require('crow.Graph');
 goog.require('crow.algorithm.SearchAlgorithm');
 
 /**
+ * @class Yer basic breadth-first search.  It oozes out equally in all directions,
+ * doesn't keep track of distances, and simply returns a list of all discovered nodes
+ * at the end.
  * @constructor
  * @private
  */
@@ -29,6 +32,7 @@ crow.algorithm.BFSAlgorithm.prototype.search = function(start, opts){
 			}
 		}
 	}
+	// TODO return a proper path
 	return list;
 };
 

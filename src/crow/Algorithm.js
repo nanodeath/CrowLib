@@ -10,6 +10,18 @@ goog.require('goog.structs.AvlTree');
  */
 crow.Algorithm = function(){};
 
+crow.Algorithm.wrapperNodeGetterTemplate = function(klass){
+	return function(node){
+		if(node instanceof klass) return node;
+		var w = this.wrapperNode.get(node);
+		if(w) return w;
+		w = new klass(node);
+		w.algorithm = this;
+		this.wrapperNode.set(node, w);
+		return w;
+	};
+};
+
 crow.Algorithm.prototype._invalidatePoint = function(path, invalidationEvent){
 	var x = invalidationEvent.x, y = invalidationEvent.y;
 	for(var i = 0; i < path.nodes.length; i++){

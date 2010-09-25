@@ -3,6 +3,7 @@ goog.require('crow.algorithm.SearchAlgorithm');
 goog.require('crow.Graph');
 
 /**
+ * Returns all the nodes in the graph (in undefined order).  Optionally filters some out.
  * @constructor
  * @private
  */
@@ -18,7 +19,7 @@ crow.algorithm.LinearAlgorithm.prototype.search = function(start, opts){
 		list = [];
 		for(var i in nodes){
 			var n = nodes[i];
-			if(!opts.filter || opts.filter.call(n)){
+			if(opts.filter.call(n)){
 				list.push(n);
 			}
 		}

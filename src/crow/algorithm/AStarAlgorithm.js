@@ -4,8 +4,13 @@ goog.require('crow.algorithm.Path');
 goog.require('crow.Graph');
 
 /**
+ * @class
  * A* algorithm, which is basically an "informed" Dijkstra's algorithm.
- * It oozes in the direction of your goal node.
+ * It branches out like Dijkstra's, but is biased in the direction of the
+ * goal using the power of priority queues.
+ * It's the basis of most/all subsequent search algorithms, and while
+ * simple (can't handle moving targets or dynamic graphs) it is certainly
+ * fast.
  * @constructor
  * @private
  */
@@ -24,6 +29,8 @@ crow.algorithm.AStarAlgorithm.prototype = new crow.algorithm.ShortestPathAlgorit
  *   To continue checking from where the path left off, see {@link crow.algorithm.Path#continueCalculating}.
  */
 crow.algorithm.AStarAlgorithm.prototype.findPath = function(start, goal, opts){
+	crow.algorithm.ShortestPathAlgorithm.prototype.findPath.apply(this, arguments);
+	// TODO move this sort of checking up a level and leverage the algo attributes
 	if(typeof goal === "function"){
 		throw new Error("A* doesn't support using a callback to determine the goal");
 	}
@@ -60,17 +67,24 @@ crow.algorithm.AStarAlgorithm.prototype.findPath = function(start, goal, opts){
 			// it may get added to the toEvaluate list twice
 			continue;
 		}
+		// this is how we push it into the 'closed' set
+		// we don't need to iterate over the closed set, just need to be sure we don't
+		// evaluate the same node twice
 		currentNode.evaluated = true;
 		this.evaluatedList.push(currentNode);
+		// TODO A* isn't a proper "realtime" algorithm -- shouldn't try to fake it
 		if(opts.limit && this.evaluatedList.length >= opts.limit){
 			break;
 		}
 		
+		// here we see if the shortest path to the neighbors of this node
+		// lie through this node.  also how we discover new nodes to check out
 		var neighbors = currentNode.innerNode.getNeighbors(this.graph);
 		for(var n in neighbors){
 			var neighbor = this._getWrapperNode(neighbors[n]);
 			if(neighbor.evaluated) continue;
 			var newGScore = currentNode.gScore + currentNode.innerNode.distanceToNeighbor(neighbor.innerNode, actor);
+			// this is how we yield control to the client code about which nodes are reachable
 			if(newGScore == Infinity) continue;
 			
 			if(!this.toEvaluate.containsValue(neighbor) || newGScore < neighbor.gScore){
@@ -110,6 +124,7 @@ crow.algorithm.AStarAlgorithm.prototype.findPath = function(start, goal, opts){
 		
 		return new crow.algorithm.Path(pathOpts);
 	} else if(opts.limit){
+		// TODO remove opts.limit from A*
 		// TODO think about this more?  It's not the best heuristic,
 		// but I think it's good enough, since we do analyze nodes in
 		// a particular order (favoring the more promising nodes)
@@ -133,13 +148,6 @@ crow.algorithm.AStarAlgorithm.prototype.findPath = function(start, goal, opts){
 	}
 };
 
-crow.algorithm.AStarAlgorithm.prototype._getWrapperNode = function(node){
-	var w = this._wrapperNode.get(node);
-	if(w) return w;
-	w = new crow.algorithm.AStarAlgorithm.WrapperNode(node);
-	this._wrapperNode.set(node, w);
-	return w;
-};
 /**
  * @constructor
  * @private
@@ -152,6 +160,12 @@ crow.algorithm.AStarAlgorithm.WrapperNode = function(node){
 	this.hScore;
 	this.fScore;
 };
+
+/**
+ * @private
+ */
+crow.algorithm.AStarAlgorithm.prototype._getWrapperNode = crow.Algorithm.wrapperNodeGetterTemplate(crow.algorithm.AStarAlgorithm.WrapperNode);
+
 
 // Attributes for AlgorithmResolver //
 crow.algorithm.AStarAlgorithm.attributes = {

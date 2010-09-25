@@ -6,5 +6,7 @@ goog.require('crow.Algorithm');
  */
 crow.algorithm.SearchAlgorithm = function(){}
 crow.algorithm.SearchAlgorithm.prototype = new crow.Algorithm();
-crow.algorithm.SearchAlgorithm.prototype.search = function(start, opts){};
+crow.algorithm.SearchAlgorithm.prototype.search = function(start, opts){
+	this.wrapperNode = new crow.Algorithm.NodeMap()
+};
 

@@ -8,18 +8,32 @@ goog.require('crow.Graph');
 /**
  * @constructor
  * @class LPA*, good when the graph between two stationary targets changes a lot, fair bit of overhead otherwise.
+ * @private
  */
 crow.algorithm.LPAStarAlgorithm = function(graph){
 	this.graph = graph;
 }
 crow.algorithm.LPAStarAlgorithm.prototype = new crow.algorithm.ShortestPathAlgorithm();
 
+/**
+ * Calculate's the key for this node.  The key determines which nodes get looked at next.
+ * Yes, it's an array -- the first element is compared, and if it's equal, the second element is compared.
+ * @private
+ * @param {crow.algorithm.LPAStarAlgorithm.WrapperNode} node
+ * @returns two-element array of numbers
+ */
 crow.algorithm.LPAStarAlgorithm.prototype._CalculateKey = function(node){
 	var startDist = Math.min(node.g, node.rhs);
 	return [startDist + node.innerNode.distanceToGoal(this.goal.innerNode), startDist];
 };
 
+/**
+ * Updates a node's rhs value and queues it for processing if it's locally inconsistent.
+ * @private
+ * @param {crow.algorithm.LPAStarAlgorithm.WrapperNode} node
+ */
 crow.algorithm.LPAStarAlgorithm.prototype._UpdateVertex = function(node){
+	// Update the rhs value (1-step lookahead g) of a node
 	if(node != this.start){
 		var neighbors = node.innerNode.getNeighbors(this.graph, this.diagonals);
 		var bestScore = Infinity;
@@ -34,12 +48,17 @@ crow.algorithm.LPAStarAlgorithm.prototype._UpdateVertex = function(node){
 		node.rhs = bestScore;
 	}
 
+	// pull the node out of the open set
 	this.U.remove(node);
 
+	// but re-queue it with the correct key if it's inconsistent
 	if(node.g != node.rhs) this.U.enqueue(this._CalculateKey(node), node);
 };
 
 /**
+ * This is the comparator we use in the priority queue to sort keys.
+ * @param {Array} key1
+ * @param {Array} key2
  * @private
  */
 crow.algorithm.LPAStarAlgorithm.prototype.keyComp = function(k1, k2){
@@ -49,13 +68,8 @@ crow.algorithm.LPAStarAlgorithm.prototype.keyComp = function(k1, k2){
 };
 
 /**
- * @private
- */
-crow.algorithm.LPAStarAlgorithm.prototype.h = function(node){
-	return node.distanceToGoal(this.goal);
-};
-
-/**
+ * Updates all the neighbors of the given node.
+ * @param {crow.algorithm.LPAStarAlgorithm.WrapperNode} node
  * @private
  */
 crow.algorithm.LPAStarAlgorithm.prototype.updateNeighbors = function(node){
@@ -69,38 +83,8 @@ crow.algorithm.LPAStarAlgorithm.prototype.updateNeighbors = function(node){
  * @private
  * @deprecated
  */
-crow.algorithm.LPAStarAlgorithm.prototype.debugGraph = function(){
-	/*
-	function myRound(num){
-		return Math.round(num * 10000) / 10000;
-	}
-	var table = jQuery("<table class='lpa'>");
-	for(var y = 0; y < this.graph.height; y++){
-		var row = jQuery("<tr>");
-		for(var x = 0; x < this.graph.width; x++){
-			var node = this.graph.getNode(x, y);
-			if(node){
-				var key = this._CalculateKey(this.graph.getNode(x, y));
-				key[0] = myRound(key[0]);
-				key[1] = myRound(key[1]);
-				var rhs = this.rhs.get(node), g = this.g.get(node);
-				var keyString = "[" + key[0] + ',' + key[1] + "]";
-				if(rhs == g){
-					var tip = keyString;
-					row.append("<td class='consistent' title='" + tip + "'>" + myRound(g) + "</td>");
-				} else {
-					var tip = "rhs: " + rhs + ", g: " + g;
-					row.append("<td class='inconsistent' title='" + tip + "'>Infinity<br><span class='key'>" + keyString + "</span></td>");
-				}
-			} else {
-				row.append("<td class='noNode'/>");
-			}
-		}
-		table.append(row);
-	}
-	return table;
-	*/
-};
+crow.algorithm.LPAStarAlgorithm.prototype.debugGraph = function(){};
+
 /**
  * Finds the best path from start node to goal node.
  * @param {crow.BaseNode} start The node from which to begin the search.
@@ -113,16 +97,16 @@ crow.algorithm.LPAStarAlgorithm.prototype.debugGraph = function(){
  */
 crow.algorithm.LPAStarAlgorithm.prototype.findPath = function(start, goal, opts){
 	if(typeof goal === "function"){
-		throw new Error("A* doesn't support using a callback to determine the goal");
+		throw new Error("LPA* doesn't support using a callback to determine the goal");
 	}
 	if(!opts) opts = {};
 	this._wrapperNode = new crow.Algorithm.NodeMap();
 	
 	this.start = this._getWrapperNode(start);
 	this.goal = this._getWrapperNode(goal);
-	this.opts = opts;
 	this.diagonals = opts.diagonals;
 	
+	/** the Open Set -- nodes we know about and plan on visiting, but haven't yet */
 	this.U = new crow.structs.BucketPriorityQueue(this.keyComp);
 	this.start.rhs = 0;
 	this.U.enqueue(this._CalculateKey(this.start), this.start);
