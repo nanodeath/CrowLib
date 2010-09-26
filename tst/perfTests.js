@@ -203,12 +203,9 @@ window["test"]["perfTests"] = function(){
 			var context = {};
 			
 			callback();
-			//if(i++ >= 2) break;
-			///*
 			if(++i % checkEvery === 0 && (actualEnd = new Date()) >= end){
 				break;
 			}
-			//*/
 		}
 		/*
 		var subtractionStart = new Date(), blah;

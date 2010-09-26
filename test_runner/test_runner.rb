@@ -25,8 +25,9 @@ LINKED_TEST = "gen/crow-test.js"
 LINKED_DEBUG_TEST = "gen/crow-test.debug.js"
 
 before do
-	@test_js = params[:debug] ? LINKED_DEBUG_TEST : LINKED_TEST
-	@debug = params[:debug]
+	@test_js = params[:debug].to_i == 1 ? LINKED_DEBUG_TEST : LINKED_TEST
+	@debug = params[:debug].to_i == 1
+	response["Content-Type"] = "text/html; charset=utf-8"
 end
 
 helpers do
@@ -77,6 +78,7 @@ helpers do
       else
         raise "Invalid content type"
     end
+    str += "; charset=utf-8"
     response["Content-Type"] = str
 	end
 

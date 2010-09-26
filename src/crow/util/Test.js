@@ -29,3 +29,39 @@ if(typeof console !== "undefined"){
 		console.log(msg + output.join(",") + " (length " + nodes.length + ")");
 	};
 }
+
+crow.util.Test.benchTime = function(opts){
+	var checkEvery = opts.checkEvery || 1;
+	var runFor = opts.runFor || 1;
+	var deadline = opts.deadline || runFor;
+	var callback = opts.callback;
+	var setup = opts.setup;
+	runFor = runFor * 1000;
+	deadline = deadline * 1000;
+	
+	var done = false;
+	var actualEnd;
+	var start = new Date(), end = new Date();
+	end = end.setTime(end.getTime() + runFor);
+
+	var i = 0;
+	while(true){
+		var context = {};
+		
+		callback();
+		if(++i % checkEvery === 0 && (actualEnd = new Date()) >= end){
+			break;
+		}
+	};
+	var ms = actualEnd - start;
+	var iterationsPerSecond = i / (ms / 1000.0);
+	return {
+		start: start,
+		end: actualEnd,
+		iterations: i,
+		iterationsPerSecond: iterationsPerSecond,
+		secondsPerIteration: 1.0 / iterationsPerSecond,
+		time: ms/*,
+		timeCheckingConditions: subtraction*/
+	};
+};

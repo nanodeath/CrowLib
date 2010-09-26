@@ -114,3 +114,35 @@ table.lpa td.inconsistent {
 table.lpa td.noNode {
 	background-color: #111;
 }
+
+table.testSuite td {
+	text-align: right;
+	padding: 0 10px;
+}
+table.testSuite td.error {
+	border: 2px solid red;
+	text-align: center;
+}
+table.testSuite td.error:before {
+	content: "Error";
+}
+table.testSuite td.initializing {
+	text-align: center;
+	border: 2px solid yellow;
+}
+table.testSuite td.initializing:before {
+	content: "...";
+}
+table.testSuite td.initialized {
+	text-align: center;
+	border: 2px solid green;
+}
+table.testSuite td.initialized:before {
+	content: "✓";
+}
+table.testSuite td.didNotFinish {
+	border: 2px solid yellow;
+}
+table.testSuite td.didNotFinish:before {
+	content: "DNF";
+}

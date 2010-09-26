@@ -467,6 +467,13 @@ window["test"]["mainTest"] = function(){
 		}
 		same(path.length, 0, "Completed path of expected length");
 	});
+	test("trivial: found is true when start == goal", function(){
+		var start = this.graph1.getNode(4, 4);
+		var goal = this.graph1.getNode(4, 3);
+		var path = this.graph1.findGoal({start: start, goal: goal, algorithm: "fra*"});
+		ok(path.found, "Path is found");
+		same(path.length, 1, "Path of length 1");	
+	});
 	
 	module("internal api : memory leaks");
 	test("paths respond as expected when baked/unbaked", function(){

@@ -64,8 +64,8 @@ crow.Graph = function(){
 	 * <p>O(1) if a coordinate is given
 	 * <p>O(n) if a filter is given (n being number of total nodes)
 	 * @param {(number|function(this:crow.BaseNode): boolean)} x_or_filter x-coordinate
-	 *  of element to remove, or a callback that eventually returns true for a node.
-	 * @param {number=} y-coordinate y-coordinate of element to remove (if callback omitted)
+	 *  of element to retrieve, or a callback that eventually returns true for a node.
+	 * @param {number=} y-coordinate y-coordinate of element to retrieve (if callback omitted)
 	 * @returns {crow.BaseNode}
 	 */
 	this.getNode = function(x_or_filter, y, orBlankNode){

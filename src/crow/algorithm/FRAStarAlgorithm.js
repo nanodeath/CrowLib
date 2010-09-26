@@ -316,11 +316,6 @@ crow.algorithm.FRAStarAlgorithm.prototype.continueCalculating = function(path){
 	
 	while(true){
 		switch(this.state){
-			case 0:
-				var newPath = this.findPath(this.start, this.goal, this.opts);
-				newPath.copyTo(path);
-				return path.found;
-				break;
 			case 1:
 				if(this.start == this.goal){
 					this.state = true;
@@ -392,10 +387,12 @@ crow.algorithm.FRAStarAlgorithm.prototype.continueCalculating = function(path){
 				this.state = 1;
 				break;
 			case true:
+				path.found = true;
 				path.nodes = [path.goal];
 				path.length = 0;
 				return true;
 			case false:
+				path.found = false;
 				path.nodes = [];
 				path.length = Infinity;
 				return false;

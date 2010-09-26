@@ -1,4 +1,5 @@
 goog.provide('crow.All');
+goog.require('crow.util.MonkeyPatches');
 goog.require('crow.Graph');
 goog.require('crow.BaseNode');
 goog.require('crow.Algorithm');
