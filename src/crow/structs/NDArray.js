@@ -1,6 +1,9 @@
 goog.provide('crow.structs.NDArray');
 goog.require('crow.util.Assert');
 
+/**
+ * @constructor
+ */
 crow.structs.NDArray = function(dimensions){
 	this.arr = [];
 	/** How deep this array is.  2 represents a 2-dimensional array. */

@@ -181,8 +181,7 @@ window["test"]["gameOptimizations"] = function(){
 	
 	test("invalidate point, lpa*", function(){
 		window.debugLPA = function(algo){
-			return;
-			$("#prelude").empty().append(algo.debugGraph());
+			//$("#prelude").empty().append(algo.debugGraph());
 		}
 	
 		var graph = lpaGraph();
@@ -202,7 +201,7 @@ window["test"]["gameOptimizations"] = function(){
 		path.continueCalculating();
 
 		ok(path.found, "found a new path");
-		return;		
+		/*		
 		var expected = [[0,0],[1,0],[1,1]];
 		for(var i in expected){
 			same([path.nodes[i].getX(), path.nodes[i].getY()], expected[i], "busted: path node " + i + " is as expected");
@@ -219,6 +218,7 @@ window["test"]["gameOptimizations"] = function(){
 		for(var i in expected){
 			same([path.nodes[i].getX(), path.nodes[i].getY()], expected[i], "new path: node " + i + " is as expected");
 		}
+		*/
 	});
 	test("invalidate point, lpa* again", function(){
 		window.debugLPA = function(algo, dontClear){

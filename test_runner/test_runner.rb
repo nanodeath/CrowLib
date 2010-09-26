@@ -13,13 +13,21 @@ require "fileutils"
 require "rake"
 require "json"
 require "open3"
+require "thread"
 
 use Rack::Deflater
 
 ROOT = File.expand_path(File.dirname(__FILE__) + "/../");
 load ROOT + "/Rakefile"
-TEST_FILE = ROOT + "/build/js/crow-test.debug.js"
-LINKED_TEST = "gen/crow-test.debug.js"
+TEST_FILE = ROOT + "/build/js/crow-test.js"
+TEST_DEBUG_FILE = ROOT + "/build/js/crow-test.debug.js"
+LINKED_TEST = "gen/crow-test.js"
+LINKED_DEBUG_TEST = "gen/crow-test.debug.js"
+
+before do
+	@test_js = params[:debug] ? LINKED_DEBUG_TEST : LINKED_TEST
+	@debug = params[:debug]
+end
 
 helpers do
 	def execute_with_output(command)
@@ -46,16 +54,17 @@ helpers do
 	def recompile_tests
 		out = nil
 		err = nil
-		out, err = execute_with_output("rake test:debug")
+		out, err = execute_with_output("rake test:build && rake test:debug")
 		return {:out => out, :err => err}
 	end
 
 	def symlink_tests
-		if(!File.exist? TEST_FILE)
+		if(!File.exist?(TEST_FILE) || !File.exist?(TEST_DEBUG_FILE))
 			recompile_tests
 		end
 		mkdir_p "public/gen/test" unless File.exist? "public/gen/test"
 		FileUtils.ln_sf(TEST_FILE, "public/" + LINKED_TEST) unless File.exist? "public/" + LINKED_TEST
+		FileUtils.ln_sf(TEST_DEBUG_FILE, "public/" + LINKED_DEBUG_TEST) unless File.exist? "public/" + LINKED_DEBUG_TEST
 	end
   def content_is(type)
     str = case type
@@ -75,7 +84,6 @@ end
 
 get "/" do
 	symlink_tests
-	@test_js = LINKED_TEST
 	@docs_exist = File.exist?("public/docs/index.html") && File.exist?("public/docs_private/index.html")
 	erb :home
 end
@@ -177,4 +185,6 @@ post "/benchmark" do
 	'{"status":"ok"}'
 end
 
-`rake test:debug`
+threads = []
+threads << Thread.new { `rake test:build` } << Thread.new { `rake test:debug` }
+threads.each {|t| t.join }

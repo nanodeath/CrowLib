@@ -13,6 +13,7 @@ goog.require('crow.Graph');
  * @private
  */
 crow.algorithm.DijkstraAlgorithm = function(graph){
+	this.klass = crow.algorithm.DijkstraAlgorithm;
 	this.graph = graph;
 }
 crow.algorithm.DijkstraAlgorithm.prototype = new crow.algorithm.ShortestPathAlgorithm();
@@ -152,5 +153,5 @@ crow.algorithm.DijkstraAlgorithm.attributes = {
 };
 // end //
 
-crow.algorithm.DijkstraAlgorithm.alias = "dijkstra";
+crow.algorithm.DijkstraAlgorithm["alias"] = "dijkstra";
 crow.Graph.registerAlgorithm(crow.algorithm.DijkstraAlgorithm);

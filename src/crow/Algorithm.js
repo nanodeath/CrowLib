@@ -103,6 +103,9 @@ crow.Algorithm.PriorityQueue = function(){
 crow.Algorithm.AvlTree = function(){
 	throw new Error("An AvlTree class is required, but none found!");
 };
+/**
+ * @constructor
+ */
 crow.Algorithm.AvlPriorityQueue = function(comparator){
 	var newComparator;
 	if(comparator){
@@ -119,9 +122,6 @@ crow.Algorithm.AvlPriorityQueue = function(comparator){
  * @private
  */
 crow.Algorithm.initializeDataStructures = function(){
-	for(var i in crow.algorithm){
-		crow.algorithm[i].prototype.klass = crow.algorithm[i];
-	}
 	crow.Algorithm.PriorityQueue = goog.structs.PriorityQueue;
 	crow.Algorithm.AvlTree = goog.structs.AvlTree;
 	

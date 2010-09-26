@@ -15,6 +15,7 @@ goog.require('crow.Graph');
  * @private
  */
 crow.algorithm.AStarAlgorithm = function(graph){
+	this.klass = crow.algorithm.AStarAlgorithm;
 	this.graph = graph;
 }
 crow.algorithm.AStarAlgorithm.prototype = new crow.algorithm.ShortestPathAlgorithm();
@@ -155,10 +156,10 @@ crow.algorithm.AStarAlgorithm.prototype.findPath = function(start, goal, opts){
 crow.algorithm.AStarAlgorithm.WrapperNode = function(node){
 	this.innerNode = node;
 	this.evaluated = false;
-	this.parent;
-	this.gScore;
-	this.hScore;
-	this.fScore;
+	this.parent = null;
+	this.gScore = null;
+	this.hScore = null;
+	this.fScore = null;
 };
 
 /**
@@ -180,5 +181,5 @@ crow.algorithm.AStarAlgorithm.attributes = {
 };
 // end //
 
-crow.algorithm.AStarAlgorithm.alias = "a*";
+crow.algorithm.AStarAlgorithm["alias"] = "a*";
 crow.Graph.registerAlgorithm(crow.algorithm.AStarAlgorithm);

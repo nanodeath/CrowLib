@@ -128,7 +128,7 @@ crow.Graph = function(){
 	/**
 	 * Find the shortest path to a goal.
 	 * @param opts Options hash describing what's wanted.
-	 * @param {crow.BaseNode} [opts.start="first node added"] Node from which to begin searching.
+	 * @param {crow.BaseNode} [opts.start="firstNodeAdded"] Node from which to begin searching.
 	 * @param {crow.BaseNode|function(this:crow.BaseNode): boolean} opts.goal Target node or condition at which to stop.  If a callback is passed, it will be passed each node that is discovered.  Return true from this callback to signify that the desired node was found.
 	 * @param [opts.actor] The actor that will be traversing the path.  Will be passed to the nodes' distanceTo algorithm.
 	 * @param [opts.baked=true] Whether the path will be returned pre-baked.  If baked, the path won't receive invalidations from the graph.  If not baked, the path will receive invalidations, but must have {@link crow.algorithm.Path#bake} called when the path can be discarded.
@@ -207,7 +207,7 @@ crow.Graph.fromArray = function(array, callback){
 };
 
 crow.Graph.registerAlgorithm = function(algo){
-	var alias = algo.alias;
+	var alias = algo["alias"];
 	if(!alias){
 		throw new Error("No alias found for algorithm");
 	}

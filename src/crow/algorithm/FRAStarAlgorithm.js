@@ -11,9 +11,32 @@ goog.require('crow.Graph');
  * @private
  */
 crow.algorithm.FRAStarAlgorithm = function(graph){
+	this.klass = crow.algorithm.FRAStarAlgorithm;
 	this.graph = graph;
 }
 crow.algorithm.FRAStarAlgorithm.prototype = new crow.algorithm.ShortestPathAlgorithm();
+
+crow.algorithm.FRAStarAlgorithm.prototype._invalidatePoint = function(path, invalidationEvent){
+	crow.Algorithm.prototype._invalidatePoint.apply(this, arguments);
+	this.reset();
+};
+
+crow.algorithm.FRAStarAlgorithm.prototype.reset = function(){
+	this.wrapperNode = new crow.Algorithm.NodeMap();
+	
+	this.start = this._getWrapperNode(this.start.innerNode);
+	this.goal = this._getWrapperNode(this.goal.innerNode);
+	
+	this.iteration = 1;
+	this.start.initialize();
+	this.start.g = 0;
+
+	this.evaluatedList = [];
+	this.openSet = new crow.structs.BucketPriorityQueue();
+	this.openSet.enqueue(0, this.start);
+	
+	this.state = 1;
+};
 
 /**
  * Initializes a cell -- this must happen to each cell we come across,
@@ -114,9 +137,9 @@ crow.algorithm.FRAStarAlgorithm.prototype.UpdateParent = function(clockwise){
 crow.algorithm.FRAStarAlgorithm.prototype.Step2 = function(){
 	// TODO this isn't very Javascript-y: it was just copied from the paper
 	this.cell = this.start;
-	while(this.UpdateParent(false));
+	while(this.UpdateParent(false)){}
 	this.cell = this.start;
-	while(this.UpdateParent(true));
+	while(this.UpdateParent(true)){}
 };
 
 crow.algorithm.FRAStarAlgorithm.prototype.Step3 = function(){
@@ -214,31 +237,19 @@ crow.algorithm.FRAStarAlgorithm.prototype.Step5 = function(){
  *   To continue checking from where the path left off, see {@link crow.algorithm.Path#continueCalculating}.
  */
 crow.algorithm.FRAStarAlgorithm.prototype.findPath = function(start, goal, opts){
-	crow.algorithm.ShortestPathAlgorithm.prototype.findPath.apply(this, arguments);
-	if(typeof goal === "function"){
-		throw new Error("A* doesn't support using a callback to determine the goal");
-	}
 	if(!opts) opts = {};
+	crow.algorithm.ShortestPathAlgorithm.prototype.findPath.apply(this, arguments);
 
-	var actor = opts.actor;	
+	//this.initialize(start, goal, opts);
 	start = this._getWrapperNode(start);
 	goal = this._getWrapperNode(goal);
 	this.start = start;
 	this.goal = goal;
 	this.opts = opts;
 	
-	this.iteration = 1;
-	start.initialize();
-	start.g = 0;
-	console.log(start);
-	console.log(goal);
-
-	this.evaluatedList = [];
-	this.openSet = new crow.structs.BucketPriorityQueue();
-	this.openSet.enqueue(0, start);
+	this.reset();
 	
-	this.state = 1;
-	var path = this.resolveResults(opts, false);
+	var path = this.resolveResults(this.opts, false);
 	this.continueCalculating(path);
 	return path;
 };
@@ -305,6 +316,11 @@ crow.algorithm.FRAStarAlgorithm.prototype.continueCalculating = function(path){
 	
 	while(true){
 		switch(this.state){
+			case 0:
+				var newPath = this.findPath(this.start, this.goal, this.opts);
+				newPath.copyTo(path);
+				return path.found;
+				break;
 			case 1:
 				if(this.start == this.goal){
 					this.state = true;
@@ -344,7 +360,22 @@ crow.algorithm.FRAStarAlgorithm.prototype.continueCalculating = function(path){
 				if(this.start == this.goal){
 					this.state = true;
 				} else {
+					// update previous start, start, and goal
+					/*if(this.newStart){
+						this.previousStart = this.start;
+						this.start = this._getWrapperNode(this.newStart);
+						this.newStart = null;
+					} else {
+						this.previousStart = this.start;
+					}*/
+					if(this.newTarget){
+						this.previousGoal = this.goal; /* is this used? */
+						this.goal = this._getWrapperNode(this.newTarget);
+						this.newTarget = null;
+					}
+					if(!this.previousStart) this.previousStart = this.start;
 					if(this.start != this.previousStart){
+						//this.previousStart = this.start;
 						this.Step2();
 						this.anchor = this.start.parent;
 						this.Step3();
@@ -376,6 +407,10 @@ crow.algorithm.FRAStarAlgorithm.prototype.moveStart = function(path, newStart){
 	// FIXME see moveTarget
 	this.previousStart = this.start;
 	this.start = newStart;
+	//if(!this.previousStart){
+	//	this.previousStart = this.start;
+	//}
+	//this.start = this._getWrapperNode(newStart);
 }
 
 crow.algorithm.FRAStarAlgorithm.prototype.moveTarget = function(path, newTarget){
@@ -385,6 +420,7 @@ crow.algorithm.FRAStarAlgorithm.prototype.moveTarget = function(path, newTarget)
 	// is somewhat undefined at this point.
 	this.previousGoal = this.goal;
 	this.goal = newTarget;
+	//this.newTarget = newTarget;
 };
 
 /**
@@ -395,7 +431,7 @@ crow.algorithm.FRAStarAlgorithm.WrapperNode = function(node){
 	this.innerNode = node;
 	this.generatedIteration = 0;
 	this.expanded = false;
-	this.g;
+	this.g = null;
 	this.parent = null;
 };
 
@@ -433,5 +469,5 @@ crow.algorithm.FRAStarAlgorithm.attributes = {
 };
 // end //
 
-crow.algorithm.FRAStarAlgorithm.alias = "fra*";
+crow.algorithm.FRAStarAlgorithm["alias"] = "fra*";
 crow.Graph.registerAlgorithm(crow.algorithm.FRAStarAlgorithm);

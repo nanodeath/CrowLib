@@ -140,9 +140,13 @@ window["test"]["mainTest"] = function(){
 	});
 	
 	test("findGoal with only a goal", function(){
+		
 		var graph = smallGraph();
-		var path = graph.findGoal({goal: graph.getNode(1, 1)});
+		
+		var path = graph.findGoal({goal: graph.getNode(1, 1), algorithm: "dijkstra"});
+		
 		equals(path.nodes.length, 3, "Path contains expected number of nodes");
+		
 		same(path.start, new MyNode([0, 0]), "Path has expected start node");
 		same(path.end, new MyNode([1, 1]), "Path has expected end node");
 		equals(path.length, 2, "Path is of expected length");
@@ -154,7 +158,7 @@ window["test"]["mainTest"] = function(){
 
 		var graph = largeGraph();
 		
-		var path = graph.findGoal({start: graph.getNode(0, 0), goal: graph.getNode(1, 5)});
+		var path = graph.findGoal({start: graph.getNode(0, 0), goal: graph.getNode(1, 5), algorithm: "dijkstra"});
 
 		equals(path.nodes.length, 13, "Path contains expected number of nodes");
 		same(path.start, new MyNode([0, 0]), "Path has expected start node");

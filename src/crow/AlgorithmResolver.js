@@ -24,11 +24,11 @@ goog.provide('crow.AlgorithmResolver');
  *  Boolean-type attributes can be either true or false for an algorithm.
  */
  
-crow.AlgorithmResolver = {
-	getAlgorithm: function(opts){
+crow.AlgorithmResolver = new function(){
+	this.getAlgorithm = function(opts){
 		return this.getAlgorithms(opts).dequeue();
-	},
-	getAlgorithms: function(opts){
+	};
+	this.getAlgorithms = function(opts){
 		if(!opts) opts = {};
 	
 		// set default opts
@@ -65,5 +65,5 @@ crow.AlgorithmResolver = {
 			}
 		}
 		return queue;
-	}
+	};
 };

@@ -8,6 +8,7 @@ goog.require('crow.Graph');
  * @private
  */
 crow.algorithm.LinearAlgorithm = function(graph){
+	this.klass = crow.algorithm.LinearAlgorithm;
 	this.graph = graph;
 }
 crow.algorithm.LinearAlgorithm.prototype = new crow.algorithm.SearchAlgorithm();
@@ -29,5 +30,5 @@ crow.algorithm.LinearAlgorithm.prototype.search = function(start, opts){
 	return list;
 };
 
-crow.algorithm.LinearAlgorithm.alias = "linear";
+crow.algorithm.LinearAlgorithm["alias"] = "linear";
 crow.Graph.registerAlgorithm(crow.algorithm.LinearAlgorithm);

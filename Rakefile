@@ -169,7 +169,7 @@ namespace "test" do
 	task :prepare_build do
 		TestList.get.each {|f| file test_filename => f}
 		file test_filename => ["build/js", GoogleClosure::CALC_DEPS_BIN, GoogleClosure::COMPILER_JAR] do
-			GoogleClosure.instance.compile FileList.new(CONFIG[:files] + CONFIG[:test_files]), test_filename, (["--create_source_map=./build/test-map"] + OPTIMIZATIONS[:mini])
+			GoogleClosure.instance.compile FileList.new(CONFIG[:files] + CONFIG[:test_files]), test_filename, (["--create_source_map=./build/test-map"] + OPTIMIZATIONS[:micro])
 		end
 	end
 	task :real_build => [test_filename]

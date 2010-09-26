@@ -11,6 +11,7 @@ goog.require('crow.Graph');
  * @private
  */
 crow.algorithm.LPAStarAlgorithm = function(graph){
+	this.klass = crow.algorithm.LPAStarAlgorithm;
 	this.graph = graph;
 }
 crow.algorithm.LPAStarAlgorithm.prototype = new crow.algorithm.ShortestPathAlgorithm();
@@ -278,5 +279,5 @@ crow.algorithm.LPAStarAlgorithm.attributes = {
 };
 // end //
 
-crow.algorithm.LPAStarAlgorithm.alias = "lpa*";
+crow.algorithm.LPAStarAlgorithm["alias"] = "lpa*";
 crow.Graph.registerAlgorithm(crow.algorithm.LPAStarAlgorithm);

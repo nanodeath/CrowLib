@@ -62,6 +62,12 @@ crow.algorithm.Path = function(opts){
 	}
 };
 
+crow.algorithm.Path.prototype.copyTo = function(other){
+	for(var i in this){
+		other[i] = this[i];
+	}
+};
+
 crow.algorithm.Path.prototype._invalidatePoint = function(e){
 	if(this._baked) return;
 	this.algorithm._invalidatePoint(this, e);

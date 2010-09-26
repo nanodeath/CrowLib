@@ -10,6 +10,7 @@ goog.require('crow.algorithm.SearchAlgorithm');
  * @private
  */
 crow.algorithm.BFSAlgorithm = function(graph){
+	this.klass = crow.algorithm.BFSAlgorithm;
 	this.graph = graph;
 }
 crow.algorithm.BFSAlgorithm.prototype = new crow.algorithm.SearchAlgorithm();
@@ -36,5 +37,5 @@ crow.algorithm.BFSAlgorithm.prototype.search = function(start, opts){
 	return list;
 };
 
-crow.algorithm.BFSAlgorithm.alias = "bfs";
+crow.algorithm.BFSAlgorithm["alias"] = "bfs";
 crow.Graph.registerAlgorithm(crow.algorithm.BFSAlgorithm);
