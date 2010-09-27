@@ -146,3 +146,19 @@ table.testSuite td.didNotFinish {
 table.testSuite td.didNotFinish:before {
 	content: "DNF";
 }
+div.example table.graph td {
+	height:5px;
+	width:5px;
+}
+div.example table.graph td.wall {
+	background-color: black;
+}
+div.example table.graph td.onPath {
+	background-color: #00f;
+}
+div.example table.graph td.start {
+	background-color: #0f0;
+}
+div.example table.graph td.end {
+	background-color: #f00;
+}
