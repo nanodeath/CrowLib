@@ -40,6 +40,7 @@
 	<h2><span>Controls</span></h2>
 	<div id="controls">
 		<input class="recompile" type="button" value="Recompile and Reload"/>
+		<input id="debug_mode" type="button" title="Debug mode uses unminified JS"/>
 	</div>
 	<div id="feedback"></div>
 </div>
@@ -48,6 +49,13 @@
 <script type="text/javascript" src="/<%= @test_js %>"></script>
 <script type="text/javascript" src="/test_runner.js"></script>
 <script>
+	$("#debug_mode").val(debugMode ? "Disable Debug Mode" : "Enable Debug Mode").click(function(){
+		if(debugMode){
+			window.location = "/";
+		} else {
+			window.location = "/?debug=1";
+		}
+	});
 	if(test){
 		var list = $("<ul>");
 		var testList = [];
