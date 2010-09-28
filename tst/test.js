@@ -252,6 +252,8 @@ window["test"]["mainTest"] = function(){
 		ok(path.found, "Path indicates end was found");
 	});
 	
+	/*
+	 * Putting this section on the back burner until we have some real-time algorithms
 	module("procedural path generation: A*");
 	test("stationary", function(){
 		var limit = 8;
@@ -319,7 +321,7 @@ window["test"]["mainTest"] = function(){
 		var unlimitedPath = graph.findGoal({start: graph.getNode(0, 0), goal: graph.getNode(7, 5), algorithm: "a*"});
 		ok(path.nodes.length <= unlimitedPath.nodes.length * 2, "resulting path is reasonably efficient (" + path.nodes.length + " vs " + unlimitedPath.nodes.length + " ideal)");
 	});
-	
+	*/
 	(function(){
 		module("passing actors into findGoal");
 

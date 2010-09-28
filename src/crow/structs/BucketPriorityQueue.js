@@ -84,6 +84,23 @@ crow.structs.BucketPriorityQueue.prototype.contains = function(value, key_hint){
 	return false;
 };
 /**
+ * Find the priority for the given item.
+ * @param {*} value Value to look for in the queue.
+ * @returns {Number} priority of the item if found, null if not found
+ */
+crow.structs.BucketPriorityQueue.prototype.getPriority = function(value){
+	for(var i = 0; i < this.arr.length; i++){
+		var bucket = this.arr[i];
+		for(var j = 0; j < bucket.length; j++){
+			var bucketValue = bucket[j];
+			if(bucketValue == value){
+				return bucket.key;
+			}
+		}
+	}
+	return null;
+};
+/**
  * Removes the given value from the queue.
  * @param {*} value Value to remove from the queue
  * @param {*} [keyHint] Key that the value has.  Will speed lookup considerably if known and provided.

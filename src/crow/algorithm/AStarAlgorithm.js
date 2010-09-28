@@ -45,25 +45,21 @@ crow.algorithm.AStarAlgorithm.prototype.findPath = function(start, goal, opts){
 	
 	start = this._getWrapperNode(start);
 
-	this.evaluatedList = [];
-	this.toEvaluate = new crow.Algorithm.PriorityQueue();
-	this.toEvaluate.enqueue(0, start);
+	this.openSet = new crow.structs.BucketPriorityQueue();
+	this.openSet.enqueue(0, start);
 	
-	// gScore is distance of a node n from the starting point
-	// hScore is the estimated distance between a node n and the goal
-	// fScore is the total estimated distance of route through a node
-	
-	var estimateDistance = this.estimateDistance;
-	
+	// g-score is distance of a node n from the starting point
+	// h-score is the estimated distance between a node n and the goal
+	// f-score is the total estimated distance of route through a node
 
-	start.gScore = 0;
-	start.hScore = start.innerNode.distanceToGoal(goal, actor);
+	start.g = 0;
+	start.h = start.innerNode.distanceToGoal(goal, actor);
 	var found = false, currentNode;
-	while(currentNode = this.toEvaluate.dequeue()){
+	while(currentNode = this.openSet.dequeue()){
 		if(currentNode.innerNode === goal){
 			found = true;
 			break;
-		} else if(currentNode.evaluated){
+		} else if(currentNode.expanded){
 			// normally this wouldn't be necessary, but if we check the same neighbor twice,
 			// it may get added to the toEvaluate list twice
 			continue;
@@ -71,29 +67,26 @@ crow.algorithm.AStarAlgorithm.prototype.findPath = function(start, goal, opts){
 		// this is how we push it into the 'closed' set
 		// we don't need to iterate over the closed set, just need to be sure we don't
 		// evaluate the same node twice
-		currentNode.evaluated = true;
-		this.evaluatedList.push(currentNode);
-		// TODO A* isn't a proper "realtime" algorithm -- shouldn't try to fake it
-		if(opts.limit && this.evaluatedList.length >= opts.limit){
-			break;
-		}
+		currentNode.expanded = true;
 		
 		// here we see if the shortest path to the neighbors of this node
 		// lie through this node.  also how we discover new nodes to check out
 		var neighbors = currentNode.innerNode.getNeighbors(this.graph);
 		for(var n in neighbors){
 			var neighbor = this._getWrapperNode(neighbors[n]);
-			if(neighbor.evaluated) continue;
-			var newGScore = currentNode.gScore + currentNode.innerNode.distanceToNeighbor(neighbor.innerNode, actor);
-			// this is how we yield control to the client code about which nodes are reachable
-			if(newGScore == Infinity) continue;
+			// Skip if neighbor is in closed list
+			if(neighbor.expanded) continue;
 			
-			if(!this.toEvaluate.containsValue(neighbor) || newGScore < neighbor.gScore){
+			var newG = currentNode.g + currentNode.innerNode.distanceToNeighbor(neighbor.innerNode, actor);
+			if(newG == Infinity) continue;
+//			if(!(neighbor == start || (neighbor.expanded && neighbor.parent != null))){
+			if(!this.openSet.contains(neighbor) || newG < neighbor.g){
 				neighbor.parent = currentNode;
-				neighbor.gScore = newGScore;
-				neighbor.hScore = neighbor.innerNode.distanceToGoal(goal, actor);
-				neighbor.fScore = newGScore + neighbor.hScore;
-				this.toEvaluate.enqueue(neighbor.fScore, neighbor);
+				neighbor.g = newG;
+				var h = neighbor.innerNode.distanceToGoal(goal, actor);
+				neighbor.f = newG + h;
+				this.openSet.enqueue(neighbor.f, neighbor);
+//			}
 			}
 		}
 	}
@@ -120,25 +113,9 @@ crow.algorithm.AStarAlgorithm.prototype.findPath = function(start, goal, opts){
 			node = node.parent;
 		}
 		pathOpts.end = endNode.innerNode;
-		pathOpts.length = endNode.gScore;
+		pathOpts.length = endNode.g;
 		pathOpts.found = true;
 		
-		return new crow.algorithm.Path(pathOpts);
-	} else if(opts.limit){
-		// TODO remove opts.limit from A*
-		// TODO think about this more?  It's not the best heuristic,
-		// but I think it's good enough, since we do analyze nodes in
-		// a particular order (favoring the more promising nodes)
-		var bestNode = this.evaluatedList[this.evaluatedList.length-1];
-		nodes.unshift(bestNode.innerNode);
-		var node = bestNode.parent;
-		while(node){
-			nodes.unshift(node.innerNode);
-			node = node.parent;
-		}
-	
-		pathOpts.end = null;
-		pathOpts.found = null;
 		return new crow.algorithm.Path(pathOpts);
 	} else {
 		pathOpts.end = null;
@@ -155,11 +132,11 @@ crow.algorithm.AStarAlgorithm.prototype.findPath = function(start, goal, opts){
  */
 crow.algorithm.AStarAlgorithm.WrapperNode = function(node){
 	this.innerNode = node;
-	this.evaluated = false;
+	this.expanded = false;
 	this.parent = null;
-	this.gScore = null;
-	this.hScore = null;
-	this.fScore = null;
+	this.g = Infinity;
+	this.h = null;
+	this.f = null;
 };
 
 /**

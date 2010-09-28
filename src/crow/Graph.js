@@ -236,16 +236,45 @@ crow.GraphUtil = {
 	 * in the form of function(dx, dy){ ... }
 	 */
 	distance: {
-		pythagoras: function(dx, dy){
+		/**
+		 * The distance given by pythagorean theorem between two points.
+		 * Useful on 4- and 8-connected graphs.
+		 */
+ 		euclidean: function(dx, dy){
 			return Math.sqrt(Math.pow(dx, 2) + Math.pow(dy, 2));
 		},
+		/**
+		 * Calculates the manhattan distance, which is the sum of the absolute differences
+		 * of their coordinates.  That is, if the two points were on cross-streets
+		 * in a city, how many blocks would you have to walk to get from one to another.
+		 * Useful for 4-connected graphs.
+		 */
 		manhattan: function(dx, dy){
 			return Math.abs(dx) + Math.abs(dy);
 		},
-		manhattan8: function(dx, dy){
+		/**
+		 * The maximum of the absolute differences of their coordinates.  Similar in use to
+		 * Manhattan distance, but appropriate for 8-connected graphs.
+		 */
+		chebyshev: function(dx, dy){
 			return Math.max(Math.abs(dx), Math.abs(dy));
 		},
+		/**
+		 * Sometimes, we want to assume the distance to another node is always 1.
+		 */
 		one: function(){ return 1; }
 	}
 };
-
+/**
+ * @deprecated use {@link crow.GraphUtil.distance.euclidean} instead
+ */
+crow.GraphUtil.distance.pythagoras = crow.GraphUtil.distance.euclidean;
+/**
+ * Short for Maximum metric, another name for the Chebyshev distance.
+ * More readable alias for {@link crow.GraphUtil.distance.chebyshev}.
+ */
+crow.GraphUtil.distance.maximum = crow.GraphUtil.distance.chebyshev;
+/**
+ * @deprecated use {@link crow.GraphUtil.distance.chebyshev} or {@link crow.GraphUtil.distance.maximum}.
+ */
+crow.GraphUtil.distance.manhattan8 = crow.GraphUtil.distance.chebyshev;

@@ -73,6 +73,7 @@ crow.algorithm.FRAStarAlgorithm.prototype.TestClosedList = function(node){
 crow.algorithm.FRAStarAlgorithm.prototype.ComputeShortestPath = function(){
 	while(node = this.openSet.dequeue()){
 		if(node.expanded) continue; // Nonstandard: if we enqueue the same element twice we may have already expanded it
+		// this is so we don't have to remove duplicates (if present) when we add them below
 		node.expanded = true;
 		var neighbors = node.innerNode.getNeighbors(this.graph, this.neighbors);
 		for(var n in neighbors){
