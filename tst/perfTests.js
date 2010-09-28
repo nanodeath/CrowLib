@@ -24,7 +24,7 @@ window["test"]["perfTests"] = function(){
 			size: 2,
 			expectedTime: 0.25,
 			algo: "dijkstra",
-			runFor: 5
+			runFor: 3
 		},
 		{
 			size: 4,
@@ -45,7 +45,7 @@ window["test"]["perfTests"] = function(){
 			size: 2,
 			expectedTime: 0.30,
 			algo: "a*",
-			runFor: 5
+			runFor: 3
 		},
 		{
 			size: 10,
@@ -62,7 +62,7 @@ window["test"]["perfTests"] = function(){
 			size: 2,
 			expectedTime: 0.30,
 			algo: "lpa*",
-			runFor: 5
+			runFor: 3
 		},
 		{
 			size: 10,
@@ -79,7 +79,7 @@ window["test"]["perfTests"] = function(){
 			size: 2,
 			expectedTime: 0.30,
 			algo: "fra*",
-			runFor: 5
+			runFor: 3
 		},
 		{
 			size: 10,
@@ -98,7 +98,7 @@ window["test"]["perfTests"] = function(){
 		if(typeof subtract !== "number") subtract = 0;
 		return end - start - subtract;
 	}
-	
+	var testsToRun = [];
 	function makeTests(tests){
 		var currentTest = {};
 		for(var i = 0; i < tests.length; i++){
@@ -179,12 +179,28 @@ window["test"]["perfTests"] = function(){
 				};
 			};
 			var testName = "Graph size " + currentTest.size + " with " + currentTest.algo;
-			test(testName, generateTest(currentTest, testName));
+			testsToRun.push([testName, generateTest(currentTest, testName)]);
 			testName = "Graph size " + currentTest.size + " with " + currentTest.algo + " and 5 graph permutations";
-			var testToRun = generateRegenTest(currentTest, testName);
-			if(testToRun) test(testName, testToRun);
+			testsToRun.push([testName, generateRegenTest(currentTest, testName)]);
 		}
 	};
+	var currentTestIdx = 0;
+	function runTests(whenDone){
+		var currentTest = testsToRun[currentTestIdx++];
+		if(currentTest){
+			setTimeout(function(){
+				if(currentTest[1]){
+					console.log("testing");
+					test(currentTest[0], currentTest[1]);
+				} else {
+					console.log("not testing");						
+				}
+				runTests(whenDone);
+			}, 0);
+		} else {
+			whenDone();
+		}
+	}
 	
 	function benchTime(opts){
 		var checkEvery = opts.checkEvery || 1;
@@ -249,6 +265,8 @@ window["test"]["perfTests"] = function(){
 		makeTests(astarTests);
 		makeTests(lpastarTests);
 		makeTests(frastarTests);
-		testAndSaveButton.appendTo("#controls");	
+		runTests(function(){
+			testAndSaveButton.appendTo("#controls");	
+		});
 	});
 }
