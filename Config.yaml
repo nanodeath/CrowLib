@@ -9,4 +9,4 @@
 :advanced_compilation:
   :mini: true
   :micro: true
-  :pico: true
+  :pico: false

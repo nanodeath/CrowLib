@@ -6,7 +6,7 @@ CONFIG = YAML.load_file(File.join(File.dirname(__FILE__), "Config.yaml"))
 desc "Builds all compilation targets specified in Config.yaml"
 task :default => [:build_crow]
 
-CLEAN.include("build/js", "dist", "test_runner/public/gen", "test_runner/tmp", "DEADJOE")
+CLEAN.include("build/js", "dist", "test_runner/public/gen", "test_runner/tmp", "DEADJOE", "tmp")
 CLOBBER.include("build", "test_runner/gems", "test_runner/.bundle")
 
 # HELPERS
@@ -256,3 +256,17 @@ task :check_bundler do
 	end
 end
 
+task :archive => [:clean] do
+	sh "mkdir -p tmp/"
+	sh "cp LICENSE README.md tmp/"
+	threads = []
+	threads << Thread.new do
+		sh "rake docs"
+	end
+	threads << Thread.new do
+		sh "rake"
+	end
+	threads.each {|t| t.join}
+	sh "cp -r dist/* tmp/"
+	cd "tmp"
+end
