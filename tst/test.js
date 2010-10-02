@@ -1,5 +1,6 @@
 goog.require('crow.Graph');
 goog.require('crow.BaseNode');
+goog.require('crow.ConnectedNode');
 goog.require('crow.algorithm.LPAStarAlgorithm');
 goog.require('crow.util.Test');
 
@@ -32,6 +33,17 @@ window["test"]["mainTest"] = function(){
 			}
 		}
 		return false;
+	}
+	
+	function MyCity(name, latLong){
+		crow.ConnectedNode.apply(this, arguments);
+		this.latLong = latLong;
+	};
+	MyCity.prototype = new crow.ConnectedNode();
+	MyCity.prototype.distanceAlgorithm = crow.GraphUtil.distance.euclidean; 
+	MyCity.prototype.distanceToGoal = function(other){
+		var dx = this.latLong[1] - other.latLong[1], dy = this.latLong[0] - other.latLong[0];
+		return this.distanceAlgorithm(dx, dy)
 	}
 	
 	function smallGraph(){
@@ -191,6 +203,35 @@ window["test"]["mainTest"] = function(){
 		//path = recalculate();
 		//ok(containsNode(path, 4, 4), "Path contains original expected midpoint");
 		//equals(path.length, 12, "Path is of expected length");
+	});
+	
+	module("ConnectedNode");
+	test("works with all algorithms", function(){
+		// the coordinates are only used to estimate distances from a point to the end
+		var Seattle = new MyCity("Seattle", [47, -122]);
+		var SaltLakeCity = new MyCity("Salt Lake City", [40, -111]);
+		var Boston = new MyCity("Boston", [42, -71]);
+		var Houston = new MyCity("Houston", [29, -95]);
+		var Tampa = new MyCity("Tampa", [27, -82]);
+		
+		Seattle.connectTo(SaltLakeCity, 701);
+		SaltLakeCity.connectTo(Boston, 2095);
+		SaltLakeCity.connectTo(Houston, 1197);
+		Houston.connectTo(Tampa, 792);
+		
+		var path;
+		var algorithms = ["dijkstra", "a*", "lpa*", "fra*"];
+		for(var i in algorithms){
+			var algo = algorithms[i];
+			path = crow.Graph.findGoal({start: Seattle, goal: Tampa, algorithm: algo});
+			ok(path.found, "Path was found (" + algo + ")");
+			equals(path.length, 3500, "Path was expected length (" + algo + ")");
+			equals(path.nodes[0].id, Seattle.id, "First stop was as expected (" + algo + ")");
+			equals(path.nodes[1].id, SaltLakeCity.id, "Second stop was as expected (" + algo + ")");
+			equals(path.nodes[2].id, Houston.id, "Third stop was as expected (" + algo + ")");
+			equals(path.nodes[3].id, Tampa.id, "Fourth stop was as expected (" + algo + ")");
+			equals(path.nodes.length, 4, "Correct number of stops (" + algo + ")");
+		}
 	});
 	
 	module("Dijkstra's");

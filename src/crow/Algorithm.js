@@ -80,7 +80,7 @@ crow.Algorithm.NodeMap = function(defaultValue){
 	 * @returns value or the default value
 	 */
 	this.get = function(node){
-		var val = map[node.hash];
+		var val = map[node.id];
 		return typeof val !== "undefined" ? val : defaultValue;
 	};
 	/**
@@ -89,7 +89,7 @@ crow.Algorithm.NodeMap = function(defaultValue){
 	 * @param value The value to set for the node
 	 */
 	this.set = function(node, val){
-		map[node.hash] = val;
+		map[node.id] = val;
 	};
 };
 /**
