@@ -23,16 +23,17 @@ crow.Graph = function(){
 	this.addNode = function(node){
 		node._initialize();
 		
-		var x = node.getX(), y = node.getY();
-		if(x + 1 > this.width){
-			this.width = x + 1;
-		}
-		if(y + 1 > this.height){
-			this.height = y + 1;
+		if(node.getX && node.getY){
+			var x = node.getX(), y = node.getY();
+			if(x + 1 > this.width){
+				this.width = x + 1;
+			}
+			if(y + 1 > this.height){
+				this.height = y + 1;
+			}
 		}
 		this.nodes.push(node);
-		if(!this.map[x]) this.map[x] = {};
-		this.map[x][y] = node;
+		this.map[node.id] = node;
 	};
 	
 	// Remove a node at given coordinates from crow.Graph
@@ -44,19 +45,20 @@ crow.Graph = function(){
 	 * @param {boolean} [alsoInvalidate=false] Whether to also invalidate the position of the removed node.
 	 */
 	this.removeNode = function(x, y, alsoInvalidate){
-		if(this.map[x] && this.map[x][y]){
-			delete this.map[x][y];
-			if(this.map[x].length == 0) delete this.map[x];
-		}
-		for(var i in this.nodes){
-			var node = this.nodes[i];
-			if(node.x == x && node.y == y){
-				this.nodes.splice(i, 1);
-				break;
+		if(typeof x === "number"){
+			delete this.map["" + x + "_" + y];
+			for(var i in this.nodes){
+				var node = this.nodes[i];
+				if(node.x == x && node.y == y){
+					this.nodes.splice(i, 1);
+					break;
+				}
 			}
-		}
-		if(alsoInvalidate){
-			this.invalidate(x, y);
+			if(alsoInvalidate){
+				this.invalidate(x, y);
+			}
+		} else {
+			delete this.map[x.id];
 		}
 	};
 	/**
@@ -78,14 +80,13 @@ crow.Graph = function(){
 					break;
 				}
 			}
+		} else if(typeof x_or_filter === "string"){
+			return this.map[x_or_filter];
 		} else {
 			if(typeof(x_or_filter) !== "number") throw new Error("x coordinate not provided");
 			if(typeof(y) !== "number") throw new Error("y coordinate not provided");
 
-			var x_map = this.map[x_or_filter];
-			if(x_map){
-				node = x_map[y];
-			}
+			node = this.map["" + x_or_filter + "_" + y];
 		}
 		if(node){
 			return node;
@@ -136,14 +137,7 @@ crow.Graph = function(){
 	 * @returns {crow.algorithm.Path} Path representing this search
 	 */
 	this.findGoal = function(opts){
-		crow.Algorithm.initializeDataStructures();
-		var start = opts.start || this.nodes[0];
-		var goal = opts.goal;
-		if(!goal) throw new Error("To find a goal, one must provide a goal...");
-		var algo = crow.Graph._lookupAlgorithm(opts.algorithm) || crow.AlgorithmResolver.getAlgorithm();
-		if(!(algo.prototype instanceof crow.algorithm.ShortestPathAlgorithm)) throw new Error("only compatible with ShortestPathAlgorithms");
-		opts.graph = this;
-		return (new algo(this)).findPath(start, goal, opts);
+		return crow.Graph.findGoal(opts, this);
 	};
 	
 	this.invalidate = function(x, y, dx, dy){
@@ -154,6 +148,23 @@ crow.Graph = function(){
 			this.validator.dispatchEvent({type: "invalidatePoint", x: x, y: y});
 		}
 	};
+};
+
+/**
+ * @see {@link crow.Graph#findGoal}.  This is the same method, but the static version that takes an optional graph param.
+ * @param opts Options hash, see above.
+ * @param {crow.Graph} [graph] Graph that this findGoal should be executed against.  Some implementations of {@link crow.Node} rely on a Graph being present here in order to calculate neighbors (in {@link crow.Node#getNeighbors}).
+ */
+crow.Graph.findGoal = function(opts, graph){
+		crow.Algorithm.initializeDataStructures();
+		var start = opts.start || (graph && graph.nodes[0]);
+		if(!start) throw new Error("To go somewhere you must know where you start...perhaps you meant to provide a start node?");
+		var goal = opts.goal;
+		if(!goal) throw new Error("To find a something, one must know what they're looking for...perhaps you meant to provide a goal node?");
+		var algo = crow.Graph._lookupAlgorithm(opts.algorithm) || crow.AlgorithmResolver.getAlgorithm();
+		if(!(algo.prototype instanceof crow.algorithm.ShortestPathAlgorithm)) throw new Error("only compatible with ShortestPathAlgorithms");
+		opts.graph = graph;
+		return (new algo(graph)).findPath(start, goal, opts);
 };
 crow.Graph.algorithm = {};
 crow.Graph.defaultAlgorithm = {};
@@ -266,7 +277,7 @@ crow.GraphUtil = {
 	}
 };
 /**
- * @deprecated use {@link crow.GraphUtil.distance.euclidean} instead
+ * Alias for {@link crow.GraphUtil.distance.euclidean}
  */
 crow.GraphUtil.distance.pythagoras = crow.GraphUtil.distance.euclidean;
 /**

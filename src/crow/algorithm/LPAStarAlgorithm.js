@@ -161,7 +161,10 @@ crow.algorithm.LPAStarAlgorithm.prototype.resolveResults = function(){
 	var nodes = [];
 	var current = this.goal;
 	var length = 0;
-	var failsafeMaximum = this.graph.width * this.graph.height, count = 0;
+	var failsafeMaximum = Infinity, count = 0;
+	if(this.graph){
+		failSafeMaximum = this.graph.width * this.graph.height;
+	}
 	while(current != this.start && current){
 		nodes.unshift(current.innerNode);
 		
