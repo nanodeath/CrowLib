@@ -6,7 +6,7 @@ CONFIG = YAML.load_file(File.join(File.dirname(__FILE__), "Config.yaml"))
 desc "Builds all compilation targets specified in Config.yaml"
 task :default => [:build_crow]
 
-CLEAN.include("build/js", "dist", "test_runner/public/gen", "test_runner/tmp", "DEADJOE", "tmp")
+CLEAN.include("build/js", "dist", "test_runner/public/gen", "test_runner/tmp", "DEADJOE", "tmp", "CrowLib.tgz")
 CLOBBER.include("build", "test_runner/gems", "test_runner/.bundle")
 
 # HELPERS
@@ -268,5 +268,9 @@ task :archive => [:clean] do
 	end
 	threads.each {|t| t.join}
 	sh "cp -r dist/* tmp/"
-	cd "tmp"
+	filename = "CrowLib.tgz"
+	cd "tmp" do
+		sh "tar -czvf #{filename} *"
+	end
+	sh "mv tmp/#{filename} ."
 end
