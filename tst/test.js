@@ -223,9 +223,14 @@ window["test"]["mainTest"] = function(){
 		var algorithms = ["dijkstra", "a*", "lpa*", "fra*"];
 		for(var i in algorithms){
 			var algo = algorithms[i];
-			path = crow.Graph.findGoal({start: Seattle, goal: Tampa, algorithm: algo});
-			ok(path.found, "Path was found (" + algo + ")");
-			equals(path.length, 3500, "Path was expected length (" + algo + ")");
+			var time = new Date();
+			var n = 1000;
+			for(var j = 0; j < n; j++){			
+				path = crow.Graph.findGoal({start: Seattle, goal: Tampa, algorithm: algo});
+			}
+			time = new Date() - time;
+			ok(path.found, "Path was found (" + algo + ") in " + (Math.round(time*100.0)/(100.0*n)) + "ms");
+			equals(path.length, 2690, "Path was expected length (" + algo + ")");
 			equals(path.nodes[0].id, Seattle.id, "First stop was as expected (" + algo + ")");
 			equals(path.nodes[1].id, SaltLakeCity.id, "Second stop was as expected (" + algo + ")");
 			equals(path.nodes[2].id, Houston.id, "Third stop was as expected (" + algo + ")");
