@@ -9,3 +9,4 @@ test_runner/gems
 test_runner/public/gen/
 test_runner/testrunner.db
 tmp/
+Crow/

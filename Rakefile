@@ -6,7 +6,7 @@ CONFIG = YAML.load_file(File.join(File.dirname(__FILE__), "Config.yaml"))
 desc "Builds all compilation targets specified in Config.yaml"
 task :default => [:build_crow]
 
-CLEAN.include("build/js", "dist", "test_runner/public/gen", "test_runner/tmp", "DEADJOE", "tmp", "CrowLib.tgz")
+CLEAN.include("build/js", "dist", "test_runner/public/gen", "test_runner/tmp", "DEADJOE", "tmp", "CrowLib.tgz", "Crow")
 CLOBBER.include("build", "test_runner/gems", "test_runner/.bundle")
 
 # HELPERS
@@ -257,8 +257,8 @@ task :check_bundler do
 end
 
 task :archive => [:clean] do
-	sh "mkdir -p tmp/"
-	sh "cp LICENSE README.md tmp/"
+	sh "mkdir -p tmp/Crow"
+	sh "cp LICENSE README.md tmp/Crow"
 	threads = []
 	threads << Thread.new do
 		sh "rake docs"
@@ -267,10 +267,10 @@ task :archive => [:clean] do
 		sh "rake"
 	end
 	threads.each {|t| t.join}
-	sh "cp -r dist/* tmp/"
+	sh "cp -r dist/* tmp/Crow"
 	filename = "CrowLib.tgz"
 	cd "tmp" do
-		sh "tar -czvf #{filename} *"
+		sh "tar -czvf #{filename} Crow"
 	end
 	sh "mv tmp/#{filename} ."
 end
