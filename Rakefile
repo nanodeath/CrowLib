@@ -1,5 +1,9 @@
+$: << "src/ruby"
+
 require 'rake/clean'
 require 'yaml'
+require 'Coordinator'
+require 'Rakelib'
 
 CONFIG = YAML.load_file(File.join(File.dirname(__FILE__), "Config.yaml"))
 
@@ -219,30 +223,28 @@ namespace "test" do
 	end
 end
 
+Thread.abort_on_exception = true
+DebugCoordinator = Coordinator.new
+DebugCoordinator.register_processor DisableClosureDeps.new
+DebugCoordinator.register_processor LineCounter.new
+DebugCoordinator.register_processor RemoveDebugHash.new
+
 def generate_debug(files, filename, markers=true)
 	deps = GoogleClosure.instance.calculate_dependencies(files)
-	deps.each_with_index {|d, i| puts "#{i}. #{d}"}
+	
 	output = StringIO.new
-	output.puts "// Crow DEBUG"
-	output.puts "var CLOSURE_NO_DEPS = true;"
-	output.puts "// Crow End DEBUG"
-	output.puts
 	deps.each do |d|
-		output.puts("// FILE: #{d}: DeBUG //") if markers
-		count = 0
 		File.open(d) do |f|
+			DebugCoordinator << ControlCode[:new_file, :filename => d]
 			while(line = f.gets)
-				count += 1
-				if(markers && count % 25 == 0)
-					output.puts(line.chomp + "\t\t// LINE #{count} in #{d}: DeBUG")
-				else
-					output.puts line
-				end
+				DebugCoordinator << line
 			end
-			output.puts("// FINAL LINE #{count} in #{d}: DeBUG //") if markers
-			output.puts
+			DebugCoordinator << ControlCode[:end_file]
 		end
 	end
+
+	DebugCoordinator.wait_until_done
+	DebugCoordinator.results.each {|r| output.puts r}
 	File.open(filename, "w") {|f| f.write output.string }
 	$stderr.puts("Wrote debug file: #{filename}")
 end
