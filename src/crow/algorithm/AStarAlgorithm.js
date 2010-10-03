@@ -3,6 +3,8 @@ goog.require('crow.algorithm.ShortestPathAlgorithm');
 goog.require('crow.algorithm.Path');
 goog.require('crow.Graph');
 
+(function(){
+
 /**
  * @class
  * A* algorithm, which is basically an "informed" Dijkstra's algorithm.
@@ -15,10 +17,13 @@ goog.require('crow.Graph');
  * @private
  */
 crow.algorithm.AStarAlgorithm = function(graph){
+	logger.debug("Instantiating A* instance");
 	this.klass = crow.algorithm.AStarAlgorithm;
 	this.graph = graph;
 }
 crow.algorithm.AStarAlgorithm.prototype = new crow.algorithm.ShortestPathAlgorithm();
+var logger = new crow.Logger(crow.algorithm.AStarAlgorithm);
+logger.setLevel("info");
 
 /**
  * Finds the best path from start node to goal node.
@@ -55,13 +60,16 @@ crow.algorithm.AStarAlgorithm.prototype.findPath = function(start, goal, opts){
 	start.g = 0;
 	start.h = start.innerNode.distanceToGoal(goal, actor);
 	var found = false, currentNode;
+	logger.info("A* loop beginning");
 	while(currentNode = this.openSet.dequeue()){
 		if(currentNode.innerNode === goal){
 			found = true;
+			logger.debug("Goal found");
 			break;
 		} else if(currentNode.expanded){
 			// normally this wouldn't be necessary, but if we check the same neighbor twice,
 			// it may get added to the toEvaluate list twice
+			logger.debug("Skipping expanded node");
 			continue;
 		}
 		// this is how we push it into the 'closed' set
@@ -79,17 +87,16 @@ crow.algorithm.AStarAlgorithm.prototype.findPath = function(start, goal, opts){
 			
 			var newG = currentNode.g + currentNode.innerNode.distanceToNeighbor(neighbor.innerNode, actor);
 			if(newG == Infinity) continue;
-//			if(!(neighbor == start || (neighbor.expanded && neighbor.parent != null))){
 			if(!this.openSet.contains(neighbor) || newG < neighbor.g){
 				neighbor.parent = currentNode;
 				neighbor.g = newG;
 				var h = neighbor.innerNode.distanceToGoal(goal, actor);
 				neighbor.f = newG + h;
 				this.openSet.enqueue(neighbor.f, neighbor);
-//			}
 			}
 		}
 	}
+	logger.info("A* loop concluding");
 
 	var nodes = [];	
 	var pathOpts = {
@@ -160,3 +167,5 @@ crow.algorithm.AStarAlgorithm.attributes = {
 
 crow.algorithm.AStarAlgorithm["alias"] = "a*";
 crow.Graph.registerAlgorithm(crow.algorithm.AStarAlgorithm);
+
+})();

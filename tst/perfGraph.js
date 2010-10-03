@@ -259,10 +259,6 @@ window["test"]["perfGraph"] = function(){
 						examplePath = path;
 						longestPath = path.length;					
 					}
-					// pick a random graph/path as we go along
-					if(Math.random() < 1 / graphIndex){
-
-					}
 				},
 				runFor: 2/*,
 				runFor: this.timePerTest*/

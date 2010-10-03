@@ -44,3 +44,33 @@ class RemoveDebugHash < Processor
 		input.include?("#debug") ? nil : input
 	end
 end
+
+class RemoveLogStatements < Processor
+	def initialize
+		@matcher = /var logger|logger\./
+	end
+	def call(input)
+		if @matcher.match input
+			nil
+		else
+			input
+		end
+	end
+end
+
+=begin
+	JSDoc (which Crow uses) requires arrays in the format crow.someType[],
+	whereas Google Closure requires arrays in the format Array.<crow.someType>.
+	So...I have to convert from one to the other.  Cool, huh?
+=end
+class FixJSDocArraysForGoogleClosure < Processor
+	def initialize
+		@matcher = /(\s*\*.*)\{([^\[]*)\[\]\}/
+		@replacement = '\1{Array.<\2>}'
+	end
+	
+	def call(input)
+		input.sub @matcher, @replacement
+	end
+end
+

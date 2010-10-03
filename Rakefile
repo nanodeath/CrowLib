@@ -1,9 +1,10 @@
-$: << "src/ruby"
+$: << File.expand_path(File.dirname(__FILE__)) + "/src/ruby"
 
 require 'rake/clean'
 require 'yaml'
 require 'Coordinator'
 require 'Rakelib'
+require 'tmpdir'
 
 CONFIG = YAML.load_file(File.join(File.dirname(__FILE__), "Config.yaml"))
 
@@ -28,7 +29,7 @@ end
 class GoogleClosure
 	include Singleton
 	
-	ROOT = "build/google_closure"
+	ROOT = File.expand_path("build/google_closure")
 
 	LIBRARY_URL = "http://closure-library.googlecode.com/svn/trunk/"
 	LIBRARY_ROOT = ROOT + "/library"
@@ -49,22 +50,24 @@ class GoogleClosure
 		sh "unzip #{COMPILER_ARCHIVE} -d #{COMPILER_ROOT}"
 	end
 	
-	def compile(files, out, flags=nil)
+	def compile(files, out, calc_deps_opts={}, flags=nil)
 		files = [files] unless files.is_a? Array
 		files = files.map {|f| "--input=#{f}"}
 		path = [LIBRARY_ROOT]
-		if(CONFIG[:path]) then path += CONFIG[:path] end
+		#if(CONFIG[:path]) then path += CONFIG[:path] end
+		path += calc_deps_opts[:path] if calc_deps_opts[:path]
 		path.map! {|d| "--path=#{d}" }
 		flags = flags.map {|f| '-f "' + f + '"'}.join(" ") unless flags.nil?
 		sh "#{CALC_DEPS_BIN} #{files.join(' ')} #{path.join(' ')} --output_mode=compiled --compiler_jar=#{COMPILER_JAR} #{flags} > #{out}"
 	end
-	def calculate_dependencies(files)
+	def calculate_dependencies(files, calc_deps_opts={})
 		if(!files.is_a? Array)
 			files = files.to_a
 		end
 		files = files.sort.map {|f| "--input=#{f}"}
 		path = [LIBRARY_ROOT]
-		if(CONFIG[:path]) then path += CONFIG[:path] end
+		#if(CONFIG[:path]) then path += CONFIG[:path] end
+		path += calc_deps_opts[:path] if calc_deps_opts[:path]
 		path.map! {|d| "--path=#{d}" }
 		puts "Checking dependencies..."
 		command = "#{CALC_DEPS_BIN} #{files.join(' ')} #{path.join(' ')}"
@@ -79,7 +82,7 @@ class SourceList
 	attr_accessor :file_list
 	
 	def self.get
-		SourceList.instance.file_list ||= GoogleClosure.instance.calculate_dependencies(FileList.new(CONFIG[:files]))
+		SourceList.instance.file_list ||= GoogleClosure.instance.calculate_dependencies(FileList.new(CONFIG[:files]), :path => CONFIG[:path])
 	end
 end
 class TestList
@@ -88,7 +91,7 @@ class TestList
 	attr_accessor :file_list
 	
 	def self.get
-		TestList.instance.file_list ||= GoogleClosure.instance.calculate_dependencies(FileList.new(CONFIG[:files] + CONFIG[:test_files]))
+		TestList.instance.file_list ||= GoogleClosure.instance.calculate_dependencies(FileList.new(CONFIG[:files] + CONFIG[:test_files]), :path => CONFIG[:path])
 	end
 end
 
@@ -148,7 +151,8 @@ task :prepare_build do
 		if(!name_to_use.nil?)
 			optimization = OPTIMIZATIONS[mode]
 			file name_to_use => [:"dist/js", GoogleClosure::CALC_DEPS_BIN, GoogleClosure::COMPILER_JAR] do
-				GoogleClosure.instance.compile CONFIG[:files], name_to_use, optimization
+				#GoogleClosure.instance.compile CONFIG[:files], name_to_use, nil, optimization
+				perform_build(CONFIG[:files], name_to_use, optimization)
 			end
 			SourceList.get.each {|f| file name_to_use => f}
 			task :real_build => [name_to_use]
@@ -170,11 +174,11 @@ task :debug => [:prepare_debug, :real_debug_build]
 
 namespace "test" do
 	test_filename = "build/js/#{default_name}-test.js"
+	file test_filename => ["build/js", GoogleClosure::CALC_DEPS_BIN, GoogleClosure::COMPILER_JAR] do
+		perform_build(FileList.new(CONFIG[:files] + CONFIG[:test_files]), test_filename, (["--create_source_map=./build/test-map"] + OPTIMIZATIONS[:micro]))
+	end
 	task :prepare_build do
 		TestList.get.each {|f| file test_filename => f}
-		file test_filename => ["build/js", GoogleClosure::CALC_DEPS_BIN, GoogleClosure::COMPILER_JAR] do
-			GoogleClosure.instance.compile FileList.new(CONFIG[:files] + CONFIG[:test_files]), test_filename, (["--create_source_map=./build/test-map"] + OPTIMIZATIONS[:micro])
-		end
 	end
 	task :real_build => [test_filename]
 	desc "Builds build/js/#{default_name}-test.js, the default minified test javascript"
@@ -227,19 +231,18 @@ Thread.abort_on_exception = true
 DebugCoordinator = Coordinator.new
 DebugCoordinator.register_processor DisableClosureDeps.new
 DebugCoordinator.register_processor LineCounter.new
-DebugCoordinator.register_processor RemoveDebugHash.new
 
 def generate_debug(files, filename, markers=true)
-	deps = GoogleClosure.instance.calculate_dependencies(files)
+	deps = GoogleClosure.instance.calculate_dependencies(files, :path => CONFIG[:path])
 	
 	output = StringIO.new
 	deps.each do |d|
 		File.open(d) do |f|
-			DebugCoordinator << ControlCode[:new_file, :filename => d]
+			DebugCoordinator << ControlCode(:new_file, :filename => d)
 			while(line = f.gets)
 				DebugCoordinator << line
 			end
-			DebugCoordinator << ControlCode[:end_file]
+			DebugCoordinator << ControlCode(:end_file)
 		end
 	end
 
@@ -249,6 +252,45 @@ def generate_debug(files, filename, markers=true)
 	$stderr.puts("Wrote debug file: #{filename}")
 end
 
+def perform_build(files, filename, opts)
+	base = File.join(Dir.tmpdir, "crow")
+	rm_rf base
+	mkdir_p base
+	cp_r "src", base
+	cp_r "tst", base
+
+	files = files.map {|f| File.expand_path File.join(base, f)}
+
+	def new_coordinator
+		c = Coordinator.new
+		c.register_processor RemoveDebugHash.new
+		c.register_processor RemoveLogStatements.new
+		c.register_processor FixJSDocArraysForGoogleClosure.new
+		c
+	end
+	
+	deps = GoogleClosure.instance.calculate_dependencies(files, :path => [base + "/src", base + "/tst"])
+	deps = deps.select {|d| d.include? base}
+	deps.each_with_index do |d, idx|
+		coordinator = new_coordinator
+		File.open(d) do |f|
+			coordinator << ControlCode(:new_file, :filename => d, :index => idx)
+			while(line = f.gets)
+				coordinator << line
+			end
+			coordinator << ControlCode(:end_file)
+		end
+		coordinator.wait_until_done
+		output = StringIO.new
+		coordinator.results.each {|r| output.puts r}
+		File.open(d, 'w') {|f| f.write output.string }
+	end
+	
+	filename = File.expand_path(filename)
+	calcdeps_opts = {:path => [base]}
+	GoogleClosure.instance.compile files, filename, calcdeps_opts, opts
+	$stderr.puts("Wrote built file: #{filename}")
+end
 
 task :docs => [:generate_javascript_docs]
 
