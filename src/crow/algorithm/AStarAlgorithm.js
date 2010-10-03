@@ -23,7 +23,6 @@ crow.algorithm.AStarAlgorithm = function(graph){
 }
 crow.algorithm.AStarAlgorithm.prototype = new crow.algorithm.ShortestPathAlgorithm();
 var logger = new crow.Logger(crow.algorithm.AStarAlgorithm);
-logger.setLevel("info");
 
 /**
  * Finds the best path from start node to goal node.
