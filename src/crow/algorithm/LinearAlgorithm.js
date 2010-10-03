@@ -18,7 +18,7 @@ crow.algorithm.LinearAlgorithm.prototype.search = function(start, opts){
 	var nodes = this.graph.getNodes();
 	if(opts.filter){
 		list = [];
-		for(var i in nodes){
+		for(var i = 0; i < nodes.length; i++){
 			var n = nodes[i];
 			if(opts.filter.call(n)){
 				list.push(n);

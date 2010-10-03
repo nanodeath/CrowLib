@@ -87,7 +87,7 @@ window["test"]["gameOptimizations"] = function(){
 		var path = graph.findGoal({start: graph.getNode(0, 0), goal: graph.getNode(2, 2), algorithm: "a*", baked: false});
 		
 		var expected = [[0,0],[1,0],[1,1],[1,2],[2,2]];
-		for(var i in expected){
+		for(var i = 0; i < expected.length; i++){
 			same([path.nodes[i].getX(), path.nodes[i].getY()], expected[i], "initial: path node " + i + " is as expected");
 		}
 		
@@ -110,7 +110,7 @@ window["test"]["gameOptimizations"] = function(){
 		ok(path.found, "after adding new node, path is found again");
 
 		var expected = [[0,0],[1,0],[1,1],[2,1],[2,2]];
-		for(var i in expected){
+		for(var i = 0; i < expected.length; i++){
 			same([path.nodes[i].getX(), path.nodes[i].getY()], expected[i], "new path: node " + i + " is as expected");
 		}
 	});
@@ -120,7 +120,7 @@ window["test"]["gameOptimizations"] = function(){
 		var path = graph.findGoal({start: graph.getNode(0, 0), goal: graph.getNode(2, 2), algorithm: "a*", baked: false});
 		
 		var expected = [[0,0],[1,0],[1,1],[1,2],[2,2]];
-		for(var i in expected){
+		for(var i = 0; i < expected.length; i++){
 			same([path.nodes[i].getX(), path.nodes[i].getY()], expected[i], "initial: path node " + i + " is as expected");
 		}
 		
@@ -141,7 +141,7 @@ window["test"]["gameOptimizations"] = function(){
 		ok(path.found, "after adding new node, path is found again");
 
 		var expected = [[0,0],[1,0],[1,1],[2,1],[2,2]];
-		for(var i in expected){
+		for(var i = 0; i < expected.length; i++){
 			same([path.nodes[i].getX(), path.nodes[i].getY()], expected[i], "new path: node " + i + " is as expected");
 		}
 	});
@@ -151,7 +151,7 @@ window["test"]["gameOptimizations"] = function(){
 		var path = graph.findGoal({start: graph.getNode(0, 0), goal: graph.getNode(2, 2), baked: false});
 		
 		var expected = [[0,0],[1,0],[1,1],[1,2],[2,2]];
-		for(var i in expected){
+		for(var i = 0; i < expected.length; i++){
 			same([path.nodes[i].getX(), path.nodes[i].getY()], expected[i], "initial: path node " + i + " is as expected");
 		}
 		
@@ -174,7 +174,7 @@ window["test"]["gameOptimizations"] = function(){
 		ok(path.found, "after adding new node, path is found again");
 
 		var expected = [[0,0],[1,0],[1,1],[2,1],[2,2]];
-		for(var i in expected){
+		for(var i = 0; i < expected.length; i++){
 			same([path.nodes[i].getX(), path.nodes[i].getY()], expected[i], "new path: node " + i + " is as expected");
 		}
 	});
@@ -187,7 +187,7 @@ window["test"]["gameOptimizations"] = function(){
 		var graph = lpaGraph();
 		var path = graph.findGoal({start: graph.getNode(3, 0), goal: graph.getNode(0, 5), algorithm: "lpa*", baked: false, diagonals: true});
 		var expected = [[3,0],[2,0],[1,1],[1,2],[1,3],[1,4],[0,5]];
-		for(var i in expected){
+		for(var i = 0; i < expected.length; i++){
 			same([path.nodes[i].getX(), path.nodes[i].getY()], expected[i], "initial: path node " + i + " is as expected");
 		}
 
@@ -203,7 +203,7 @@ window["test"]["gameOptimizations"] = function(){
 		ok(path.found, "found a new path");
 		/*		
 		var expected = [[0,0],[1,0],[1,1]];
-		for(var i in expected){
+		for(var i = 0; i < expected.length; i++){
 			same([path.nodes[i].getX(), path.nodes[i].getY()], expected[i], "busted: path node " + i + " is as expected");
 		}
 		equals(path.nodes.length, 3, "busted path is indeed shorter");
@@ -215,7 +215,7 @@ window["test"]["gameOptimizations"] = function(){
 		ok(path.found, "after adding new node, path is found again");
 
 		var expected = [[0,0],[1,0],[1,1],[2,1],[2,2]];
-		for(var i in expected){
+		for(var i = 0; i < expected.length; i++){
 			same([path.nodes[i].getX(), path.nodes[i].getY()], expected[i], "new path: node " + i + " is as expected");
 		}
 		*/

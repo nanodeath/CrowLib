@@ -1,6 +1,6 @@
 goog.provide('crow.algorithm.BFSAlgorithm');
 goog.require('crow.Graph');
-goog.require('crow.algorithm.SearchAlgorithm');
+goog.require('crow.algorithm.BasicTraversalAlgorithm');
 
 /**
  * @class Yer basic breadth-first search.  It oozes out equally in all directions,
@@ -13,28 +13,10 @@ crow.algorithm.BFSAlgorithm = function(graph){
 	this.klass = crow.algorithm.BFSAlgorithm;
 	this.graph = graph;
 }
-crow.algorithm.BFSAlgorithm.prototype = new crow.algorithm.SearchAlgorithm();
-crow.algorithm.BFSAlgorithm.prototype.search = function(start, opts){
-	if(typeof opts == "undefined") opts = {};
-	var visited = new crow.Algorithm.NodeMap(false);
-	var pendingVisit = new crow.Algorithm.NodeMap(false);
+crow.algorithm.BFSAlgorithm.prototype = new crow.algorithm.BasicTraversalAlgorithm();
 
-	var queue = [start], list = [], el;
-	while(el = queue.shift()){
-		visited.set(el, true);
-		list.push(el);
-		
-		var neighbors = el.getNeighbors(this.graph);
-		for(var i = 0; i < neighbors.length; i++){
-			var neighbor = neighbors[i];
-			if(!visited.get(neighbor) && !pendingVisit.get(neighbor) && el.distanceToNeighbor(neighbor) < Infinity && (!opts.filter || opts.filter(neighbor))){
-				queue.push(neighbor);
-				pendingVisit.set(neighbor, true);
-			}
-		}
-	}
-	// TODO return a proper path
-	return list;
+crow.algorithm.BFSAlgorithm.prototype.getNext = function(col){
+	return col.shift();
 };
 
 crow.algorithm.BFSAlgorithm["alias"] = "bfs";

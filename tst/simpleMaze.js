@@ -57,7 +57,7 @@ window["test"]["simpleMaze"] = function(){
 	  var maze = generateMaze(w, h, d);
 	  var nodes = maze.graph.nodes;
 	  var graphArray = [];
-	  for(var i in nodes){
+	  for(var i = 0; i < nodes.length; i++){
 	    var n = nodes[i];
 	    var x = n.getX(), y = n.getY();
 	    if(!graphArray[y]) graphArray[y] = [];

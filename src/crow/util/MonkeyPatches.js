@@ -25,3 +25,15 @@ if (!Array.prototype.indexOf)
     return -1;
   };
 }
+
+/*!
+ * + Jonas Raoni Soares Silva
+ * //@ http://jsfromhell.com/array/shuffle [rev. #1]
+ */
+if(!Array.prototype.shuffle){
+	Array.prototype.shuffle = function(){
+		var v = this.concat();
+    for(var j, x, i = v.length; i; j = parseInt(Math.random() * i), x = v[--i], v[i] = v[j], v[j] = x){}
+    return v;
+  };
+}

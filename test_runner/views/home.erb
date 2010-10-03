@@ -61,9 +61,9 @@
 		var testList = [];
 		for(var i in test) testList.push(i);
 		testList = testList.sort();
-		for(var i in testList){
-			i = testList[i];
-			list.append("<li><a href='/test/" + i + "?debug=" + debugMode + "'>" + i + "</a></li>");
+		for(var i = 0; i < testList.length; i++){
+			var t = testList[i];
+			list.append("<li><a href='/test/" + t + "?debug=" + debugMode + "'>" + t + "</a></li>");
 		}
 		$("#tests").replaceWith(list);
 	} else {

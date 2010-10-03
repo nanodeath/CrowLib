@@ -74,7 +74,7 @@ crow.algorithm.DijkstraAlgorithm.prototype.findPath = function(start, goal, opts
  */
 crow.algorithm.DijkstraAlgorithm.prototype.determineClosestEndNode = function(goal){
 	var closest, closestDistance = Infinity;
-	for(var i in this.visitedList){
+	for(var i = 0; i < this.visitedList.length; i++){
 		var node = this.visitedList[i];
 		if(goal.call(node.innerNode)){
 			var d = node.distance;
@@ -98,7 +98,7 @@ crow.algorithm.DijkstraAlgorithm.prototype.mainLoop = function(node, endNode){
 	node = this._getWrapperNode(node);
 	while(node != null){
 		var neighbors = node.innerNode.getNeighbors(this.graph);
-		for(var n in neighbors){
+		for(var n = 0; n < neighbors.length; n++){
 			var neighbor = this._getWrapperNode(neighbors[n]);
 			if(neighbor.visited) continue;
 		

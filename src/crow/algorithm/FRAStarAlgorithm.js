@@ -1,5 +1,6 @@
 goog.provide('crow.algorithm.FRAStarAlgorithm');
 goog.require('crow.algorithm.ShortestPathAlgorithm');
+goog.require('crow.algorithm.BFSBasicAlgorithm');
 goog.require('crow.algorithm.Path');
 goog.require('crow.structs.BucketPriorityQueue');
 goog.require('crow.Graph');
@@ -76,7 +77,7 @@ crow.algorithm.FRAStarAlgorithm.prototype.ComputeShortestPath = function(){
 		// this is so we don't have to remove duplicates (if present) when we add them below
 		node.expanded = true;
 		var neighbors = node.innerNode.getNeighbors(this.graph, this.neighbors);
-		for(var n in neighbors){
+		for(var n = 0; n < neighbors.length; n++){
 			var neighbor = this._getWrapperNode(neighbors[n]);
 			if(!this.TestClosedList(neighbor)){
 				neighbor.initialize();
@@ -148,7 +149,7 @@ crow.algorithm.FRAStarAlgorithm.prototype.Step3 = function(){
 	var newStart = this.start, oldStart = this.previousStart;
 	// find all elements rooted at the previous start that
 	// don't contain the new start in their shortest path
-	var bfs = new crow.algorithm.BFSAlgorithm(this.graph);
+	var bfs = new crow.algorithm.BFSBasicAlgorithm(this.graph);
 	var getWrapper = this._getWrapperNode;
 	var algo = this;
 	var nodes = bfs.search(this.previousStart.innerNode, {
@@ -157,7 +158,7 @@ crow.algorithm.FRAStarAlgorithm.prototype.Step3 = function(){
 			return a.indexOf(oldStart) >= 0 && a.indexOf(newStart) < 0;
 		}
 	});
-	for(var i in nodes){
+	for(var i = 0; i < nodes.length; i++){
 		var node = this._getWrapperNode(nodes[i]);
 		node.parent = null;
 		this.openSet.remove(node);
@@ -200,7 +201,7 @@ crow.algorithm.FRAStarAlgorithm.prototype.FindPerimeter = function(startNode, in
 
 crow.algorithm.FRAStarAlgorithm.prototype.Step5 = function(){
 	var perimeter = this.FindPerimeter(this.start, this.anchor);
-	for(var i in perimeter){
+	for(var i = 0; i < perimeter.length; i++){
 		var pNode = perimeter[i];
 		this.openSet.enqueue(this.ComputePriority(pNode), pNode);
 	}
@@ -222,7 +223,7 @@ crow.algorithm.FRAStarAlgorithm.prototype.Step5 = function(){
 			}
 		}
 	});
-	for(var i in newNodes){
+	for(var i = 0; i < newNodes.length; i++){
 		var node = newNodes[i];
 		this.openSet.enqueue(this.ComputePriority(node), node);
 	}
@@ -344,7 +345,7 @@ crow.algorithm.FRAStarAlgorithm.prototype.continueCalculating = function(path){
 			case 4: /* main loop */
 				var onPath = false;
 				if(/* target not caught */ this.start != this.goal){
-					for(var i in path.nodes){
+					for(var i = 0; i < path.nodes.length; i++){
 						// target on path?
 						var node = path.nodes[i];
 						if(node == this.goal.innerNode){

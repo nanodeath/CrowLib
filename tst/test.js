@@ -26,7 +26,7 @@ window["test"]["mainTest"] = function(){
 	MyNode.prototype.distanceAlgorithm = crow.GraphUtil.distance.manhattan;
 	
 	function containsNode(path, x, y){
-		for(var i in path.nodes){
+		for(var i = 0; i < path.nodes.length; i++){
 			var n = path.nodes[i];
 			if(n.getX() === x && n.getY() === y){
 				return true;
@@ -82,6 +82,18 @@ window["test"]["mainTest"] = function(){
 			}
 		});
 	}
+	function largeBlankGraph(){
+		return crow.Graph.fromArray([
+			"11111111",
+			"11111111",
+			"11111111",
+			"11111111",
+			"11111111",
+			"11111111"
+		], function(x, y){
+			return new MyNode([x, y]);
+		});
+	}
 	
 	test("getNode with coordinates", function() {
 		var graph = smallGraph();
@@ -126,7 +138,8 @@ window["test"]["mainTest"] = function(){
 		same(nodes[0], new MyNode([0, 0]), "First element is first");
 		same(nodes[1], new MyNode([1, 1]), "Third element is second");
 	});
-	
+			var graph = largeGraph();
+		var path = graph.findGoal({algorithm: "dfs"});
 	test("getNodes with options hash and filter", function(){
 		var graph = smallGraph();
 		var nodes = graph.getNodes({
@@ -143,7 +156,7 @@ window["test"]["mainTest"] = function(){
 		var graph = smallGraph();
 		var nodes = graph.getNodes({
 			start: graph.getNode(1, 1),
-			algorithm: 'bfs'
+			algorithm: 'bfs_basic'
 		});
 		equals(nodes.length, 3, "Three elements");
 		same(nodes[0], new MyNode([1, 1]), "First element is lower right node");
@@ -237,6 +250,19 @@ window["test"]["mainTest"] = function(){
 			equals(path.nodes[3].id, Tampa.id, "Fourth stop was as expected (" + algo + ")");
 			equals(path.nodes.length, 4, "Correct number of stops (" + algo + ")");
 		}
+	});
+	
+	module("DFS");
+	test("basic test", function(){
+		var graph = largeGraph();
+		var path = graph.findGoal({algorithm: "dfs"});
+		window.dfsPath = path;
+	});
+	
+	test("random test", function(){
+		var graph = largeBlankGraph();
+		var path = graph.findGoal({algorithm: "dfs", random: true});
+		window.randomDfsPath = path;
 	});
 	
 	module("Dijkstra's");

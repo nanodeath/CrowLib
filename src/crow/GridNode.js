@@ -115,7 +115,7 @@ crow.GridNode.prototype.getNeighbors = function(graph, includeDiagonals, include
 	rawNeighbors.push(                     graph.getNode(ox    , oy - 1));
 	if(includeDiagonals) rawNeighbors.push(graph.getNode(ox + 1, oy - 1));
 	var neighbors = [];
-	for(var i in rawNeighbors){
+	for(var i = 0; i < rawNeighbors.length; i++){
 		var neighbor = rawNeighbors[i];
 		if(neighbor) {
 			neighbors.push(neighbor);

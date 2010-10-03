@@ -257,7 +257,7 @@ window["test"]["fogOfWar"] = function(){
 			this.liftFog = function(){
 				var currentNode = graph.getNode(x, y);
 				var nodes = graph.getNodes();
-				for(var i in nodes){
+				for(var i = 0; i < nodes.length; i++){
 					var n = nodes[i];
 					if(n.distanceToGoal(currentNode) <= range && n.foggy){
 						n.foggy = false;

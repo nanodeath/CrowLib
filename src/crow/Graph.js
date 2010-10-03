@@ -47,7 +47,7 @@ crow.Graph = function(){
 	this.removeNode = function(x, y, alsoInvalidate){
 		if(typeof x === "number"){
 			delete this.map["" + x + "_" + y];
-			for(var i in this.nodes){
+			for(var i = 0; i < this.nodes.length; i++){
 				var node = this.nodes[i];
 				if(node.x == x && node.y == y){
 					this.nodes.splice(i, 1);
@@ -73,7 +73,7 @@ crow.Graph = function(){
 	this.getNode = function(x_or_filter, y, orBlankNode){
 		var node;
 		if(typeof x_or_filter === "function"){
-			for(var i in this.nodes){
+			for(var i = 0; i < this.nodes.length; i++){
 				var n = this.nodes[i];
 				if(x_or_filter.call(n)){
 					node = n;
@@ -160,7 +160,6 @@ crow.Graph.findGoal = function(opts, graph){
 		var start = opts.start || (graph && graph.nodes[0]);
 		if(!start) throw new Error("To go somewhere you must know where you start...perhaps you meant to provide a start node?");
 		var goal = opts.goal;
-		if(!goal) throw new Error("To find a something, one must know what they're looking for...perhaps you meant to provide a goal node?");
 		var algo = crow.Graph._lookupAlgorithm(opts.algorithm) || crow.AlgorithmResolver.getAlgorithm();
 		if(!(algo.prototype instanceof crow.algorithm.ShortestPathAlgorithm)) throw new Error("only compatible with ShortestPathAlgorithms");
 		opts.graph = graph;

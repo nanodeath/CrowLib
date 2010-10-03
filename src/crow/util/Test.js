@@ -1,4 +1,4 @@
-goog.require('crow.BaseNode');
+goog.require('crow.GridNode');
 goog.provide('crow.util.Test');
 
 if(typeof same !== "undefined"){
@@ -9,7 +9,7 @@ if(typeof same !== "undefined"){
 		var newArgs = [];
 		for(var i = 0; i < arguments.length; i++){
 			var arg = arguments[i];
-			if(arg instanceof crow.BaseNode){
+			if(arg instanceof crow.GridNode){
 				arg._initialize();
 			}
 			newArgs.push(arg);

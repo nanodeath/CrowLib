@@ -79,7 +79,7 @@ crow.algorithm.AStarAlgorithm.prototype.findPath = function(start, goal, opts){
 		// here we see if the shortest path to the neighbors of this node
 		// lie through this node.  also how we discover new nodes to check out
 		var neighbors = currentNode.innerNode.getNeighbors(this.graph);
-		for(var n in neighbors){
+		for(var n = 0; n < neighbors.length; n++){
 			var neighbor = this._getWrapperNode(neighbors[n]);
 			// Skip if neighbor is in closed list
 			if(neighbor.expanded) continue;

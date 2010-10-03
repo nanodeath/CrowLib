@@ -53,7 +53,7 @@ window["test"]["dunesAndDemise"] = function(){
 		var path = graph.findGoal({start: graph.getNode(0, 0), goal: graph.getNode(5, 4), algorithm: "a*"});
 		ok(path.found, "found route");
 		var expected = [[0,0],[0,1],[0,2],[1,2],[2,2],[2,3],[3,3],[4,3],[5,3],[5,4]];
-		for(var i in expected){
+		for(var i = 0; i < expected.length; i++){
 			same([path.nodes[i].getX(), path.nodes[i].getY()], expected[i], "path node " + i + " is as expected");
 		}
 		window["testPaths"].push(["A* path", path]);
@@ -63,7 +63,7 @@ window["test"]["dunesAndDemise"] = function(){
 		var path = graph.findGoal({start: graph.getNode(0, 0), goal: graph.getNode(5, 4), algorithm: "dijkstra"});
 		ok(path.found, "found route");
 		var expected = [[0,0],[0,1],[0,2],[1,2],[2,2],[2,3],[3,3],[4,3],[5,3],[5,4]];
-		for(var i in expected){
+		for(var i = 0; i < expected.length; i++){
 			same([path.nodes[i].getX(), path.nodes[i].getY()], expected[i], "path node " + i + " is as expected");
 		}
 		window["testPaths"].push(["Dijkstra's path", path]);
@@ -73,7 +73,7 @@ window["test"]["dunesAndDemise"] = function(){
 		var path = graph.findGoal({start: graph.getNode(0, 0), goal: graph.getNode(5, 4), algorithm: "fra*"});
 		ok(path.found, "found route");
 		var expected = [[0,0],[0,1],[0,2],[1,2],[2,2],[2,3],[3,3],[4,3],[5,3],[5,4]];
-		for(var i in expected){
+		for(var i = 0; i < expected.length; i++){
 			same([path.nodes[i].getX(), path.nodes[i].getY()], expected[i], "path node " + i + " is as expected");
 		}
 		window["testPaths"].push(["FRA* path", path]);
