@@ -45,7 +45,7 @@ crow.algorithm.BasicTraversalAlgorithm.prototype.findPath = function(start, goal
 		for(var i = 0; i < neighbors.length; i++){
 			var neighbor = this._getWrapperNode(neighbors[i]);
 			if(neighbor.expanded || neighbor.pending) continue;
-			if(el.innerNode.distanceToNeighbor(neighbor.innerNode, this.actor) < Infinity && (!filter || filter(neighbor))){
+			if(el.innerNode.distanceToNeighbor(neighbor.innerNode, this.actor) < Infinity && (!filter || filter.call(this, neighbor))){
 				this.addNext(queue, neighbor);
 				neighbor.pending = true;
 				neighbor.parent = el;
