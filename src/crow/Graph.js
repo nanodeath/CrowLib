@@ -61,6 +61,26 @@ crow.Graph = function(){
 			delete this.map[x.id];
 		}
 	};
+	//Replace the node that was at x, y with the givenNode
+	// O(n) where n is the number of nodes
+	/**
+	 * Replaces a node on the graph
+	 * @param {crow.BaseNode} node Node to replace existing node at the same position or id.
+	 * @param {boolean} [alsoInvalidate=false] Whether to also invalidate the position of the replaced node.
+	 */
+	this.replaceNode = function(node, alsoInvalidate){
+		node._initialize();
+		var oldNode = this.map[node.id];
+		this.map[node.id] = node;
+		for(var i = 0; i < this.nodes.length; i++){
+			if(this.nodes[i] === oldNode){
+				this.nodes[i] = node;
+			}
+		}
+		if(!(node.x === undefined)){
+			this.invalidate(node.x,node.y);
+		}
+	};
 	/**
 	 * <p>Gets a node at a particular coordinate, or the first node that meets a condition
 	 * <p>O(1) if a coordinate is given
