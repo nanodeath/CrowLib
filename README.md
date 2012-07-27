@@ -38,7 +38,7 @@ There's two ways you can include Crow into your app -- either as a simple script
 
 Automatically-compiled script
 -----------------------------
-If you run `rake` (assuming you have the build-time requirements given lower down), three files will be generated for you at dist/js:
+If you run `bundle install` and then `bundle exec rake` (assuming you have the build-time requirements given lower down), three files will be generated for you at dist/js:
 
 1. crow.mini.js: this compiled with `whitespace_only`.  Safest, but least compression.
 2. crow.micro.js: this compiled with `simple_optimizations`.  Renames local variables and the like, but public API is untouched.  Little better compression.
@@ -64,6 +64,7 @@ There are numerous build-time requirements, but any Linux user should already ha
 * java
 * ruby
 * rake
+* [Bundler](http://gembundler.com/) (you probably won't have this one unless you're a Ruby dev, actually)
 
 Runtime
 -------
