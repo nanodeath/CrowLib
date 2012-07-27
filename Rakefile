@@ -138,7 +138,7 @@ task :generate_javascript_docs => ["dist/docs", "dist/docs_private", JsDoc::JAR]
 	sh "java -jar #{JsDoc::JAR} #{JsDoc::RUN_JS} -a -t=#{JsDoc::TEMPLATES} --private #{FILES} -d=dist/docs_private"
 end
 
-task :prepare_build do
+task :prepare_build => [GoogleClosure::CALC_DEPS_BIN] do
 	CONFIG[:advanced_compilation].each do |mode, name|
 		name_to_use = nil
 
