@@ -17,6 +17,8 @@ goog.require('crow.algorithm.LPAStarAlgorithm');
 goog.require('crow.algorithm.SearchAlgorithm');
 goog.require('crow.algorithm.ShortestPathAlgorithm');
 goog.require('crow.BaseNode');
+goog.require('crow.ConnectedNode');
+goog.require('crow.GridNode');
 goog.require('crow.structs.BucketPriorityQueue');
 goog.require('crow.structs.NDArray');
 
