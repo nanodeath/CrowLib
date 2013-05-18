@@ -17,20 +17,20 @@ window["test"]["dunesAndDemise"] = function(){
 		return realDistance;
 	};
 	MyNode.prototype.resistance = 1.0;
-	
+
 	/**
 	 * @constructor
 	 */
 	function Road(){ MyNode.apply(this, arguments); }
 	Road.prototype = new MyNode();
-	
+
 	/**
 	 * @constructor
 	 */
 	function Sand(){ MyNode.apply(this, arguments); }
 	Sand.prototype = new MyNode();
 	Sand.prototype.resistance = 2.0; // Sand has double the "resistance" of regular path
-	
+
 	var graphArray = [
 			"R---R-",  // R for Road, S for Sand, and - means not a tile
 			"R-RRRR",
@@ -54,7 +54,7 @@ window["test"]["dunesAndDemise"] = function(){
 		ok(path.found, "found route");
 		var expected = [[0,0],[0,1],[0,2],[1,2],[2,2],[2,3],[3,3],[4,3],[5,3],[5,4]];
 		for(var i = 0; i < expected.length; i++){
-			same([path.nodes[i].getX(), path.nodes[i].getY()], expected[i], "path node " + i + " is as expected");
+			deepEqual([path.nodes[i].getX(), path.nodes[i].getY()], expected[i], "path node " + i + " is as expected");
 		}
 		window["testPaths"].push(["A* path", path]);
 	});
@@ -64,7 +64,7 @@ window["test"]["dunesAndDemise"] = function(){
 		ok(path.found, "found route");
 		var expected = [[0,0],[0,1],[0,2],[1,2],[2,2],[2,3],[3,3],[4,3],[5,3],[5,4]];
 		for(var i = 0; i < expected.length; i++){
-			same([path.nodes[i].getX(), path.nodes[i].getY()], expected[i], "path node " + i + " is as expected");
+			deepEqual([path.nodes[i].getX(), path.nodes[i].getY()], expected[i], "path node " + i + " is as expected");
 		}
 		window["testPaths"].push(["Dijkstra's path", path]);
 	});
@@ -74,7 +74,7 @@ window["test"]["dunesAndDemise"] = function(){
 		ok(path.found, "found route");
 		var expected = [[0,0],[0,1],[0,2],[1,2],[2,2],[2,3],[3,3],[4,3],[5,3],[5,4]];
 		for(var i = 0; i < expected.length; i++){
-			same([path.nodes[i].getX(), path.nodes[i].getY()], expected[i], "path node " + i + " is as expected");
+			deepEqual([path.nodes[i].getX(), path.nodes[i].getY()], expected[i], "path node " + i + " is as expected");
 		}
 		window["testPaths"].push(["FRA* path", path]);
 	});
@@ -89,7 +89,7 @@ window["test"]["dunesAndDemise"] = function(){
 		ctx.fill();
 		ctx.stroke();
 	}
-	
+
 	canvas = $("<canvas class='goal' width='40' height='40'>").appendTo(document.body).hide();
 	canvasDom = canvas[0];
 	if (canvasDom.getContext){
@@ -116,6 +116,6 @@ window["test"]["dunesAndDemise"] = function(){
 		graphTable.append(row);
 	}
 	prelude.append(graphTable);
-	
+
 	$("#prelude").append(prelude);
 };
