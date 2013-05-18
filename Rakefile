@@ -28,7 +28,8 @@ end
 
 class GoogleClosure
 	include Singleton
-	
+	include Rake::DSL
+
 	ROOT = File.expand_path("build/google_closure")
 
 	LIBRARY_URL = "http://closure-library.googlecode.com/svn/trunk/"
@@ -39,7 +40,7 @@ class GoogleClosure
 	COMPILER_ARCHIVE = ROOT + "/compiler.zip"
 	COMPILER_ROOT = ROOT + "/compiler"
 	COMPILER_JAR = COMPILER_ROOT + "/compiler.jar"
-	
+
 	def checkout_library
 		sh "svn checkout #{LIBRARY_URL} #{LIBRARY_ROOT}"
 	end
@@ -49,7 +50,7 @@ class GoogleClosure
 		download_file(COMPILER_URL, COMPILER_ARCHIVE) unless File.exist?(COMPILER_ARCHIVE)
 		sh "unzip #{COMPILER_ARCHIVE} -d #{COMPILER_ROOT}"
 	end
-	
+
 	def compile(files, out, calc_deps_opts={}, flags=nil)
 		files = [files] unless files.is_a? Array
 		files = files.map {|f| "--input=#{f}"}
@@ -78,18 +79,18 @@ end
 
 class SourceList
 	include Singleton
-	
+
 	attr_accessor :file_list
-	
+
 	def self.get
 		SourceList.instance.file_list ||= GoogleClosure.instance.calculate_dependencies(FileList.new(CONFIG[:files]), :path => CONFIG[:path])
 	end
 end
 class TestList
 	include Singleton
-	
+
 	attr_accessor :file_list
-	
+
 	def self.get
 		TestList.instance.file_list ||= GoogleClosure.instance.calculate_dependencies(FileList.new(CONFIG[:files] + CONFIG[:test_files]), :path => CONFIG[:path])
 	end
@@ -234,7 +235,7 @@ DebugCoordinator.register_processor LineCounter.new
 
 def generate_debug(files, filename, markers=true)
 	deps = GoogleClosure.instance.calculate_dependencies(files, :path => CONFIG[:path])
-	
+
 	output = StringIO.new
 	deps.each do |d|
 		File.open(d) do |f|
@@ -268,7 +269,7 @@ def perform_build(files, filename, opts)
 		c.register_processor FixJSDocArraysForGoogleClosure.new
 		c
 	end
-	
+
 	deps = GoogleClosure.instance.calculate_dependencies(files, :path => [base + "/src", base + "/tst"])
 	deps = deps.select {|d| d.include? base}
 	deps.each_with_index do |d, idx|
@@ -285,7 +286,7 @@ def perform_build(files, filename, opts)
 		coordinator.results.each {|r| output.puts r}
 		File.open(d, 'w') {|f| f.write output.string }
 	end
-	
+
 	filename = File.expand_path(filename)
 	calcdeps_opts = {:path => [base]}
 	GoogleClosure.instance.compile files, filename, calcdeps_opts, opts
