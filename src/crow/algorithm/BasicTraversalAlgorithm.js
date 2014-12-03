@@ -40,7 +40,7 @@ crow.algorithm.BasicTraversalAlgorithm.prototype.findPath = function(start, goal
 		
 		var neighbors = el.innerNode.getNeighbors(this.graph);
 		if(opts.random){
-			neighbors = neighbors.shuffle();
+			neighbors = ArrayUtilities.shuffle(neighbors);
 		}
 		for(var i = 0; i < neighbors.length; i++){
 			var neighbor = this._getWrapperNode(neighbors[i]);

@@ -1,5 +1,26 @@
 goog.provide('crow.util.MonkeyPatches');
 
+var ArrayUtilities = {
+    
+    /*!
+     * + Jonas Raoni Soares Silva
+     * //@ http://jsfromhell.com/array/shuffle [rev. #1]
+     * Altered so that doesn't modify Array.prototype
+     */
+    shuffle: function(array) {
+        /* the following if statement runs basically isArray(array)
+         * https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/isArray
+         * I don't want to add further functions to the Array.prototype
+         */
+        if(Object.prototype.toString.call(array) === '[object Array]') {
+            var v = array.concat();
+            for(var j, x, i = v.length; i; j = parseInt(Math.random() * i), x = v[--i], v[i] = v[j], v[j] = x){}
+            return v;
+        }
+    }
+}
+
+
 /**
  * @see https://developer.mozilla.org/en/JavaScript/Reference/Global_Objects/Array/indexOf#Compatibility
  */
@@ -23,17 +44,5 @@ if (!Array.prototype.indexOf)
         return from;
     }
     return -1;
-  };
-}
-
-/*!
- * + Jonas Raoni Soares Silva
- * //@ http://jsfromhell.com/array/shuffle [rev. #1]
- */
-if(!Array.prototype.shuffle){
-	Array.prototype.shuffle = function(){
-		var v = this.concat();
-    for(var j, x, i = v.length; i; j = parseInt(Math.random() * i), x = v[--i], v[i] = v[j], v[j] = x){}
-    return v;
   };
 }
