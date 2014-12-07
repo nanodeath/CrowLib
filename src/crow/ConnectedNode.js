@@ -16,7 +16,7 @@ crow.ConnectedNode.prototype.connectTo = function(otherNode, distance, symmetric
 	if(typeof distance == "undefined") distance = 1;
 	this.connections.push(otherNode);
 	this.connectionDistances[otherNode.id] = distance;
-	if(typeof symmetric !== "false" && otherNode instanceof crow.ConnectedNode){
+	if(symmetric !== false && otherNode instanceof crow.ConnectedNode){
 		otherNode.connections.push(this);
 		otherNode.connectionDistances[this.id] = distance;
 	}

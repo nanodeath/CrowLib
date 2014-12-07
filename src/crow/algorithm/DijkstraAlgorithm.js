@@ -110,7 +110,15 @@ crow.algorithm.DijkstraAlgorithm.prototype.mainLoop = function(node, endNode){
 				currentNeighborDistance = neighborDistanceThroughMe;
 			}
 			if(currentNeighborDistance < Infinity){
-				nextNodes.enqueue(currentNeighborDistance, neighbor);
+				var existing = nextNodes.getPriority(neighbor);
+				if(existing !== null) {
+					if(currentNeighborDistance < existing) {
+						nextNodes.remove(neighbor);
+						nextNodes.enqueue(currentNeighborDistance, neighbor);
+					}
+				} else {
+					nextNodes.enqueue(currentNeighborDistance, neighbor);
+				}
 			}
 		}
 		node.visited = true;
